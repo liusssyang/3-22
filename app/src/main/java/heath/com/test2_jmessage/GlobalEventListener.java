@@ -2,15 +2,21 @@ package heath.com.test2_jmessage;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import cn.jpush.im.android.api.JMessageClient;
+import cn.jpush.im.android.api.content.TextContent;
 import cn.jpush.im.android.api.enums.ConversationType;
 import cn.jpush.im.android.api.event.MessageEvent;
 import cn.jpush.im.android.api.event.NotificationClickEvent;
+import cn.jpush.im.android.api.model.Conversation;
 import cn.jpush.im.android.api.model.GroupInfo;
 import cn.jpush.im.android.api.model.Message;
 import cn.jpush.im.android.api.model.UserInfo;
 import heath.com.test2_jmessage.activity.createmessage.ShowMessageActivity;
+
+import static heath.com.test2_jmessage.activity.createmessage.CreateSigTextMessageActivity.mEt_text;
 
 /**
  * 在demo中对于通知栏点击事件和在线消息接收事件，我们都直接在全局监听
@@ -18,16 +24,23 @@ import heath.com.test2_jmessage.activity.createmessage.ShowMessageActivity;
 public class GlobalEventListener {
     private Context appContext;
 
+    private LocalBroadcastManager localBroadcastManager;
     public GlobalEventListener(Context context) {
         appContext = context;
         JMessageClient.registerEventReceiver(this);
     }
 
     public void onEvent(NotificationClickEvent event) {
-        jumpToActivity(event.getMessage());
+        //jumpToActivity(event.getMessage());
     }
 
     public void onEvent(MessageEvent event) {
+        TextContent textContent = (TextContent) event.getMessage().getContent();
+        String text=textContent.getText();
+        localBroadcastManager=LocalBroadcastManager.getInstance(appContext);
+        Intent intent=new Intent("message");
+        intent.putExtra("key", text);
+        localBroadcastManager.sendBroadcast(intent);
         jumpToActivity(event.getMessage());
     }
 
@@ -47,6 +60,11 @@ public class GlobalEventListener {
         notificationIntent.putExtra(ShowMessageActivity.EXTRA_FROM_APPKEY, fromUser.getAppKey());
         notificationIntent.putExtra(ShowMessageActivity.EXTRA_MSG_TYPE, msg.getContentType().toString());
         notificationIntent.putExtra(ShowMessageActivity.EXTRA_MSGID, msg.getId());
-        appContext.startActivity(notificationIntent);
+        //appContext.startActivity(notificationIntent);
+        TextContent textContent = (TextContent) msg.getContent();
+
+
+
+
     }
 }

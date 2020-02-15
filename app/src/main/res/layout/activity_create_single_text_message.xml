@@ -3,44 +3,55 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/msg_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="9"/>
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="8">
+        android:layout_weight="0">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="必填字段" />
-
             <EditText
                 android:id="@+id/et_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="对方username" />
-
-            <EditText
-                android:id="@+id/et_text"
+                android:text="sunnydata"
+                android:visibility="gone"/>
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="准备发送的文本" />
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+                android:orientation="horizontal">
+                <EditText
+                    android:id="@+id/et_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="准备发送的文本" />
+                <Button
+                    android:id="@+id/bt_send"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="4"
+                    android:text="发送" />
+
+            </LinearLayout>
+
+
 
             <include layout="@layout/message_sending_options_layout" />
         </LinearLayout>
 
     </ScrollView>
 
-    <Button
-        android:id="@+id/bt_send"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="发送" />
+
 
 </LinearLayout>

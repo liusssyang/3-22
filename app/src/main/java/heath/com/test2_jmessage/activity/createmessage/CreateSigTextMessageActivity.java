@@ -2,6 +2,10 @@ package heath.com.test2_jmessage.activity.createmessage;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -12,12 +16,26 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.content.TextContent;
+import cn.jpush.im.android.api.enums.ConversationType;
+import cn.jpush.im.android.api.event.MessageEvent;
+import cn.jpush.im.android.api.event.NotificationClickEvent;
 import cn.jpush.im.android.api.model.Conversation;
+import cn.jpush.im.android.api.model.GroupInfo;
 import cn.jpush.im.android.api.model.Message;
+import cn.jpush.im.android.api.model.UserInfo;
 import cn.jpush.im.android.api.options.MessageSendingOptions;
 import cn.jpush.im.api.BasicCallback;
+import heath.com.test2_jmessage.GlobalEventListener;
+import heath.com.test2_jmessage.Msg;
+import heath.com.test2_jmessage.MsgAdapter;
 import heath.com.test2_jmessage.R;
 
 /**
@@ -49,7 +67,7 @@ public class CreateSigTextMessageActivity extends Activity {
 
     private static final String TAG = "CreateSigTextMessage";
     private EditText mEt_name;
-    private EditText mEt_text;
+    public static EditText mEt_text;
     private Button mBt_send;
     public static final String TEXT_MESSAGE = "text_message";
     private EditText mEt_appkey;
@@ -65,17 +83,22 @@ public class CreateSigTextMessageActivity extends Activity {
     private CheckBox mCb_enableCustomNotify;
     private CheckBox mCb_enableReadReceipt;
     private ProgressDialog mProgressDialog;
+    private IntentFilter intentFilter;
+    private  Localreceiver localRceiver;
+    private LocalBroadcastManager localBroadcastManager;
+    private List<Msg> msgList=new ArrayList<>();
+    private RecyclerView msgRecyclerView;
+    private MsgAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         initView();
+
     }
-
-
     private void initView() {
         setContentView(R.layout.activity_create_single_text_message);
-
         mEt_name = (EditText) findViewById(R.id.et_name);
         mEt_text = (EditText) findViewById(R.id.et_text);
         mBt_send = (Button) findViewById(R.id.bt_send);
@@ -91,7 +114,12 @@ public class CreateSigTextMessageActivity extends Activity {
         mCb_retainOfflineMsg = (CheckBox) findViewById(R.id.cb_retainOffline);
         mCb_enableCustomNotify = (CheckBox) findViewById(R.id.cb_enableCustomNotify);
         mCb_enableReadReceipt = (CheckBox) findViewById(R.id.cb_needReadReceipt);
-        findViewById(R.id.et_custom_notifyAtPrefix).setVisibility(View.GONE);
+        //findViewById(R.id.et_custom_notifyAtPrefix).setVisibility(View.GONE);
+        msgRecyclerView=findViewById(R.id.msg_recycler_view);
+        LinearLayoutManager layoutManager=new LinearLayoutManager(this);
+        msgRecyclerView.setLayoutManager(layoutManager);
+        adapter=new MsgAdapter(msgList);
+        msgRecyclerView.setAdapter(adapter);
 
         mCb_enableCustomNotify.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -118,6 +146,10 @@ public class CreateSigTextMessageActivity extends Activity {
                     String customFromName = mEt_customName.getText().toString();
                     String extraKey = mEt_extraKey.getText().toString();
                     String extraValue = mEt_extraValue.getText().toString();
+
+                    final Msg msg=new Msg(text,Msg.TYPE_SENT);
+
+
                     boolean retainOfflineMsg = mCb_retainOfflineMsg.isChecked();
                     boolean showNotification = mCb_showNotification.isChecked();
                     boolean enableCustomNotify = mCb_enableCustomNotify.isChecked();
@@ -141,7 +173,11 @@ public class CreateSigTextMessageActivity extends Activity {
                         public void gotResult(int i, String s) {
                             mProgressDialog.dismiss();
                             if (i == 0) {
-                                Log.i(TAG, "JMessageClient.createSingleTextMessage" + ", responseCode = " + i + " ; LoginDesc = " + s);
+                                //Log.i(TAG, "JMessageClient.createSingleTextMessage" + ", responseCode = " + i + " ; LoginDesc = " + s);
+                                msgList.add(msg);
+                                adapter.notifyItemInserted(msgList.size()-1);
+                                msgRecyclerView.scrollToPosition(msgList.size()-1);
+                                mEt_text.setText("");
                                 Toast.makeText(getApplicationContext(), "发送成功", Toast.LENGTH_SHORT).show();
                             } else {
                                 Log.i(TAG, "JMessageClient.createSingleTextMessage" + ", responseCode = " + i + " ; LoginDesc = " + s);
@@ -177,5 +213,35 @@ public class CreateSigTextMessageActivity extends Activity {
                 }
             }
         });
+
+        intentFilter=new IntentFilter();
+        intentFilter.addAction("message");
+        localRceiver =new Localreceiver(msgList,msgRecyclerView,adapter);
+        localBroadcastManager=LocalBroadcastManager.getInstance(this);
+        localBroadcastManager.registerReceiver(localRceiver,intentFilter);
+
     }
+    public void onDestroy(){
+        super.onDestroy();
+        localBroadcastManager.unregisterReceiver(localRceiver);
+    }
+
+    class  Localreceiver extends BroadcastReceiver{
+        private List<Msg> msgList;
+        private RecyclerView msgRecyclerView;
+        private MsgAdapter adapter;
+        public Localreceiver(){}
+        public Localreceiver(List<Msg> msgList,RecyclerView msgRecyclerView,MsgAdapter adapter){
+            this.msgList=msgList;
+            this.msgRecyclerView=msgRecyclerView;
+            this.adapter=adapter;
+        }
+        public void onReceive(Context context, Intent intent) {
+            Msg msg=new Msg(intent.getStringExtra("key"),Msg.TYPE_RECEIVED);
+            msgList.add(msg);
+            adapter.notifyItemInserted(msgList.size()-1);
+            msgRecyclerView.scrollToPosition(msgList.size()-1);
+        }
+    }
+
 }
