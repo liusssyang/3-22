@@ -34,6 +34,9 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.REAL_GET_TASKSS" />
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions"/>
 
     <application
         android:allowBackup="true"
@@ -82,8 +85,6 @@
         <receiver
             android:name="cn.jpush.android.service.AlarmReceiver"
             android:exported="false" />
-
-
         <!-- Required since JCore 1.1.7. SDK 核心功能-->
         <provider
             android:name="cn.jpush.android.service.DataProvider"

@@ -3,6 +3,7 @@ package heath.com.test2_jmessage.activity;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AppOpsManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -34,6 +36,7 @@ import cn.jpush.im.android.api.model.UserInfo;
 import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.activity.setting.RegisterActivity;
+import heath.com.test2_jmessage.application.IMDebugApplication;
 import heath.com.test2_jmessage.utils.AndroidUtils;
 
 /**
@@ -58,6 +61,7 @@ public class RegisterAndLoginActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (!AndroidUtils.checkPermission(this, REQUIRED_PERMISSIONS)) {
             try {
                 AndroidUtils.requestPermission(this, REQUIRED_PERMISSIONS);
@@ -189,6 +193,7 @@ public class RegisterAndLoginActivity extends Activity {
 
     private void initView() {
         setContentView(R.layout.activity_login);
+        //permission();
         mEd_userName = (EditText) findViewById(R.id.ed_login_username);
         mEd_password = (EditText) findViewById(R.id.ed_login_password);
         mBt_login = (Button) findViewById(R.id.bt_login);
@@ -272,5 +277,15 @@ public class RegisterAndLoginActivity extends Activity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    public void permission(){
+        AppOpsManager appOpt = (AppOpsManager) IMDebugApplication.getContext()
+                .getSystemService(Context.APP_OPS_SERVICE);
+        int mode = appOpt.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
+                android.os.Process.myUid(), IMDebugApplication.getContext().getPackageName());
+        boolean isGranted=mode == AppOpsManager.MODE_ALLOWED;
+        if(!isGranted)
+            IMDebugApplication.getContext().startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+
     }
 }

@@ -1,4 +1,7 @@
 <resources>
-
+    <style name="MyEditText" parent="Theme.AppCompat.Light">
+        <item name="colorControlNormal">#04c568</item>
+        <item name="colorControlActivated">#04c568</item>
+    </style>
 
 </resources>

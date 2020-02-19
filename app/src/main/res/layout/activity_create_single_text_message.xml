@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:id="@+id/co"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -15,6 +22,7 @@
         android:layout_weight="0">
 
         <LinearLayout
+
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -23,35 +31,60 @@
                 android:id="@+id/et_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="sunnydata"
+                android:text="A123"
                 android:visibility="gone"/>
-            <LinearLayout
+            <RelativeLayout
+                android:id="@+id/l1"
+                android:paddingRight="10dp"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="10dp"
-                android:orientation="horizontal">
+                android:layout_height="50dp"
+                android:background="#F8F7F7"
+                >
+
+                <TextView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@drawable/menu"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginStart="10dp"
+                    android:id="@+id/menu"
+                    android:text=" "
+                    />
+                <TextView
+                    android:id="@+id/bt_send"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@drawable/send4"
+                    android:layout_marginTop="10dp"
+                    android:layout_alignParentEnd="true"/>
+                <TextView
+                    android:layout_toLeftOf="@+id/bt_send"
+                    android:id="@+id/expression"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginRight="10dp"
+                    android:background="@drawable/expression"
+                    android:layout_marginTop="10dp"
+                    />
                 <EditText
                     android:id="@+id/et_text"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="准备发送的文本" />
-                <Button
-                    android:id="@+id/bt_send"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="4"
-                    android:text="发送" />
-
-            </LinearLayout>
-
-
-
+                    android:layout_height="30dp"
+                    android:layout_toLeftOf="@+id/expression"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_toRightOf="@+id/menu"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/background_round"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:textColor="#000000"
+                    android:theme="@style/MyEditText" />
+            </RelativeLayout>
             <include layout="@layout/message_sending_options_layout" />
         </LinearLayout>
 
     </ScrollView>
-
-
-
 </LinearLayout>
+    <include layout="@layout/bottomsheet" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

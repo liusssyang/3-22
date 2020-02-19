@@ -1,24 +1,35 @@
 package heath.com.test2_jmessage.activity.createmessage;
 
 import android.app.Activity;
+import android.app.AppOpsManager;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Rect;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -35,8 +46,9 @@ import cn.jpush.im.android.api.options.MessageSendingOptions;
 import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.GlobalEventListener;
 import heath.com.test2_jmessage.Msg;
-import heath.com.test2_jmessage.MsgAdapter;
+import heath.com.test2_jmessage.adapter.MsgAdapter;
 import heath.com.test2_jmessage.R;
+import heath.com.test2_jmessage.application.IMDebugApplication;
 
 /**
  * Created by ${chenyn} on 16/3/29.
@@ -68,7 +80,7 @@ public class CreateSigTextMessageActivity extends Activity {
     private static final String TAG = "CreateSigTextMessage";
     private EditText mEt_name;
     public static EditText mEt_text;
-    private Button mBt_send;
+    private TextView mBt_send;
     public static final String TEXT_MESSAGE = "text_message";
     private EditText mEt_appkey;
     private EditText mEt_customName;
@@ -89,19 +101,22 @@ public class CreateSigTextMessageActivity extends Activity {
     private List<Msg> msgList=new ArrayList<>();
     private RecyclerView msgRecyclerView;
     private MsgAdapter adapter;
+    private TextView menu;
+    private BottomSheetBehavior behavior;
+    //private Button button,button2;
+    private RelativeLayout re;
+    private CoordinatorLayout coordinatorLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         initView();
-
     }
     private void initView() {
         setContentView(R.layout.activity_create_single_text_message);
         mEt_name = (EditText) findViewById(R.id.et_name);
         mEt_text = (EditText) findViewById(R.id.et_text);
-        mBt_send = (Button) findViewById(R.id.bt_send);
+        mBt_send = (TextView) findViewById(R.id.bt_send);
         mEt_appkey = (EditText) findViewById(R.id.et_appkey);
         mEt_customName = (EditText) findViewById(R.id.et_custom_name);
         mEt_extraKey = (EditText) findViewById(R.id.et_extra_key);
@@ -114,6 +129,7 @@ public class CreateSigTextMessageActivity extends Activity {
         mCb_retainOfflineMsg = (CheckBox) findViewById(R.id.cb_retainOffline);
         mCb_enableCustomNotify = (CheckBox) findViewById(R.id.cb_enableCustomNotify);
         mCb_enableReadReceipt = (CheckBox) findViewById(R.id.cb_needReadReceipt);
+        menu=(TextView) findViewById(R.id.menu);
         //findViewById(R.id.et_custom_notifyAtPrefix).setVisibility(View.GONE);
         msgRecyclerView=findViewById(R.id.msg_recycler_view);
         LinearLayoutManager layoutManager=new LinearLayoutManager(this);
@@ -121,6 +137,56 @@ public class CreateSigTextMessageActivity extends Activity {
         adapter=new MsgAdapter(msgList);
         msgRecyclerView.setAdapter(adapter);
 
+        RelativeLayout linearLayout=findViewById(R.id.ll_content_bottom_sheet);
+        behavior = BottomSheetBehavior.from(linearLayout);
+        behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        coordinatorLayout=findViewById(R.id.co);
+        re=findViewById(R.id.l1);
+
+// 得到参数
+        final CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(re.getLayoutParams());
+        mEt_text.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                menu.setBackgroundResource(R.drawable.menu);
+                menu.setText(" ");
+                coordinatorLayout.scrollTo(0,0);
+            }
+        });
+        menu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideInput();
+                if (menu.getText().toString().equals(" ")){
+                    menu.setBackgroundResource(R.drawable.close);
+                    menu.setText("  ");
+                    coordinatorLayout.scrollTo(0,500);
+                    //behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+               }
+                else {
+                    menu.setBackgroundResource(R.drawable.menu);
+                    menu.setText(" ");
+                    coordinatorLayout.scrollTo(0,0);
+                    //behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                }
+            }
+        });
+        /*behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState)
+            {
+                //这里是bottomSheet状态的改变
+                if (newState==BottomSheetBehavior.STATE_DRAGGING)
+                    behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset)
+            {
+                //这里是拖拽中的回调，根据slideOffset可以做一些动画
+                Log.d("ssss", "onSlide: "+slideOffset);
+            }
+        });*/
         mCb_enableCustomNotify.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -146,10 +212,7 @@ public class CreateSigTextMessageActivity extends Activity {
                     String customFromName = mEt_customName.getText().toString();
                     String extraKey = mEt_extraKey.getText().toString();
                     String extraValue = mEt_extraValue.getText().toString();
-
                     final Msg msg=new Msg(text,Msg.TYPE_SENT);
-
-
                     boolean retainOfflineMsg = mCb_retainOfflineMsg.isChecked();
                     boolean showNotification = mCb_showNotification.isChecked();
                     boolean enableCustomNotify = mCb_enableCustomNotify.isChecked();
@@ -213,24 +276,76 @@ public class CreateSigTextMessageActivity extends Activity {
                 }
             }
         });
-
         intentFilter=new IntentFilter();
         intentFilter.addAction("message");
         localRceiver =new Localreceiver(msgList,msgRecyclerView,adapter);
         localBroadcastManager=LocalBroadcastManager.getInstance(this);
         localBroadcastManager.registerReceiver(localRceiver,intentFilter);
+    }
+    public static void sendMessage(String name, String text, String appkey, String customFromName,
+                                   String extraKey, String extraValue, String NotificationTitle,
+                                   String NotificationAtPrefix, String NotificationText, String MsgCount){
+        if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(text)) {
 
+            //通过username和appkey拿到会话对象，通过指定appkey可以创建一个和跨应用用户的会话对象，从而实现跨应用的消息发送
+            Conversation mConversation = JMessageClient.getSingleConversation(name, appkey);
+            if (mConversation == null) {
+                mConversation = Conversation.createSingleConversation(name, appkey);
+            }
+
+            //构造message content对象
+            TextContent textContent = new TextContent(text);
+            //设置自定义的extra参数
+            textContent.setStringExtra(extraKey, extraValue);
+            //创建message实体，设置消息发送回调。
+            final Message message = mConversation.createSendMessage(textContent, customFromName);
+            message.setOnSendCompleteCallback(new BasicCallback() {
+                @Override
+                public void gotResult(int i, String s) {
+                    //mProgressDialog.dismiss();
+                    if (i == 0) {
+                        Toast.makeText(IMDebugApplication.getContext(), "发送成功", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(IMDebugApplication.getContext(), "发送失败", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+            //设置消息发送时的一些控制参数
+            MessageSendingOptions options = new MessageSendingOptions();
+            options.setNeedReadReceipt(true);//是否需要对方用户发送消息已读回执
+            options.setRetainOffline(true);//是否当对方用户不在线时让后台服务区保存这条消息的离线消息
+            options.setShowNotification(true);//是否让对方展示sdk默认的通知栏通知
+            options.setCustomNotificationEnabled(true);//是否需要自定义对方收到这条消息时sdk默认展示的通知栏中的文字
+            if (true) {
+                options.setNotificationTitle(NotificationTitle);//自定义对方收到消息时通知栏展示的title
+                options.setNotificationAtPrefix(NotificationAtPrefix);//自定义对方收到消息时通知栏展示的@信息的前缀
+                options.setNotificationText(NotificationText);//自定义对方收到消息时通知栏展示的text
+            }
+            if (MsgCount!=null) {
+                try {
+                    options.setMsgCount(Integer.valueOf(MsgCount));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            //mProgressDialog = MsgProgressDialog.show(IMDebugApplication.getContext(), message);
+
+            //发送消息
+            JMessageClient.sendMessage(message, options);
+        }
+        else {
+            Toast.makeText(IMDebugApplication.getContext(), "必填字段不能为空", Toast.LENGTH_SHORT).show();
+        }
     }
     public void onDestroy(){
         super.onDestroy();
         localBroadcastManager.unregisterReceiver(localRceiver);
     }
-
     class  Localreceiver extends BroadcastReceiver{
         private List<Msg> msgList;
         private RecyclerView msgRecyclerView;
         private MsgAdapter adapter;
-        public Localreceiver(){}
+
         public Localreceiver(List<Msg> msgList,RecyclerView msgRecyclerView,MsgAdapter adapter){
             this.msgList=msgList;
             this.msgRecyclerView=msgRecyclerView;
@@ -241,7 +356,23 @@ public class CreateSigTextMessageActivity extends Activity {
             msgList.add(msg);
             adapter.notifyItemInserted(msgList.size()-1);
             msgRecyclerView.scrollToPosition(msgList.size()-1);
+
+            if (intent.getStringExtra("SysMessage")!=null){
+                Msg msg2=new Msg(intent.getStringExtra("SysMessage"),Msg.TYPE_SENT);
+                msgList.add(msg2);
+                adapter.notifyItemInserted(msgList.size()-1);
+                msgRecyclerView.scrollToPosition(msgList.size()-1);
+                sendMessage(mEt_name.getText().toString(),intent.getStringExtra("SysMessage"),null,null,null,null,null,null,null,null);
+            }
+
+        }
+
+    }
+    protected void hideInput() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        View v = getWindow().peekDecorView();
+        if (null != v) {
+            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
         }
     }
-
 }
