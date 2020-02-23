@@ -47,6 +47,7 @@ import cn.jpush.im.android.api.model.GroupInfo;
 import cn.jpush.im.android.api.model.Message;
 import cn.jpush.im.android.api.model.UserInfo;
 import heath.com.test2_jmessage.R;
+import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
 import heath.com.test2_jmessage.activity.chatroom.ChatRoomActivity;
 import heath.com.test2_jmessage.activity.conversation.ConversationActivity;
 import heath.com.test2_jmessage.activity.createmessage.CreateMessageActivity;
@@ -100,6 +101,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
 
     private void initView() {
         setContentView(R.layout.activity_type);
+        StatusBarUtil.setStatusBarColor(this,Color.parseColor("#00C4FF"));
         Toolbar toolbar=findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.parseColor("#ffffff"));
         setActionBar(toolbar);
