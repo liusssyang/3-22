@@ -2,7 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:fitsSystemWindows="true"
+    android:clipToPadding="false">
+    <Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#00C4FF"
+        android:id="@+id/toolbar"
+        android:theme="@style/Theme.MaterialComponents.BottomSheetDialog"
+        app:popupTheme="@style/Theme.MaterialComponents.BottomSheetDialog"/>
+
 
     <TextView
         android:id="@+id/tv_header"

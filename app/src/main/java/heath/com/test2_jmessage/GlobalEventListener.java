@@ -5,12 +5,16 @@ import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -18,22 +22,22 @@ import java.util.List;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import cn.jpush.im.android.api.JMessageClient;
+import cn.jpush.im.android.api.content.ImageContent;
 import cn.jpush.im.android.api.content.TextContent;
+import cn.jpush.im.android.api.enums.ContentType;
 import cn.jpush.im.android.api.enums.ConversationType;
 import cn.jpush.im.android.api.event.MessageEvent;
 import cn.jpush.im.android.api.event.NotificationClickEvent;
-import cn.jpush.im.android.api.model.Conversation;
 import cn.jpush.im.android.api.model.GroupInfo;
 import cn.jpush.im.android.api.model.Message;
 import cn.jpush.im.android.api.model.UserInfo;
+import heath.com.test2_jmessage.MyDialog.Mydialog;
 import heath.com.test2_jmessage.activity.createmessage.CreateSigTextMessageActivity;
 import heath.com.test2_jmessage.activity.createmessage.ShowMessageActivity;
 import heath.com.test2_jmessage.application.IMDebugApplication;
 
 import static android.content.Context.USAGE_STATS_SERVICE;
 import static cn.jpush.im.android.api.jmrtc.JMRTCInternalUse.getApplicationContext;
-import static heath.com.test2_jmessage.activity.TypeActivity.TAG;
-import static heath.com.test2_jmessage.activity.createmessage.CreateSigTextMessageActivity.mEt_text;
 
 /**
  * 在demo中对于通知栏点击事件和在线消息接收事件，我们都直接在全局监听
@@ -50,23 +54,13 @@ public class GlobalEventListener {
     }
 
     public void onEvent(NotificationClickEvent event) {
-
+        jumpToActivity(event.getMessage());
     }
 
     public void onEvent(MessageEvent event) {
-        TextContent textContent = (TextContent) event.getMessage().getContent();
-        String text=textContent.getText();
         localBroadcastManager=LocalBroadcastManager.getInstance(appContext);
-        Intent intent=new Intent("message");
-        intent.putExtra("key", text);
-        if (text.equals("Ask"))
-            intent.putExtra("SysMessage",SysMessage());
-        else
-            Log.d(TAG,"wrong");
-        localBroadcastManager.sendBroadcast(intent);
-
+        dealing(localBroadcastManager,event);
     }
-
     private void jumpToActivity(Message msg) {
         UserInfo fromUser = msg.getFromUser();
         final Intent notificationIntent = new Intent(appContext, CreateSigTextMessageActivity.class);
@@ -132,7 +126,67 @@ public class GlobalEventListener {
         boolean isGranted=mode == AppOpsManager.MODE_ALLOWED;
         if(!isGranted)
             IMDebugApplication.getContext().startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+    }
+    private void dealing(LocalBroadcastManager localBroadcastManager,MessageEvent event){
+        SharedPreferences.Editor editor2=getApplicationContext().getSharedPreferences("history",0).edit();
+        SharedPreferences pref=getApplicationContext().getSharedPreferences("history",0);
+        String history=pref.getString("historyRecord"," ");
+        ContentType contentType=ContentType.valueOf(event.getMessage().getContentType().toString());
+        Intent intent=new Intent("message");
+        switch (contentType) {
+            case text:
+                TextContent textContent = (TextContent) event.getMessage().getContent();
+                String text=textContent.getText();
+                intent.putExtra("key", text);
+                history=history+text+"text_left%%";
+                editor2.putString("historyRecord",history);
+                editor2.apply();
+                if (text.equals("Ask"))
+                    intent.putExtra("SysMessage",SysMessage());
+                else
+                    Log.d(TAG,"wrong");
+                localBroadcastManager.sendBroadcast(intent);
+                break;
+            case image:
+                Mydialog.imageContent=(ImageContent)event.getMessage().getContent();
+                Mydialog.message=event.getMessage();
+                SharedPreferences.Editor editor=getApplicationContext().getSharedPreferences("data",0).edit();
+                String thumbLocalPath = ((ImageContent)event.getMessage().getContent()).getLocalThumbnailPath();
+                editor.putString("filepath",null);
+                editor.apply();
+                if (!TextUtils.isEmpty(thumbLocalPath)) {
+                    history=history+thumbLocalPath+"image_left%%";
+                    editor2.putString("historyRecord",history);
+                    editor2.apply();
+                    Bitmap bitmap = BitmapFactory.decodeFile(thumbLocalPath);
+                    Mydialog.bitmap=bitmap;
+                    ByteArrayOutputStream output = new ByteArrayOutputStream();//初始化一个流对象
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, output);//把bitmap100%高质量压缩 到 output对象里
+                    byte[] result = output.toByteArray();//转换成功了  result就是一个bit的资源数组
+                    intent.putExtra("image", result);
+                    localBroadcastManager.sendBroadcast(intent);
+                }
+                break;
 
+            case voice:
+
+                break;
+
+            case location:
+                break;
+            case file:
+
+                break;
+            case custom:
+                break;
+            case eventNotification:
+                break;
+            case prompt:
+               break;
+            case video:
+
+                break;
+        }
     }
 
 }

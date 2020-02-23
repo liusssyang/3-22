@@ -1,13 +1,18 @@
 package heath.com.test2_jmessage.activity;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toolbar;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -95,6 +100,14 @@ public class TypeActivity extends Activity implements View.OnClickListener {
 
     private void initView() {
         setContentView(R.layout.activity_type);
+        Toolbar toolbar=findViewById(R.id.toolbar);
+        toolbar.setTitleTextColor(Color.parseColor("#ffffff"));
+        setActionBar(toolbar);
+        ActionBar actionBar=getActionBar();
+        if (actionBar!=null){
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeAsUpIndicator(R.drawable.col_set_white);
+        }
         tv_header = (TextView) findViewById(R.id.tv_header);
         findViewById(R.id.bt_about_setting).setOnClickListener(this);
         findViewById(R.id.bt_create_message).setOnClickListener(this);
@@ -506,6 +519,22 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                 context.startActivity(intent);
             }
         }
+    }
+    public  boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.toolbar,menu);
+        return true;
+    }
+    public  boolean onOptionsItemSelected(MenuItem item){
+        switch (item.getItemId()){
+            case  R.id.add:
+
+                break;
+
+            case android.R.id.home:
+
+                break;
+        }
+        return  true;
     }
 
     @Override

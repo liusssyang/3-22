@@ -3,5 +3,9 @@
         <item name="colorControlNormal">#04c568</item>
         <item name="colorControlActivated">#04c568</item>
     </style>
+    <style name="status_transparent" parent="Theme.AppCompat">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+
+    </style>
 
 </resources>

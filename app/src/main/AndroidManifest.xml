@@ -44,7 +44,9 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         android:name=".application.IMDebugApplication"
+
         >
         <service
             android:name="heath.com.test2_jmessage.PushService"
@@ -126,6 +128,7 @@
 
         <activity
             android:name="heath.com.test2_jmessage.activity.RegisterAndLoginActivity"
+            android:theme="@style/status_transparent"
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

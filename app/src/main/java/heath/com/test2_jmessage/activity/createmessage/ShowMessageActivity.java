@@ -35,6 +35,7 @@ import cn.jpush.im.android.api.content.VoiceContent;
 import cn.jpush.im.android.api.enums.ContentType;
 import cn.jpush.im.android.api.model.Conversation;
 import cn.jpush.im.android.api.model.Message;
+import heath.com.test2_jmessage.MyDialog.Mydialog;
 import heath.com.test2_jmessage.R;
 
 /**
@@ -202,12 +203,14 @@ public class ShowMessageActivity extends Activity {
                     switch (contentType) {
                         case image:
                             ImageContent imageContent = (ImageContent) message.getContent();
+                            Mydialog.imageContent=imageContent;
+                            Mydialog.message=message;
                             imageContent.downloadOriginImage(message, new DownloadCompletionCallback() {
                                 @Override
                                 public void onComplete(int responseCode, String responseMessage, File file) {
                                     dialog.dismiss();
                                     if (responseCode == 0) {
-                                        mTv_showText.append("原图文件下载成功，路径:" + file.getPath() + "\n");
+                                        mTv_showText.append("已下载原图文件，路径:" + file.getPath() + "\n");
                                         Toast.makeText(getApplicationContext(), "原图下载成功", Toast.LENGTH_SHORT).show();
                                     } else {
                                         Toast.makeText(getApplicationContext(), "原图下载失败", Toast.LENGTH_SHORT).show();
