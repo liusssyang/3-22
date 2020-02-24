@@ -2,15 +2,15 @@ package heath.com.test2_jmessage.activity;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import cn.jpush.im.android.api.JMessageClient;
@@ -108,8 +109,12 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     public static final String TRANS_COMMAND_CMD = "trans_command_cmd";
     private RecyclerView recyclerView;
     private personAdapter adapter;
+    private personMsg h1;
     private List<personMsg> personList=new ArrayList<>();
     private DrawerLayout drawerLayout;
+    private IntentFilter intentFilter;
+    private Localreceiver localRceiver;
+    private LocalBroadcastManager localBroadcastManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,12 +122,9 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         JMessageClient.registerEventReceiver(this);
         initView();
     }
-
     private void initView() {
-        getWindow().setFlags(
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-        );
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(R.layout.activity_type);
         zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
         Toolbar toolbar=findViewById(R.id.toolbar);
@@ -171,24 +173,30 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                 drawerLayout.openDrawer(GravityCompat.START);
             }
         });
-
         mTv_showOfflineMsg = (TextView) findViewById(R.id.tv_showOfflineMsg);
         tv_refreshEvent = (TextView) findViewById(R.id.tv_refreshEvent);
         tv_deviceInfo = (TextView) findViewById(R.id.tv_deviceInfo);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
         recyclerView=findViewById(R.id.type_recyclerview);
         LinearLayoutManager layoutManager=new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         adapter=new personAdapter(personList);
         recyclerView.setAdapter(adapter);
+        h1=new personMsg("A123",null,null,null,null);
+        personList.add(0,h1);
+        intentFilter=new IntentFilter();
+        intentFilter.addAction("message");
+        localRceiver =new Localreceiver(personList,recyclerView,adapter);
+        localBroadcastManager= LocalBroadcastManager.getInstance(this);
+        localBroadcastManager.registerReceiver(localRceiver,intentFilter);
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
         SharedPreferences pref2=this.getSharedPreferences("backdata",0);
         String simpleMessage=pref2.getString("simplemessage","");
         String time=pref2.getString("time","");
-        personList.add(0,new personMsg("A123",null,null,simpleMessage,time));
+        h1.setTime(time);
+        h1.setSimpleMessage(simpleMessage);
         adapter.notifyItemChanged(personList.size()-1);
         tv_header.setText("");
         tv_deviceInfo.setText("");
@@ -212,13 +220,11 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             }
         }
     }
-
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
     }
-
     @Override
     public void onClick(View v) {
         Intent intent = new Intent();
@@ -255,7 +261,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                 break;
         }
     }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == 8) {
@@ -263,8 +268,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             tv_refreshEvent.setText("");
         }
     }
-
-
     public void onEvent(ContactNotifyEvent event) {
         String reason = event.getReason();
         String fromUsername = event.getFromUsername();
@@ -299,7 +302,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                 break;
         }
     }
-
     public void onEvent(LoginStateChangeEvent event) {
         LoginStateChangeEvent.Reason reason = event.getReason();
         UserInfo myInfo = event.getMyInfo();
@@ -307,7 +309,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         intent.putExtra(LOGOUT_REASON, "reason = " + reason + "\n" + "logout user name = " + myInfo.getUserName());
         startActivity(intent);
     }
-
     public void onEventMainThread(OfflineMessageEvent event) {
         Conversation conversation = event.getConversation();
         List<Message> newMessageList = event.getOfflineMessageList();//获取此次离线期间会话收到的新消息列表
@@ -322,7 +323,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             mTv_showOfflineMsg.setText("conversation is null or new message list is null");
         }
     }
-
     public void onEventMainThread(ConversationRefreshEvent event) {
         Conversation conversation = event.getConversation();
         ConversationRefreshEvent.Reason reason = event.getReason();
@@ -333,11 +333,9 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             tv_refreshEvent.setText("conversation is null");
         }
     }
-
     public void onEvent(GroupMemNicknameChangedEvent event) {
         new ShowMemChangeTask(getApplicationContext()).execute(event);
     }
-
     public void onEvent(GroupAnnouncementChangedEvent event) {
         StringBuilder builder = new StringBuilder();
         builder.append("群组ID:").append(event.getGroupID()).append("\n\n");
@@ -351,7 +349,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         intent.putExtra(ShowAnnouncementChangedActivity.SHOW_ANNOUNCEMENT_CHANGED, builder.toString());
         startActivity(intent);
     }
-
     public void onEvent(GroupBlackListChangedEvent event) {
         StringBuilder builder = new StringBuilder();
         builder.append("群组ID:").append(event.getGroupID()).append("\n\n");
@@ -369,11 +366,9 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         intent.putExtra(ShowGroupBlcakListChangedActivity.SHOW_GROUP_BLACK_LIST_CHANGED, builder.toString());
         startActivity(intent);
     }
-
     public void onEventBackgroundThread(ChatRoomNotificationEvent event) {
         new ShowChatRoomNotificationTask(getApplicationContext(), event).run();
     }
-
     private static class ShowChatRoomNotificationTask {
         private WeakReference<Context> contextWeakReference;
         ChatRoomNotificationEvent event;
@@ -432,14 +427,12 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             }
         }
     }
-
     public void onEvent(MyInfoUpdatedEvent event) {
         UserInfo myInfo = event.getMyInfo();
         Intent intent = new Intent(TypeActivity.this, ShowMyInfoUpdateActivity.class);
         intent.putExtra(INFO_UPDATE, myInfo.getUserName());
         startActivity(intent);
     }
-
     public void onEvent(final CommandNotificationEvent event) {
         event.getSenderUserInfo(new GetUserInfoCallback() {
             @Override
@@ -475,7 +468,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             }
         });
     }
-
     public void onEvent(GroupApprovalEvent event) {
         Intent intent = new Intent(getApplicationContext(), ShowGroupApprovalActivity.class);
         Gson gson = new Gson();
@@ -484,7 +476,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
 
         startActivity(intent);
     }
-
     public void onEvent(final GroupApprovalRefuseEvent event) {
         final Intent intent = new Intent(getApplicationContext(), ShowGroupApprovalActivity.class);
         event.getFromUserInfo(new GetUserInfoCallback() {
@@ -514,11 +505,9 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             }
         });
     }
-
     public void onEventMainThread(GroupApprovedNotificationEvent event) {
         tv_refreshEvent.append("\n收到入群审批已审批事件通知.对应审批事件id: " + event.getApprovalEventID());
     }
-
     public void onEventMainThread(MessageReceiptStatusChangeEvent event) {
         Conversation conv = event.getConversation();
         tv_refreshEvent.append(String.format(Locale.SIMPLIFIED_CHINESE, "\n收到MessageReceiptStatusChangeEvent事件,会话对象是%s\n", conv.getTargetId()));
@@ -528,7 +517,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         }
 
     }
-
     private static class ShowMemChangeTask extends AsyncTask<GroupMemNicknameChangedEvent, Integer, String> {
         private WeakReference<Context> contextWeakReference;
 
@@ -587,30 +575,41 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             }
         }
     }
-    public  boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.toolbar,menu);
-        return true;
-    }
-    public  boolean onOptionsItemSelected(MenuItem item){
-        switch (item.getItemId()){
-            case  R.id.add:
-
-                break;
-        }
-        return  true;
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
         JMessageClient.unRegisterEventReceiver(this);
+        localBroadcastManager.unregisterReceiver(localRceiver);
     }
-    private void zoomInViewSize(int height)
-    {
+    private void zoomInViewSize(int height) {
         View img1 = findViewById(R.id.statusbar);
         ViewGroup.LayoutParams  lp = img1.getLayoutParams();
         lp.height =height;
         img1.setLayoutParams(lp);
     }
+    class  Localreceiver extends BroadcastReceiver {
+        private List<personMsg> msgList;
+        private RecyclerView msgRecyclerView;
+        private personAdapter adapter;
 
+        public Localreceiver(List<personMsg> msgList,RecyclerView msgRecyclerView,personAdapter adapter){
+            this.msgList=msgList;
+            this.msgRecyclerView=msgRecyclerView;
+            this.adapter=adapter;
+        }
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getStringExtra("key")!=null) {
+                msgList.get(0).setSimpleMessage(intent.getStringExtra("key"));
+                msgList.get(0).setTime(intent.getStringExtra("time"));
+            }
+            if (intent.getStringExtra("SysMessage")!=null){
+                msgList.get(0).setSimpleMessage("[System]");
+            }
+            if (intent.getByteArrayExtra("image")!=null){
+                msgList.get(0).setSimpleMessage("[图片]");
+            }
+            adapter.notifyDataSetChanged();
+        }
+
+    }
 }

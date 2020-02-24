@@ -11,19 +11,17 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 import de.hdodenhof.circleimageview.CircleImageView;
-import heath.com.test2_jmessage.LocalReceiver.Localreceiver;
 import heath.com.test2_jmessage.MyDialog.Mydialog;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.recycleView_item.Msg;
 
+//import heath.com.test2_jmessage.LocalReceiver.Localreceiver;
+
 
 public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.ViewHolder>{
     private List<Msg> mMsgList;
-    private Localreceiver localRceiver;
-    private LocalBroadcastManager localBroadcastManager;
     static class ViewHolder extends RecyclerView.ViewHolder{
         LinearLayout leftLayout;
         LinearLayout rightLayout;

@@ -49,18 +49,68 @@
             android:gravity="center"
             android:text="消息"
             android:textColor="#ffffff"/>
+        <TextView
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:id="@+id/addNew"
+            android:background="@drawable/addnew"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="15dp"/>
     </RelativeLayout>
     </Toolbar>
 
     <TextView
         android:id="@+id/tv_header"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#ffffff">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:id="@+id/index"
+            android:background="@drawable/background_round_"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginTop="10dp"
+            android:text="🔍搜索"
+            android:gravity="center"
+        />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:textColor="#000000"
+            android:id="@+id/newFriends"
+            android:layout_below="@+id/index"
+            android:text="新朋友"
+            android:layout_marginTop="10dp"
+            android:textSize="18sp"
+            android:gravity="center_vertical"
+            android:layout_marginStart="15dp"/>
+        <TextView
+            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:text=">"
+            android:gravity="center_vertical"
+            android:background="#ffffff"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="17dp"
+            android:layout_below="@+id/index"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:background="#f5f6fa"
+            android:layout_below="@+id/newFriends"/>
+    </RelativeLayout>
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/type_recyclerview"
+        android:background="#ffffff"
         />
     <Button
         android:id="@+id/bt_about_setting"

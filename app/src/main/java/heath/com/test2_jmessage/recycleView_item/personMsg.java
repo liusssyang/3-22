@@ -27,5 +27,10 @@ public class personMsg {
     public String getAppkey(){return appkey;}
     public String getSimpleMessage(){return simpleMessage;}
     public String getTime(){return time;}
+    public void setName(String name){this.name=name;}
+    public void setSendName(String Sendname){this.sendName=Sendname;}
+    public void setAppkey(String Appkey){this.appkey=Appkey;}
+    public void setSimpleMessage(String Simplemessage){this.simpleMessage=Simplemessage;}
+    public void setTime(String time){this.time=time;}
 
 }

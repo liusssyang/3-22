@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import cn.jpush.im.android.api.JMessageClient;
@@ -47,7 +48,7 @@ public class GlobalEventListener {
     private final static String TAG = "log1";
     private UsageStatsManager mUsageStatsManager;
 
-    private LocalBroadcastManager localBroadcastManager;
+
     public GlobalEventListener(Context context) {
         appContext = context;
         JMessageClient.registerEventReceiver(this);
@@ -58,7 +59,7 @@ public class GlobalEventListener {
     }
 
     public void onEvent(MessageEvent event) {
-        localBroadcastManager=LocalBroadcastManager.getInstance(appContext);
+        LocalBroadcastManager localBroadcastManager=LocalBroadcastManager.getInstance(appContext);
         dealing(localBroadcastManager,event);
     }
     private void jumpToActivity(Message msg) {
@@ -133,6 +134,22 @@ public class GlobalEventListener {
         String history=pref.getString("historyRecord"," ");
         ContentType contentType=ContentType.valueOf(event.getMessage().getContentType().toString());
         Intent intent=new Intent("message");
+        Calendar cal;
+        String year, month, day, hour, minute, second, timeA;
+        String total = "";
+        cal = Calendar.getInstance();
+        cal.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
+        year = String.valueOf(cal.get(Calendar.YEAR));
+        month = String.valueOf(cal.get(Calendar.MONTH) + 1);
+        day = String.valueOf(cal.get(Calendar.DATE));
+        if (cal.get(Calendar.AM_PM) == 0)
+            hour = String.valueOf(cal.get(Calendar.HOUR));
+        else
+            hour = String.valueOf(cal.get(Calendar.HOUR) + 12);
+        minute = String.valueOf(cal.get(Calendar.MINUTE));
+        second = String.valueOf(cal.get(Calendar.SECOND));
+        timeA = month + "/" + day + "  " + hour + ":" + minute;
+        intent.putExtra("time",timeA);
         switch (contentType) {
             case text:
                 TextContent textContent = (TextContent) event.getMessage().getContent();
