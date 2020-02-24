@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/add"
-        android:icon="@drawable/add"
+        android:icon="@android:drawable/ic_menu_add"
         android:title="添加好友"
         app:showAsAction="ifRoom"/>
 </menu>

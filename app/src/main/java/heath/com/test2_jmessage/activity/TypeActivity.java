@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -11,9 +12,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toolbar;
 
+import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -24,6 +29,10 @@ import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.callback.GetUserInfoCallback;
 import cn.jpush.im.android.api.callback.GetUserInfoListCallback;
@@ -60,10 +69,14 @@ import heath.com.test2_jmessage.activity.groupinfo.ShowMemNicknameChangedActivit
 import heath.com.test2_jmessage.activity.jmrtc.JMRTCActivity;
 import heath.com.test2_jmessage.activity.setting.SettingMainActivity;
 import heath.com.test2_jmessage.activity.setting.ShowLogoutReasonActivity;
+import heath.com.test2_jmessage.activity.setting.UpdateUserInfoActivity;
 import heath.com.test2_jmessage.activity.showinfo.ShowAnnouncementChangedActivity;
 import heath.com.test2_jmessage.activity.showinfo.ShowChatRoomNotificationActivity;
 import heath.com.test2_jmessage.activity.showinfo.ShowGroupBlcakListChangedActivity;
 import heath.com.test2_jmessage.activity.showinfo.ShowMyInfoUpdateActivity;
+import heath.com.test2_jmessage.adapter.personAdapter;
+import heath.com.test2_jmessage.application.IMDebugApplication;
+import heath.com.test2_jmessage.recycleView_item.personMsg;
 
 /**
  * Created by ${chenyn} on 16/3/23.
@@ -81,16 +94,22 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     public static final String DOWNLOAD_THUMBNAIL_IMAGE = "download_thumbnail_image";
     public static final String IS_UPLOAD = "is_upload";
     public static final String LOGOUT_REASON = "logout_reason";
+    public static String tv_username,tv_appkey;
     private TextView mTv_showOfflineMsg;
     private TextView tv_refreshEvent;
     private TextView tv_deviceInfo;
     private TextView tv_header;
+    private TextView menu,headusername,headappkey,headvision,signature;
     public static final String DOWNLOAD_INFO = "download_info";
     public static final String INFO_UPDATE = "info_update";
     public static final String TRANS_COMMAND_SENDER = "trans_command_sender";
     public static final String TRANS_COMMAND_TARGET = "trans_command_target";
     public static final String TRANS_COMMAND_TYPE = "trans_command_type";
     public static final String TRANS_COMMAND_CMD = "trans_command_cmd";
+    private RecyclerView recyclerView;
+    private personAdapter adapter;
+    private List<personMsg> personList=new ArrayList<>();
+    private DrawerLayout drawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,17 +119,44 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     }
 
     private void initView() {
+        getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        );
         setContentView(R.layout.activity_type);
-        StatusBarUtil.setStatusBarColor(this,Color.parseColor("#00C4FF"));
+        zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
         Toolbar toolbar=findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.parseColor("#ffffff"));
         setActionBar(toolbar);
         ActionBar actionBar=getActionBar();
-        if (actionBar!=null){
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeAsUpIndicator(R.drawable.col_set_white);
-        }
+
         tv_header = (TextView) findViewById(R.id.tv_header);
+
+        UserInfo info = JMessageClient.getMyInfo();
+        drawerLayout=findViewById(R.id.sigText_drawerLayout);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        View navHeaderView = navigationView.inflateHeaderView(R.layout.headlayout);
+        headusername=navHeaderView.findViewById(R.id.head_username);
+        headappkey=navHeaderView.findViewById(R.id.head_appkey);
+        headvision=navHeaderView.findViewById(R.id.head_vision);
+        signature=navHeaderView.findViewById(R.id.signature);
+        headusername.setText(info.getNickname());
+        headappkey.setText("");
+        headappkey.append("AppKey："+info.getAppKey());
+        headvision.setText("版本号：" + JMessageClient.getSdkVersionString());
+        headvision.setVisibility(View.GONE);
+        if (info.getSignature()!=null)
+            signature.setText(info.getSignature());
+        else
+            signature.setText("点击编辑个性签名");
+        RelativeLayout re=navHeaderView.findViewById(R.id.head);
+        re.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               Intent intent=new Intent(IMDebugApplication.getContext(), UpdateUserInfoActivity.class);
+                IMDebugApplication.getContext().startActivity(intent);
+            }
+        });
         findViewById(R.id.bt_about_setting).setOnClickListener(this);
         findViewById(R.id.bt_create_message).setOnClickListener(this);
         findViewById(R.id.bt_group_info).setOnClickListener(this);
@@ -118,6 +164,13 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         findViewById(R.id.bt_friend).setOnClickListener(this);
         findViewById(R.id.bt_chatroom).setOnClickListener(this);
         findViewById(R.id.bt_jmrtc).setOnClickListener(this);
+        menu=findViewById(R.id.type_menu);
+        menu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
 
         mTv_showOfflineMsg = (TextView) findViewById(R.id.tv_showOfflineMsg);
         tv_refreshEvent = (TextView) findViewById(R.id.tv_refreshEvent);
@@ -127,10 +180,22 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onResume() {
         super.onResume();
+        recyclerView=findViewById(R.id.type_recyclerview);
+        LinearLayoutManager layoutManager=new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        adapter=new personAdapter(personList);
+        recyclerView.setAdapter(adapter);
+        SharedPreferences pref2=this.getSharedPreferences("backdata",0);
+        String simpleMessage=pref2.getString("simplemessage","");
+        String time=pref2.getString("time","");
+        personList.add(0,new personMsg("A123",null,null,simpleMessage,time));
+        adapter.notifyItemChanged(personList.size()-1);
         tv_header.setText("");
         tv_deviceInfo.setText("");
         UserInfo info = JMessageClient.getMyInfo();
         if (null != info) {
+            tv_appkey=info.getAppKey();
+            tv_username=info.getUserName();
             tv_header.append("当前已登录用户：" + info.getUserName() + "\n");
             tv_header.append("用户所属appkey：" + info.getAppKey() + "\n");
         }
@@ -531,10 +596,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             case  R.id.add:
 
                 break;
-
-            case android.R.id.home:
-
-                break;
         }
         return  true;
     }
@@ -544,4 +605,12 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         super.onDestroy();
         JMessageClient.unRegisterEventReceiver(this);
     }
+    private void zoomInViewSize(int height)
+    {
+        View img1 = findViewById(R.id.statusbar);
+        ViewGroup.LayoutParams  lp = img1.getLayoutParams();
+        lp.height =height;
+        img1.setLayoutParams(lp);
+    }
+
 }

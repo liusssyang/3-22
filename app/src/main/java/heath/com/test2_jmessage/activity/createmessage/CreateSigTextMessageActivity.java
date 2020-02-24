@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -24,7 +25,9 @@ import android.widget.Toast;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -36,10 +39,12 @@ import cn.jpush.im.android.api.model.Conversation;
 import cn.jpush.im.android.api.model.Message;
 import cn.jpush.im.android.api.options.MessageSendingOptions;
 import cn.jpush.im.api.BasicCallback;
-import heath.com.test2_jmessage.Msg;
 import heath.com.test2_jmessage.R;
+import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
+import heath.com.test2_jmessage.activity.TypeActivity;
 import heath.com.test2_jmessage.adapter.MsgAdapter;
 import heath.com.test2_jmessage.application.IMDebugApplication;
+import heath.com.test2_jmessage.recycleView_item.Msg;
 
 /**
  * Created by ${chenyn} on 16/3/29.
@@ -92,24 +97,31 @@ public class CreateSigTextMessageActivity extends Activity {
     private List<Msg> msgList=new ArrayList<>();
     private RecyclerView msgRecyclerView;
     private MsgAdapter adapter;
-    private TextView menu;
+    private TextView menu,back,toolbarName;
     private BottomSheetBehavior behavior;
     //private Button button,button2;
     private RelativeLayout re;
     private CoordinatorLayout coordinatorLayout;
-    SharedPreferences.Editor editor2;
-    SharedPreferences pref;
+    SharedPreferences.Editor editor2,editor3;
+    SharedPreferences pref,pref2;
     String history;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_single_text_message);
+        StatusBarUtil.setStatusBarColor(this, Color.parseColor("#00C4FF"));
         editor2=getApplicationContext().getSharedPreferences("history",0).edit();
         pref=getApplicationContext().getSharedPreferences("history",0);
+        editor3=getApplicationContext().getSharedPreferences("backdata",0).edit();
         history=pref.getString("historyRecord","");
         String []his=history.split("%%");
+        back=findViewById(R.id.back);
+        toolbarName=findViewById(R.id.sigText_toolbarName);
         mEt_name = (EditText) findViewById(R.id.et_name);
+        toolbarName.setText(getIntent().getStringExtra("name"));
+        mEt_name.setText(getIntent().getStringExtra("name"));
+        Log.d("TAG", "onCreate: "+getIntent().getStringExtra("name"));
         mEt_text = (EditText) findViewById(R.id.et_text);
         mBt_send = (TextView) findViewById(R.id.bt_send);
         mEt_appkey = (EditText) findViewById(R.id.et_appkey);
@@ -182,6 +194,13 @@ public class CreateSigTextMessageActivity extends Activity {
                 }
             }
         });
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(IMDebugApplication.getContext(), TypeActivity.class);
+                IMDebugApplication.getContext().startActivity(intent);
+            }
+        });
         /*behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState)
@@ -216,8 +235,26 @@ public class CreateSigTextMessageActivity extends Activity {
         mBt_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Calendar cal;
+                String year, month, day, hour, minute, second, timeA;
+                String total = "";
+                cal = Calendar.getInstance();
+                cal.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
+                year = String.valueOf(cal.get(Calendar.YEAR));
+                month = String.valueOf(cal.get(Calendar.MONTH) + 1);
+                day = String.valueOf(cal.get(Calendar.DATE));
+                if (cal.get(Calendar.AM_PM) == 0)
+                    hour = String.valueOf(cal.get(Calendar.HOUR));
+                else
+                    hour = String.valueOf(cal.get(Calendar.HOUR) + 12);
+                minute = String.valueOf(cal.get(Calendar.MINUTE));
+                second = String.valueOf(cal.get(Calendar.SECOND));
+                timeA = month + "/" + day + "  " + hour + ":" + minute;
                 String name = mEt_name.getText().toString();
                 String text = mEt_text.getText().toString();
+                editor3.putString("simplemessage",text);
+                editor3.putString("time",timeA);
+                editor3.apply();
                 if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(text)) {
                     String appkey = mEt_appkey.getText().toString();
                     String customFromName = mEt_customName.getText().toString();

@@ -10,6 +10,52 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
+        <Toolbar
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="#00C4FF"
+            android:id="@+id/toolbar_sigText"
+            app:contentInsetLeft="0dp"
+            app:contentInsetStart="0dp"
+            app:contentInsetRight="0dp"
+            app:contentInsetEnd="0dp"
+            >
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@color/colorQQ"
+                android:paddingTop="15dp"
+                >
+                <TextView
+                    android:id="@+id/back"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:background="@drawable/back"
+                    android:layout_gravity="center"
+                    android:textColor="#ffffff"
+                    />
+                <TextView
+                    android:id="@+id/sigText_toolbarName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_centerInParent="true"
+                    android:layout_gravity="center"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:textColor="#ffffff"/>
+                <TextView
+                    android:id="@+id/sigText_toolbarMenu"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_alignParentEnd="true"
+                    android:background="@drawable/col_set_white"
+                    android:layout_gravity="center"
+                    android:textSize="16sp"
+                    android:layout_marginEnd="20dp"
+                    android:gravity="center"
+                    android:textColor="#ffffff"/>
+            </RelativeLayout>
+        </Toolbar>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/msg_recycler_view"
         android:layout_width="match_parent"

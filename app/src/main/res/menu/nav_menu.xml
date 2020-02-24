@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+        <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/set"
+            android:icon="@android:drawable/ic_menu_set_as"
+            android:title="设置"/>
+                <item
+                    android:id="@+id/history"
+                    android:icon="@android:drawable/ic_menu_recent_history"
+                    android:title="历史纪录"/>
+        <item
+            android:id="@+id/addfile"
+            android:icon="@android:drawable/ic_menu_add"
+            android:title="添加文件"/>
+        <item
+            android:id="@+id/addpic"
+            android:icon="@android:drawable/ic_menu_camera"
+            android:title="图片翻译"/>
+
+        <item
+            android:id="@+id/nav_share"
+            android:icon="@android:drawable/ic_menu_share"
+            android:title="分享"/>
+        <item
+            android:id="@+id/nav_raise"
+            android:icon="@android:drawable/ic_menu_more"
+            android:title="更多"/>
+        <item
+            android:id="@+id/developer"
+            android:icon="@android:drawable/ic_menu_rotate"
+            android:title="开发者选项"/>
+        <item
+            android:id="@+id/nav_exit"
+            android:icon="@android:drawable/ic_menu_close_clear_cancel"
+            android:title="退出"/>
+        </group>
+
+</menu>

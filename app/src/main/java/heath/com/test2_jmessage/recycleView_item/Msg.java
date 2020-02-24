@@ -1,4 +1,4 @@
-package heath.com.test2_jmessage;
+package heath.com.test2_jmessage.recycleView_item;
 
 import android.graphics.Bitmap;
 

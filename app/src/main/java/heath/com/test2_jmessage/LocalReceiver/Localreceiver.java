@@ -7,7 +7,7 @@ import android.content.Intent;
 import java.util.List;
 
 import androidx.recyclerview.widget.RecyclerView;
-import heath.com.test2_jmessage.Msg;
+import heath.com.test2_jmessage.recycleView_item.Msg;
 import heath.com.test2_jmessage.adapter.MsgAdapter;
 
 public class Localreceiver extends BroadcastReceiver {
