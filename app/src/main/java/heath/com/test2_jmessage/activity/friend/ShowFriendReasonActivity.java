@@ -2,6 +2,8 @@ package heath.com.test2_jmessage.activity.friend;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,6 +16,8 @@ import cn.jpush.im.android.api.ContactManager;
 import cn.jpush.im.android.api.event.ContactNotifyEvent;
 import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.R;
+import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
+import heath.com.test2_jmessage.activity.TypeActivity;
 
 /**
  * Created by ${chenyn} on 16/4/17.
@@ -23,7 +27,6 @@ import heath.com.test2_jmessage.R;
 public class ShowFriendReasonActivity extends Activity {
     private static final String TAG = ShowFriendReasonActivity.class.getSimpleName();
     public static final String EXTRA_TYPE = "event_type";
-
     private TextView mTv_showAddFriendInfo;
     private Button mAccept_invitation;
     private Button mDeclined_invitation;
@@ -38,11 +41,39 @@ public class ShowFriendReasonActivity extends Activity {
     }
 
     private void initData() {
+        TextView showFriend_toolbarName=findViewById(R.id.showFriend_toolbarName);
+        showFriend_toolbarName.setText("新朋友");
+        TextView showFriend_back=findViewById(R.id.showFriend_back);
+        showFriend_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(getApplicationContext(), TypeActivity.class);
+                getApplicationContext().startActivity(intent);
+            }
+        });
+        TextView showFriend_toolbarAdd=findViewById(R.id.showFriend_toolbarAdd);
+        showFriend_toolbarAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent();
+                intent.setClass(getApplicationContext(), FriendContactManager.class);
+                startActivity(intent);
+            }
+        });
+        TextView showFriend_person=findViewById(R.id.showFriend_person);
+        TextView showFriend_message=findViewById(R.id.showFriend_message);
+        TextView tiptext2=findViewById(R.id.tiptext2);
+        TextView Appkeytext2=findViewById(R.id.Appkeytext2);
+        final SharedPreferences pref=getSharedPreferences("friends",0);
         final Intent intent = getIntent();
-        ContactNotifyEvent.Type type = ContactNotifyEvent.Type.valueOf(intent.getStringExtra(EXTRA_TYPE));
-        switch (type) {
+       // ContactNotifyEvent.Type type = ContactNotifyEvent.Type.valueOf(intent.getStringExtra(EXTRA_TYPE));
+        ContactNotifyEvent.Type type =ContactNotifyEvent.Type.valueOf(pref.getString(EXTRA_TYPE,null));
+                switch (type) {
             case invite_received:
-                mTv_showAddFriendInfo.append(intent.getStringExtra("invite_received"));
+                showFriend_person.setText(pref.getString("username",null));
+                tiptext2.setText(pref.getString("reason",null));
+                Appkeytext2.setText(pref.getString("appkey",null));
+                //mTv_showAddFriendInfo.append(pref.getString("invite_received",null));
                 break;
             case invite_accepted:
                 mEt_reason.setVisibility(View.GONE);
@@ -76,7 +107,8 @@ public class ShowFriendReasonActivity extends Activity {
         mAccept_invitation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ContactManager.acceptInvitation(intent.getStringExtra("username"), intent.getStringExtra("appkey"), new BasicCallback() {
+
+                ContactManager.acceptInvitation(pref.getString("username",null), pref.getString("appkey",null), new BasicCallback() {
                     @Override
                     public void gotResult(int i, String s) {
                         if (i == 0) {
@@ -95,7 +127,7 @@ public class ShowFriendReasonActivity extends Activity {
             @Override
             public void onClick(View v) {
                 String reason = mEt_reason.getText().toString();
-                ContactManager.declineInvitation(intent.getStringExtra("username"), intent.getStringExtra("appkey"), reason, new BasicCallback() {
+                ContactManager.declineInvitation(pref.getString("username",null), pref.getString("appkey",null), reason, new BasicCallback() {
                     @Override
                     public void gotResult(int i, String s) {
                         if (i == 0) {
@@ -112,6 +144,7 @@ public class ShowFriendReasonActivity extends Activity {
 
     private void initView() {
         setContentView(R.layout.activity_show_friend_reason);
+        StatusBarUtil.setStatusBarColor(this, Color.parseColor("#00C4FF"));
         mTv_showAddFriendInfo = (TextView) findViewById(R.id.tv_show_add_friend_info);
         mAccept_invitation = (Button) findViewById(R.id.accept_invitation);
         mDeclined_invitation = (Button) findViewById(R.id.declined_invitation);

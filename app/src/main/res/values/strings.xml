@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">JMessageDemo</string>
+    <string name="app_name">Test2_JMessage</string>
     <string name="getUserName">getUserName: %1$s</string>
     <string name="getAddress">getAddress: %1$s</string>
     <string name="getAppKey">getAppKey: %1$s</string>

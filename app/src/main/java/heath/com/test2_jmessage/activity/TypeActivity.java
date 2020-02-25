@@ -98,8 +98,8 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     public static String tv_username,tv_appkey;
     private TextView mTv_showOfflineMsg;
     private TextView tv_refreshEvent;
-    private TextView tv_deviceInfo;
-    private TextView tv_header;
+    private TextView tv_deviceInfo,newFriends;
+    private TextView tv_header,addNew;
     private TextView menu,headusername,headappkey,headvision,signature;
     public static final String DOWNLOAD_INFO = "download_info";
     public static final String INFO_UPDATE = "info_update";
@@ -188,6 +188,25 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         localRceiver =new Localreceiver(personList,recyclerView,adapter);
         localBroadcastManager= LocalBroadcastManager.getInstance(this);
         localBroadcastManager.registerReceiver(localRceiver,intentFilter);
+        addNew=findViewById(R.id.addNew);
+        addNew.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent();
+                intent.setClass(getApplicationContext(), FriendContactManager.class);
+                startActivity(intent);
+            }
+        });
+        newFriends=findViewById(R.id.newFriends);
+        newFriends.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent();
+                intent.setClass(getApplicationContext(), ShowFriendReasonActivity
+                        .class);
+                startActivity(intent);
+            }
+        });
     }
     @Override
     protected void onResume() {
@@ -272,15 +291,23 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         String reason = event.getReason();
         String fromUsername = event.getFromUsername();
         String appkey = event.getfromUserAppKey();
-
+        String s=event.getCreateTime()+"";
+        SharedPreferences.Editor editor=getApplicationContext().
+                getSharedPreferences("friends",0).edit();
+        editor.putString(ShowFriendReasonActivity.EXTRA_TYPE, event.getType().toString());
         Intent intent = new Intent(getApplicationContext(), ShowFriendReasonActivity.class);
         intent.putExtra(ShowFriendReasonActivity.EXTRA_TYPE, event.getType().toString());
         switch (event.getType()) {
             case invite_received://收到好友邀请
+                editor.putString("invite_received", "fromUsername = " + fromUsername + "\nfromUserAppKey" + appkey + "\nreason = " + reason);
+                editor.putString("username", fromUsername);
+                editor.putString("appkey", appkey);
+                editor.putString("reason",reason);
+                editor.apply();
                 intent.putExtra("invite_received", "fromUsername = " + fromUsername + "\nfromUserAppKey" + appkey + "\nreason = " + reason);
                 intent.putExtra("username", fromUsername);
                 intent.putExtra("appkey", appkey);
-                startActivity(intent);
+                //startActivity(intent);
                 break;
             case invite_accepted://对方接收了你的好友邀请
                 intent.putExtra("invite_accepted", "对方接受了你的好友邀请");

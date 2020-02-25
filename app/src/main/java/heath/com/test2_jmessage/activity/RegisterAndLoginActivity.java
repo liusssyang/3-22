@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -16,8 +17,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Toast;
@@ -28,16 +27,18 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Locale;
 
-//import cn.jmessage.common.logger.Logger;
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.callback.RequestCallback;
 import cn.jpush.im.android.api.model.DeviceInfo;
 import cn.jpush.im.android.api.model.UserInfo;
 import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.R;
+import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
 import heath.com.test2_jmessage.activity.setting.RegisterActivity;
 import heath.com.test2_jmessage.application.IMDebugApplication;
 import heath.com.test2_jmessage.utils.AndroidUtils;
+
+//import cn.jmessage.common.logger.Logger;
 
 /**
  * Created by ${chenyn} on 16/3/23.
@@ -194,6 +195,7 @@ public class RegisterAndLoginActivity extends Activity {
     private void initView() {
         setContentView(R.layout.activity_login);
         //permission();
+        StatusBarUtil.setStatusBarColor(this, Color.parseColor("#00C4FF"));
         mEd_userName = (EditText) findViewById(R.id.ed_login_username);
         mEd_password = (EditText) findViewById(R.id.ed_login_password);
         mBt_login = (Button) findViewById(R.id.bt_login);
