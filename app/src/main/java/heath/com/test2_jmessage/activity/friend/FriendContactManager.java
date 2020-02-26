@@ -53,6 +53,7 @@ public class FriendContactManager extends Activity {
                         if (i == 0) {
                             StringBuilder sb = new StringBuilder();
                             for (UserInfo info : list) {
+                                Log.d("showFriendList", info.getUserName());
                                 sb.append(info);
                                 sb.append("\n" + "\n");
                             }
@@ -78,7 +79,6 @@ public class FriendContactManager extends Activity {
                 startActivity(intent);
             }
         });
-
         //示例只删除列表中第一个
         mBt_delFriend.setOnClickListener(new View.OnClickListener() {
             @Override

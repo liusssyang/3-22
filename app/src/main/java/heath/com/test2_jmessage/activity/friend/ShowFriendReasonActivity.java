@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,6 +18,7 @@ import cn.jpush.im.android.api.event.ContactNotifyEvent;
 import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
+import heath.com.test2_jmessage.activity.RegisterAndLoginActivity;
 import heath.com.test2_jmessage.activity.TypeActivity;
 
 /**
@@ -149,6 +151,9 @@ public class ShowFriendReasonActivity extends Activity {
         mAccept_invitation = (Button) findViewById(R.id.accept_invitation);
         mDeclined_invitation = (Button) findViewById(R.id.declined_invitation);
         mEt_reason = (EditText) findViewById(R.id.et_reason);
+        LinearLayout linearLayout=findViewById(R.id.showFriend_mainLayout);
+        RegisterAndLoginActivity.addLayoutListener(linearLayout,mDeclined_invitation);
+
     }
 
     @Override

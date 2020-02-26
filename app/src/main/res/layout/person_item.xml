@@ -14,7 +14,7 @@
             android:id="@+id/person_icon"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="5dp"
-            android:src="@drawable/ic_launcher_background"
+            android:src="@drawable/icon_right_default"
             />
         <RelativeLayout
             android:layout_toRightOf="@+id/person_icon"
@@ -34,6 +34,7 @@
                 android:layout_toLeftOf="@+id/message_time"
                 android:textColor="#000000"/>
             <TextView
+                android:layout_marginEnd="10dp"
                 android:layout_marginBottom="5dp"
                 android:layout_width="120dp"
                 android:layout_height="35dp"
@@ -43,13 +44,11 @@
                 android:layout_alignParentEnd="true"
                 />
             <TextView
-
                 android:layout_marginLeft="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
                 android:id="@+id/simple_message"
                 android:layout_below="@+id/person"
-                android:text="[图片]"
                 android:maxLines="1"/>
         </RelativeLayout>
     </RelativeLayout>

@@ -23,6 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_marginTop="15dp"
+        android:textColor="#70999999"
         android:textSize="14sp"
 
         />
@@ -30,7 +31,7 @@
         android:id="@+id/picture"
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:src="@drawable/ssss"
+        android:src="@drawable/icon_left_default"
         android:layout_marginBottom="5dp"
         android:layout_above="@+id/head_appkey"
         android:layout_alignParentStart="true"

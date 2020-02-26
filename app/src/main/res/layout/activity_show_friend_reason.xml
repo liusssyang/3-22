@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
+    android:id="@+id/showFriend_mainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#f5f6fa">
@@ -75,7 +76,7 @@
         android:layout_marginStart="10dp"
         android:layout_marginEnd="5dp"
         android:layout_marginBottom="10dp"
-        android:src="@drawable/ic_launcher_background"
+        android:src="@drawable/icon_right_default"
         />
 
         <TextView

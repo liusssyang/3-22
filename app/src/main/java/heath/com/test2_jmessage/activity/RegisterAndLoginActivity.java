@@ -10,15 +10,21 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -57,6 +63,7 @@ public class RegisterAndLoginActivity extends Activity {
     private ProgressDialog mProgressDialog = null;
     private RadioGroup mRgType;
     private boolean isTestVisibility = false;
+    private TextView pwdIsVisible;
     private static final String[] REQUIRED_PERMISSIONS = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
 
     @Override
@@ -201,6 +208,26 @@ public class RegisterAndLoginActivity extends Activity {
         mBt_login = (Button) findViewById(R.id.bt_login);
         mBt_login_with_infos = (Button) findViewById(R.id.bt_login_with_infos);
         mBt_gotoRegister = (Button) findViewById(R.id.bt_goto_regester);
+        RelativeLayout re=findViewById(R.id.login_all);
+        pwdIsVisible=findViewById(R.id.eye);
+        pwdIsVisible.setText(" ");
+        pwdIsVisible.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (pwdIsVisible.getText().toString().equals(" ")) {
+                    mEd_password.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                    mEd_password.setSelection(mEd_password.getText().toString().length());
+                    pwdIsVisible.setText("");
+                    pwdIsVisible.setBackgroundResource(R.drawable.eye_close);
+                }else{
+                    pwdIsVisible.setText(" ");
+                    mEd_password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                    mEd_password.setSelection(mEd_password.getText().toString().length());
+                    pwdIsVisible.setBackgroundResource(R.drawable.eye_open);
+                }
+            }
+        });
+        addLayoutListener(re,mBt_login);
         mRgType = (RadioGroup) findViewById(R.id.rg_environment);;
         if (!isTestVisibility) {
             mRgType.setVisibility(View.GONE);
@@ -289,5 +316,27 @@ public class RegisterAndLoginActivity extends Activity {
         if(!isGranted)
             IMDebugApplication.getContext().startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
 
+    }
+    public static void addLayoutListener(final View main,final View scroll){
+        main.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        Rect rect=new Rect();
+                        main.getWindowVisibleDisplayFrame(rect);
+                        int mainInvisibleHeight=main.getRootView().getHeight()-rect.bottom;
+                        if (mainInvisibleHeight>100){
+                            int[] location=new int[2];
+                            scroll.getLocationInWindow(location);
+                            int srollHeight=
+                                    (location[1]+scroll.getHeight())-rect.bottom;
+                            main.scrollTo(0,srollHeight);
+                        }else{
+                            main.scrollTo(0,0);
+                        }
+
+                    }
+                }
+        );
     }
 }

@@ -147,7 +147,8 @@
         <activity android:name="heath.com.test2_jmessage.activity.setting.UpdatePassword" />
         <activity android:name="heath.com.test2_jmessage.activity.setting.UpdateUserInfoActivity" />
         <activity android:name="heath.com.test2_jmessage.activity.createmessage.CreateMessageActivity" />
-        <activity android:name="heath.com.test2_jmessage.activity.createmessage.CreateSigTextMessageActivity" />
+        <activity android:name="heath.com.test2_jmessage.activity.createmessage.CreateSigTextMessageActivity"
+                  android:launchMode="singleTask"/>
         <activity android:name="heath.com.test2_jmessage.activity.groupinfo.GroupInfoActivity" />
         <activity android:name="heath.com.test2_jmessage.activity.groupinfo.CreateGroupActivity" />
         <activity android:name="heath.com.test2_jmessage.activity.groupinfo.GetGroupInfoActivity" />

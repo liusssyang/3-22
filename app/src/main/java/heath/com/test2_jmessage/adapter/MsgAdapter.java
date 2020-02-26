@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import de.hdodenhof.circleimageview.CircleImageView;
 import heath.com.test2_jmessage.MyDialog.Mydialog;
 import heath.com.test2_jmessage.R;
+import heath.com.test2_jmessage.activity.TypeActivity;
 import heath.com.test2_jmessage.recycleView_item.Msg;
 
 //import heath.com.test2_jmessage.LocalReceiver.Localreceiver;
@@ -67,7 +68,8 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.ViewHolder>{
 
     public void onBindViewHolder(ViewHolder holder,int position){
         Msg msg=mMsgList.get(position);
-
+        holder.lefticon.setImageBitmap(msg.getIconContent());
+        holder.righticon.setImageBitmap(TypeActivity.myIcon);
         if (msg.getType() == Msg.TYPE_RECEIVED) {
             if (msg.getImageContent()!=null||msg.getContent()==null)
                 holder.leftLayout.setBackgroundColor(Color.parseColor("#00000000"));

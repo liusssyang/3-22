@@ -105,6 +105,7 @@ public class CreateSigTextMessageActivity extends Activity {
     SharedPreferences.Editor editor2,editor3;
     SharedPreferences pref,pref2;
     String history;
+    private static int position;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,7 +122,8 @@ public class CreateSigTextMessageActivity extends Activity {
         mEt_name = (EditText) findViewById(R.id.et_name);
         toolbarName.setText(getIntent().getStringExtra("name"));
         mEt_name.setText(getIntent().getStringExtra("name"));
-        Log.d("TAG", "onCreate: "+getIntent().getStringExtra("name"));
+        position=getIntent().getIntExtra("position",0);
+        Log.d("TAG", "onCreate: "+position);
         mEt_text = (EditText) findViewById(R.id.et_text);
         mBt_send = (TextView) findViewById(R.id.bt_send);
         mEt_appkey = (EditText) findViewById(R.id.et_appkey);
@@ -146,14 +148,15 @@ public class CreateSigTextMessageActivity extends Activity {
         for (int i=0;i<his.length;i++){
             getTextMessage+=i+"\n"+his[i]+"\n\n";
         }
-        Log.d("kkk",getTextMessage);
         for (int i=his.length-1;i>=0;i--){
+            if (position<1)
+                position=1;
             if (his[i].contains("text_left")&&!his[i].equals("text_left")){
-                msgList.add(0,new Msg(null,his[i].replace("text_left",""),Msg.TYPE_RECEIVED));
+                msgList.add(0,new Msg(TypeActivity.friendsIcon[position-1],null,his[i].replace("text_left",""),Msg.TYPE_RECEIVED));
             }
             if (his[i].contains("image_left")&&!his[i].equals("image_left")){
                 Bitmap bitmap= BitmapFactory.decodeFile(his[i].replace("image_left",""));
-                msgList.add(0,new Msg(bitmap,null,Msg.TYPE_RECEIVED));
+                msgList.add(0,new Msg(TypeActivity.friendsIcon[position-1],bitmap,null,Msg.TYPE_RECEIVED));
             }
             if (his[i].contains("text_right")&&!his[i].equals("text_right")){
                 msgList.add(0,new Msg(null,his[i].replace("text_right",""),Msg.TYPE_SENT));
@@ -214,7 +217,7 @@ public class CreateSigTextMessageActivity extends Activity {
             public void onSlide(@NonNull View bottomSheet, float slideOffset)
             {
                 //这里是拖拽中的回调，根据slideOffset可以做一些动画
-                Log.d("ssss", "onSlide: "+slideOffset);
+                Log.d("icon_left_default", "onSlide: "+slideOffset);
             }
         });*/
         mCb_enableCustomNotify.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -382,8 +385,6 @@ public class CreateSigTextMessageActivity extends Activity {
                     e.printStackTrace();
                 }
             }
-
-
             //发送消息
             JMessageClient.sendMessage(message, options);
         }
@@ -408,6 +409,8 @@ public class CreateSigTextMessageActivity extends Activity {
         public void onReceive(Context context, Intent intent) {
             if (intent.getStringExtra("key")!=null) {
                 Msg msg = new Msg(null, intent.getStringExtra("key"), Msg.TYPE_RECEIVED);
+               if (position>=1)
+                    msg.setIcon(TypeActivity.friendsIcon[position-1]);
                 msgList.add(msg);
                 adapter.notifyItemInserted(msgList.size() - 1);
                 msgRecyclerView.scrollToPosition(msgList.size() - 1);

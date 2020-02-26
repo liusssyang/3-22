@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/login_all"
+    android:background="#ffffff">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:background="#ffffff"
+    android:id="@+id/main_login"
     android:orientation="vertical">
     <LinearLayout
         android:layout_width="wrap_content"
@@ -39,7 +45,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_margin="10dp"
-            android:src="@drawable/ssss"/>
+            android:src="@drawable/icon_left_default"/>
 
     <EditText
         android:id="@+id/ed_login_username"
@@ -63,8 +69,11 @@
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp">
         <TextView
+            android:focusable="true"
+            android:clickable="true"
             android:layout_width="20dp"
             android:layout_height="20dp"
+            android:id="@+id/eye"
             android:background="@drawable/eye_close"
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp"/>
@@ -95,25 +104,7 @@
             android:background="@drawable/login" />
     </LinearLayout>
 
-<LinearLayout
-    android:layout_width="wrap_content"
-    android:orientation="horizontal"
-    android:visibility="gone"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="40dp">
-    <Button
-        android:id="@+id/bt_login_with_infos"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="登陆并获取用户设备登陆记录"/>
 
-    <Button
-        android:id="@+id/bt_goto_regester"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="注册"
-        />
-</LinearLayout>
     <RadioGroup
         android:id="@+id/rg_environment"
         android:layout_width="match_parent"
@@ -143,3 +134,37 @@
             />
     </RadioGroup>
 </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        >
+        <Button
+            android:id="@+id/bt_login_with_infos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="忘记密码"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:background="#00000000"
+            android:layout_marginEnd="20dp"
+           />
+        <View
+            android:layout_width="1dp"
+            android:layout_height="20dp"
+            android:background="#F2F3F7"/>
+        <Button
+            android:layout_marginStart="20dp"
+            android:id="@+id/bt_goto_regester"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#00000000"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:text="用户注册"
+            />
+    </LinearLayout>
+</RelativeLayout>

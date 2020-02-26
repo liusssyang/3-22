@@ -9,6 +9,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import androidx.recyclerview.widget.RecyclerView;
+import de.hdodenhof.circleimageview.CircleImageView;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.activity.createmessage.CreateSigTextMessageActivity;
 import heath.com.test2_jmessage.application.IMDebugApplication;
@@ -21,6 +22,7 @@ public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder
     static class ViewHolder extends RecyclerView.ViewHolder{
         View v;
         TextView leftMsg,simpleMessage,time;
+        CircleImageView friendsIcon;
 
         public ViewHolder(View view){
             super(view);
@@ -28,6 +30,7 @@ public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder
             leftMsg=(TextView) view.findViewById(R.id.person);
             simpleMessage=view.findViewById(R.id.simple_message);
             time=view.findViewById(R.id.message_time);
+            friendsIcon=view.findViewById(R.id.person_icon);
 
         }
     }
@@ -45,6 +48,8 @@ public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder
                 personMsg personmsg=personMsgList.get(position);
                 Intent intent = new Intent(IMDebugApplication.getContext(), CreateSigTextMessageActivity.class);
                 intent.putExtra("name",personmsg.getName());
+                intent.putExtra("position",position);
+                //intent.putExtra("icon",position);
                 IMDebugApplication.getContext().startActivity(intent);
             }
         });
@@ -56,7 +61,7 @@ public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder
         holder.leftMsg.setText(msg.getName());
         holder.simpleMessage.setText(msg.getSimpleMessage());
         holder.time.setText(msg.getTime());
-
+        holder.friendsIcon.setImageBitmap(msg.getBitmap());
         /*if (msg.getType() == Msg.TYPE_RECEIVED) {
             if (msg.getImageContent()!=null||msg.getContent()==null)
                 holder.leftLayout.setBackgroundColor(Color.parseColor("#00000000"));

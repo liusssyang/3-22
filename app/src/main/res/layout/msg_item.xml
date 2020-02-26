@@ -14,7 +14,7 @@ android:layout_height="wrap_content">
             android:id="@+id/iconleft"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="5dp"
-            android:src="@drawable/ic_launcher_background"/>
+            android:src="@drawable/icon_right_default"/>
         <LinearLayout
             android:layout_toRightOf="@+id/iconleft"
             android:layout_marginBottom="5dp"
@@ -48,7 +48,7 @@ android:layout_height="wrap_content">
             android:layout_marginEnd="10dp"
             android:layout_height="40dp"
             android:id="@+id/iconright"
-            android:src="@drawable/ssss"/>
+            android:src="@drawable/icon_left_default"/>
         <LinearLayout
             android:layout_marginBottom="5dp"
             android:layout_width="wrap_content"

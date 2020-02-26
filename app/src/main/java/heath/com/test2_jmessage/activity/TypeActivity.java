@@ -7,15 +7,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.google.android.material.navigation.NavigationView;
@@ -34,7 +40,9 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import cn.jpush.im.android.api.ContactManager;
 import cn.jpush.im.android.api.JMessageClient;
+import cn.jpush.im.android.api.callback.GetAvatarBitmapCallback;
 import cn.jpush.im.android.api.callback.GetUserInfoCallback;
 import cn.jpush.im.android.api.callback.GetUserInfoListCallback;
 import cn.jpush.im.android.api.event.ChatRoomNotificationEvent;
@@ -56,6 +64,7 @@ import cn.jpush.im.android.api.model.DeviceInfo;
 import cn.jpush.im.android.api.model.GroupInfo;
 import cn.jpush.im.android.api.model.Message;
 import cn.jpush.im.android.api.model.UserInfo;
+import de.hdodenhof.circleimageview.CircleImageView;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
 import heath.com.test2_jmessage.activity.chatroom.ChatRoomActivity;
@@ -70,6 +79,7 @@ import heath.com.test2_jmessage.activity.groupinfo.ShowMemNicknameChangedActivit
 import heath.com.test2_jmessage.activity.jmrtc.JMRTCActivity;
 import heath.com.test2_jmessage.activity.setting.SettingMainActivity;
 import heath.com.test2_jmessage.activity.setting.ShowLogoutReasonActivity;
+import heath.com.test2_jmessage.activity.setting.UpdateUserAvatar;
 import heath.com.test2_jmessage.activity.setting.UpdateUserInfoActivity;
 import heath.com.test2_jmessage.activity.showinfo.ShowAnnouncementChangedActivity;
 import heath.com.test2_jmessage.activity.showinfo.ShowChatRoomNotificationActivity;
@@ -110,11 +120,15 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     private RecyclerView recyclerView;
     private personAdapter adapter;
     private personMsg h1;
+    private personMsg myFriendsList[];
     private List<personMsg> personList=new ArrayList<>();
     private DrawerLayout drawerLayout;
     private IntentFilter intentFilter;
     private Localreceiver localRceiver;
     private LocalBroadcastManager localBroadcastManager;
+    private CircleImageView circleImageView;
+    public static Bitmap myIcon;
+    public static Bitmap friendsIcon[];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,31 +145,63 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         toolbar.setTitleTextColor(Color.parseColor("#ffffff"));
         setActionBar(toolbar);
         ActionBar actionBar=getActionBar();
-
         tv_header = (TextView) findViewById(R.id.tv_header);
-
-        UserInfo info = JMessageClient.getMyInfo();
         drawerLayout=findViewById(R.id.sigText_drawerLayout);
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         View navHeaderView = navigationView.inflateHeaderView(R.layout.headlayout);
         headusername=navHeaderView.findViewById(R.id.head_username);
+        circleImageView=navHeaderView.findViewById(R.id.picture);
         headappkey=navHeaderView.findViewById(R.id.head_appkey);
         headvision=navHeaderView.findViewById(R.id.head_vision);
         signature=navHeaderView.findViewById(R.id.signature);
-        headusername.setText(info.getNickname());
-        headappkey.setText("");
-        headappkey.append("AppKey："+info.getAppKey());
-        headvision.setText("版本号：" + JMessageClient.getSdkVersionString());
-        headvision.setVisibility(View.GONE);
-        if (info.getSignature()!=null)
-            signature.setText(info.getSignature());
-        else
-            signature.setText("点击编辑个性签名");
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem item) {
+                drawerLayout.closeDrawers();
+                Intent intent = new Intent();
+                if (item.toString().equals("设置")) {
+                    intent.setClass(getApplicationContext(), SettingMainActivity.class);
+                    startActivityForResult(intent, 0);
+                }
+                if (item.toString().equals("退出")) {
+                    UserInfo myInfo = JMessageClient.getMyInfo();
+                    if (myInfo != null) {
+                        JMessageClient.logout();
+                        Toast.makeText(getApplicationContext(), "登出成功", Toast.LENGTH_SHORT).show();
+                        intent.setClass(TypeActivity.this, RegisterAndLoginActivity.class);
+                        setResult(8);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(TypeActivity.this, "登出失败", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                if (item.toString().equals("历史纪录")) {
+                    SharedPreferences.Editor editor=getApplicationContext().getSharedPreferences("history",0).edit();
+                    editor.putString("historyRecord","");
+                    editor.apply();
+                    Toast.makeText(getApplicationContext(),"cleared",Toast.LENGTH_LONG).show();
+                }
+                    return true;
+            }
+        });
+        Resources resource=getBaseContext().getResources();
+        ColorStateList csl=resource.getColorStateList(R.color.selector);
+        navigationView.setItemTextColor(csl);
+        navigationView.setItemIconTintList(csl);
+        navigationView.getMenu().getItem(0).setChecked(true);
         RelativeLayout re=navHeaderView.findViewById(R.id.head);
         re.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                Intent intent=new Intent(IMDebugApplication.getContext(), UpdateUserInfoActivity.class);
+                IMDebugApplication.getContext().startActivity(intent);
+            }
+        });
+        circleImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(IMDebugApplication.getContext(), UpdateUserAvatar.class);
                 IMDebugApplication.getContext().startActivity(intent);
             }
         });
@@ -181,8 +227,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         recyclerView.setLayoutManager(layoutManager);
         adapter=new personAdapter(personList);
         recyclerView.setAdapter(adapter);
-        h1=new personMsg("A123",null,null,null,null);
-        personList.add(0,h1);
         intentFilter=new IntentFilter();
         intentFilter.addAction("message");
         localRceiver =new Localreceiver(personList,recyclerView,adapter);
@@ -202,11 +246,38 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent();
-                intent.setClass(getApplicationContext(), ShowFriendReasonActivity
-                        .class);
+                intent.setClass(getApplicationContext(), ShowFriendReasonActivity.class);
                 startActivity(intent);
             }
         });
+        ContactManager.getFriendList(new GetUserInfoListCallback() {
+            @Override
+            public void gotResult(int i, String s, List<UserInfo> list) {
+                myFriendsList=new personMsg[list.size()];
+                friendsIcon=new Bitmap[list.size()];
+                if (i == 0) {
+                    for (int j=0;j<list.size();j++) {
+                        myFriendsList[j]=new personMsg(null,list.get(j).getUserName(),null,null,null,null);
+                        personList.add(myFriendsList[j]);
+                        friendsIcon[j]=BitmapFactory.decodeFile(list.get(j).getBigAvatarFile().getPath());
+                        myFriendsList[j].setBitmap(friendsIcon[j]);
+                        Log.d("pIcon", list.get(j).getBigAvatarFile().getPath()+"//"+j);
+                        Log.d("showFriendList", list.get(j).getUserName());
+                        adapter.notifyItemChanged(personList.size()-1);
+                    }
+                    if (list.size() == 0) {
+                        // mTv_showFriendList.append("没有好友");
+                    }
+                    Toast.makeText(getApplicationContext(), "获取成功", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "获取失败", Toast.LENGTH_SHORT).show();
+                    Log.i("FriendContactManager", "ContactManager.getFriendList" + ", responseCode = " + i + " ; LoginDesc = " + s);
+                }
+            }
+        });
+        h1=new personMsg(null,"A235",null,null,null,null);
+        personList.add(0,h1);
+
     }
     @Override
     protected void onResume() {
@@ -217,16 +288,23 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         h1.setTime(time);
         h1.setSimpleMessage(simpleMessage);
         adapter.notifyItemChanged(personList.size()-1);
-        tv_header.setText("");
-        tv_deviceInfo.setText("");
         UserInfo info = JMessageClient.getMyInfo();
         if (null != info) {
-            tv_appkey=info.getAppKey();
-            tv_username=info.getUserName();
-            tv_header.append("当前已登录用户：" + info.getUserName() + "\n");
-            tv_header.append("用户所属appkey：" + info.getAppKey() + "\n");
+            headappkey.setText("Appkey："+info.getAppKey());
+            headusername.setText(info.getUserName());
+            signature.setText(info.getSignature());
+            headvision.setText("Vision："+JMessageClient.getSdkVersionString());
+            info.getAvatarBitmap(new GetAvatarBitmapCallback() {
+                @Override
+                public void gotResult(int i, String s, Bitmap bitmap) {
+                    Log.d("Hresult", i+"\n"+s);
+                    if (s.equals("Success")){
+                        myIcon=bitmap;
+                        circleImageView.setImageBitmap(myIcon);
+                    }else myIcon= BitmapFactory.decodeResource(getResources(),R.drawable.icon_left_default);
+                }
+            });
         }
-        tv_header.append("版本号：" + JMessageClient.getSdkVersionString());
         Intent intent = getIntent();
         Gson gson = new Gson();
         List<DeviceInfo> deviceInfos = gson.fromJson(intent.getStringExtra("deviceInfos"), new TypeToken<List<DeviceInfo>>() {}.getType());

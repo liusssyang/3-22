@@ -38,6 +38,8 @@ public class UpdateUserAvatar extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        initView();
+        initData();
     }
 
     private void initData() {
