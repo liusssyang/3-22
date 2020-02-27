@@ -49,7 +49,7 @@ public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder
                 Intent intent = new Intent(IMDebugApplication.getContext(), CreateSigTextMessageActivity.class);
                 intent.putExtra("name",personmsg.getName());
                 intent.putExtra("position",position);
-                //intent.putExtra("icon",position);
+                intent.putExtra("userId",personmsg.getUserId());
                 IMDebugApplication.getContext().startActivity(intent);
             }
         });

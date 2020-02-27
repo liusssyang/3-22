@@ -46,6 +46,8 @@ import heath.com.test2_jmessage.adapter.MsgAdapter;
 import heath.com.test2_jmessage.application.IMDebugApplication;
 import heath.com.test2_jmessage.recycleView_item.Msg;
 
+import static heath.com.test2_jmessage.activity.TypeActivity.myUserId;
+
 /**
  * Created by ${chenyn} on 16/3/29.
  * <p>
@@ -103,19 +105,21 @@ public class CreateSigTextMessageActivity extends Activity {
     private RelativeLayout re;
     private CoordinatorLayout coordinatorLayout;
     SharedPreferences.Editor editor2,editor3;
-    SharedPreferences pref,pref2;
+    SharedPreferences pref;
     String history;
     private static int position;
+    private static long userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_single_text_message);
         StatusBarUtil.setStatusBarColor(this, Color.parseColor("#00C4FF"));
-        editor2=getApplicationContext().getSharedPreferences("history",0).edit();
-        pref=getApplicationContext().getSharedPreferences("history",0);
+        userId=getIntent().getLongExtra("userId",0);
+        editor2=getApplicationContext().getSharedPreferences("history"+myUserId,0).edit();
+        pref=getApplicationContext().getSharedPreferences("history"+myUserId,0);
         editor3=getApplicationContext().getSharedPreferences("backdata",0).edit();
-        history=pref.getString("historyRecord","");
+        history=pref.getString("historyRecord"+userId,"");
         String []his=history.split("%%");
         back=findViewById(R.id.back);
         toolbarName=findViewById(R.id.sigText_toolbarName);
@@ -292,7 +296,7 @@ public class CreateSigTextMessageActivity extends Activity {
                                 adapter.notifyItemInserted(msgList.size()-1);
                                 msgRecyclerView.scrollToPosition(msgList.size()-1);
                                 history=history+mEt_text.getText().toString()+"text_right%%";
-                                editor2.putString("historyRecord",history);
+                                editor2.putString("historyRecord"+userId,history);
                                 editor2.apply();
                                 mEt_text.setText("");
                                 Toast.makeText(getApplicationContext(), "发送成功", Toast.LENGTH_SHORT).show();

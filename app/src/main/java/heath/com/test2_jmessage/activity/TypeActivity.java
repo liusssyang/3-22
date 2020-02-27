@@ -120,13 +120,14 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     private RecyclerView recyclerView;
     private personAdapter adapter;
     private personMsg h1;
-    private personMsg myFriendsList[];
+
     private List<personMsg> personList=new ArrayList<>();
     private DrawerLayout drawerLayout;
     private IntentFilter intentFilter;
     private Localreceiver localRceiver;
     private LocalBroadcastManager localBroadcastManager;
     private CircleImageView circleImageView;
+    public static long myUserId;
     public static Bitmap myIcon;
     public static Bitmap friendsIcon[];
 
@@ -177,8 +178,8 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                     }
                 }
                 if (item.toString().equals("历史纪录")) {
-                    SharedPreferences.Editor editor=getApplicationContext().getSharedPreferences("history",0).edit();
-                    editor.putString("historyRecord","");
+                    SharedPreferences.Editor editor=getApplicationContext().getSharedPreferences("history"+myUserId,0).edit();
+                    editor.clear();
                     editor.apply();
                     Toast.makeText(getApplicationContext(),"cleared",Toast.LENGTH_LONG).show();
                 }
@@ -253,16 +254,11 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         ContactManager.getFriendList(new GetUserInfoListCallback() {
             @Override
             public void gotResult(int i, String s, List<UserInfo> list) {
-                myFriendsList=new personMsg[list.size()];
-                friendsIcon=new Bitmap[list.size()];
                 if (i == 0) {
                     for (int j=0;j<list.size();j++) {
-                        myFriendsList[j]=new personMsg(null,list.get(j).getUserName(),null,null,null,null);
-                        personList.add(myFriendsList[j]);
-                        friendsIcon[j]=BitmapFactory.decodeFile(list.get(j).getBigAvatarFile().getPath());
-                        myFriendsList[j].setBitmap(friendsIcon[j]);
-                        Log.d("pIcon", list.get(j).getBigAvatarFile().getPath()+"//"+j);
-                        Log.d("showFriendList", list.get(j).getUserName());
+                        // friendsIcon[j]=BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath());
+                        Log.d("pIcon", list.get(j).getAvatarFile().getPath()+"//"+j);
+                        personList.add(new personMsg(list.get(j).getUserID(),null,list.get(j).getUserName(),null,null,null,null));
                         adapter.notifyItemChanged(personList.size()-1);
                     }
                     if (list.size() == 0) {
@@ -275,7 +271,11 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                 }
             }
         });
-        h1=new personMsg(null,"A235",null,null,null,null);
+        /*for(int i=0;i<2;i++){
+            h1=new personMsg(friendsUserId[i],null,friendsName[i],null,null,null,null);
+            personList.add(h1);
+        }*/
+        h1=new personMsg(13172,null,"A235",null,null,null,null);
         personList.add(0,h1);
 
     }
@@ -290,6 +290,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         adapter.notifyItemChanged(personList.size()-1);
         UserInfo info = JMessageClient.getMyInfo();
         if (null != info) {
+            myUserId=info.getUserID();
             headappkey.setText("Appkey："+info.getAppKey());
             headusername.setText(info.getUserName());
             signature.setText(info.getSignature());

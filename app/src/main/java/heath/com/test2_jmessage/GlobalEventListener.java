@@ -39,6 +39,7 @@ import heath.com.test2_jmessage.application.IMDebugApplication;
 
 import static android.content.Context.USAGE_STATS_SERVICE;
 import static cn.jpush.im.android.api.jmrtc.JMRTCInternalUse.getApplicationContext;
+import static heath.com.test2_jmessage.activity.TypeActivity.myUserId;
 
 /**
  * 在demo中对于通知栏点击事件和在线消息接收事件，我们都直接在全局监听
@@ -129,9 +130,10 @@ public class GlobalEventListener {
             IMDebugApplication.getContext().startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
     }
     private void dealing(LocalBroadcastManager localBroadcastManager,MessageEvent event){
-        SharedPreferences.Editor editor2=getApplicationContext().getSharedPreferences("history",0).edit();
-        SharedPreferences pref=getApplicationContext().getSharedPreferences("history",0);
-        String history=pref.getString("historyRecord"," ");
+        long userId=event.getMessage().getFromUser().getUserID();
+        SharedPreferences.Editor editor2=getApplicationContext().getSharedPreferences("history"+myUserId,0).edit();
+        SharedPreferences pref=getApplicationContext().getSharedPreferences("history"+myUserId,0);
+        String history=pref.getString("historyRecord"+userId," ");
         ContentType contentType=ContentType.valueOf(event.getMessage().getContentType().toString());
         Intent intent=new Intent("message");
         Calendar cal;
@@ -156,7 +158,7 @@ public class GlobalEventListener {
                 String text=textContent.getText();
                 intent.putExtra("key", text);
                 history=history+text+"text_left%%";
-                editor2.putString("historyRecord",history);
+                editor2.putString("historyRecord"+userId,history);
                 editor2.apply();
                 if (text.equals("Ask"))
                     intent.putExtra("SysMessage",SysMessage());
@@ -173,7 +175,7 @@ public class GlobalEventListener {
                 editor.apply();
                 if (!TextUtils.isEmpty(thumbLocalPath)) {
                     history=history+thumbLocalPath+"image_left%%";
-                    editor2.putString("historyRecord",history);
+                    editor2.putString("historyRecord"+userId,history);
                     editor2.apply();
                     Bitmap bitmap = BitmapFactory.decodeFile(thumbLocalPath);
                     Mydialog.bitmap=bitmap;

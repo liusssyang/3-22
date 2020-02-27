@@ -13,6 +13,7 @@ public class personMsg {
     private String simpleMessage;
     private String appkey;
     private String time;
+    private long userId;
     private Bitmap bitmap;
 
     public personMsg(String name,String appkey,String sendName){
@@ -20,13 +21,14 @@ public class personMsg {
         this.appkey=appkey;
         this.sendName=sendName;
     }
-    public personMsg(Bitmap icon,String name,String appkey,String sendName,String simpleMessage,String time){
+    public personMsg(long userId,Bitmap icon,String name,String appkey,String sendName,String simpleMessage,String time){
         this.name=name;
         this.appkey=appkey;
         this.sendName=sendName;
         this.simpleMessage=simpleMessage;
         this.time=time;
         this.bitmap=icon;
+        this.userId=userId;
     }
     public String getName(){
         return name;
@@ -35,6 +37,7 @@ public class personMsg {
     public String getAppkey(){return appkey;}
     public String getSimpleMessage(){return simpleMessage;}
     public String getTime(){return time;}
+    public long getUserId(){return userId;}
     public Bitmap getBitmap(){
         if (this.bitmap==null)
             return BitmapFactory.decodeResource(IMDebugApplication.getContext().getResources(), R.drawable.icon_right_default);
