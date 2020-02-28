@@ -1,4 +1,4 @@
-package heath.com.test2_jmessage;
+package heath.com.test2_jmessage.MyService;
 
 import cn.jpush.android.service.JCommonService;
 

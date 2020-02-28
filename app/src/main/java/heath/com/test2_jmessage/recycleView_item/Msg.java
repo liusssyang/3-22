@@ -33,7 +33,7 @@ public class Msg {
     }
     public Bitmap getIconContent(){
         if (this.icon==null)
-            return BitmapFactory.decodeResource(IMDebugApplication.getContext().getResources(), R.drawable.icon_left_default);
+            return BitmapFactory.decodeResource(IMDebugApplication.getContext().getResources(), R.drawable.icon_right_default);
         else
             return this.icon;
     }
@@ -42,7 +42,7 @@ public class Msg {
     }
     public void setIcon(Bitmap icon){
         if (icon==null)
-            this.icon= BitmapFactory.decodeResource(IMDebugApplication.getContext().getResources(), R.drawable.icon_left_default);
+            this.icon= BitmapFactory.decodeResource(IMDebugApplication.getContext().getResources(), R.drawable.icon_right_default);
         else
             this.icon=icon;
     }

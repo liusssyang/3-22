@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Build;
@@ -33,7 +35,9 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Locale;
 
+import cn.jpush.im.android.api.ContactManager;
 import cn.jpush.im.android.api.JMessageClient;
+import cn.jpush.im.android.api.callback.GetUserInfoListCallback;
 import cn.jpush.im.android.api.callback.RequestCallback;
 import cn.jpush.im.android.api.model.DeviceInfo;
 import cn.jpush.im.android.api.model.UserInfo;
@@ -42,7 +46,14 @@ import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
 import heath.com.test2_jmessage.activity.setting.RegisterActivity;
 import heath.com.test2_jmessage.application.IMDebugApplication;
+import heath.com.test2_jmessage.recycleView_item.personMsg;
 import heath.com.test2_jmessage.utils.AndroidUtils;
+
+import static heath.com.test2_jmessage.activity.TypeActivity.TAG;
+import static heath.com.test2_jmessage.activity.TypeActivity.adapter;
+import static heath.com.test2_jmessage.activity.TypeActivity.friendList;
+import static heath.com.test2_jmessage.activity.TypeActivity.friendsIcon;
+import static heath.com.test2_jmessage.activity.TypeActivity.personList;
 
 //import cn.jmessage.common.logger.Logger;
 
@@ -108,9 +119,37 @@ public class RegisterAndLoginActivity extends Activity {
         /**=================     获取个人信息不是null，说明已经登陆，无需再次登陆，则直接进入type界面    =================*/
         UserInfo myInfo = JMessageClient.getMyInfo();
         if (myInfo != null) {
+
+            ContactManager.getFriendList(new GetUserInfoListCallback() {
+                @Override
+                public void gotResult(int i, String s, List<UserInfo> list) {
+                    friendsIcon=new Bitmap[list.size()];
+                    friendList=new personMsg[list.size()];
+                    if (i == 0) {
+                        for (int j=0;j<list.size();j++) {
+                            friendsIcon[j]= BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath());;
+                            friendList[j]=new personMsg(list.get(j).getUserID(),friendsIcon[j],list.get(j).getUserName(),null,null,null,null);
+                            personList.add(friendList[j]);
+                            //friendList[j].setBitmap(TIcon);
+                            adapter.notifyItemChanged(personList.size()-1);
+                            adapter.notifyDataSetChanged();
+                        }
+                        if (list.size() == 0) {
+                            Toast.makeText(getApplicationContext(), "暂无好友", Toast.LENGTH_SHORT).show();
+                        }
+                        Toast.makeText(getApplicationContext(), "获取成功", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "获取失败", Toast.LENGTH_SHORT).show();
+                        Log.i("FriendContactManager", "ContactManager.getFriendList" + ", responseCode = " + i + " ; LoginDesc = " + s);
+                    }
+                }
+            });
             Intent intent = new Intent(RegisterAndLoginActivity.this, TypeActivity.class);
             startActivity(intent);
             finish();
+            Log.d(TAG, "R: "+personList.size());
+
+
         }
         /**=================     调用注册接口    =================*/
         mBt_gotoRegister.setOnClickListener(new View.OnClickListener() {

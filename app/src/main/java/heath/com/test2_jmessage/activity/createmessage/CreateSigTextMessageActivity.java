@@ -205,6 +205,7 @@ public class CreateSigTextMessageActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(IMDebugApplication.getContext(), TypeActivity.class);
+                intent.putExtra("userId",userId);
                 IMDebugApplication.getContext().startActivity(intent);
             }
         });

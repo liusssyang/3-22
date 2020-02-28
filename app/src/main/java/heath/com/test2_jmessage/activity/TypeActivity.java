@@ -40,7 +40,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import cn.jpush.im.android.api.ContactManager;
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.callback.GetAvatarBitmapCallback;
 import cn.jpush.im.android.api.callback.GetUserInfoCallback;
@@ -95,15 +94,7 @@ import heath.com.test2_jmessage.recycleView_item.personMsg;
  * @desc : 各个接口的的引导界面
  */
 public class TypeActivity extends Activity implements View.OnClickListener {
-    public static final String TAG = "TypeActivity";
-    public static final String CREATE_GROUP_CUSTOM_KEY = "create_group_custom_key";
-    public static final String SET_DOWNLOAD_PROGRESS = "set_download_progress";
-    public static final String IS_DOWNLOAD_PROGRESS_EXISTS = "is_download_progress_exists";
-    public static final String CUSTOM_MESSAGE_STRING = "custom_message_string";
-    public static final String CUSTOM_FROM_NAME = "custom_from_name";
-    public static final String DOWNLOAD_ORIGIN_IMAGE = "download_origin_image";
-    public static final String DOWNLOAD_THUMBNAIL_IMAGE = "download_thumbnail_image";
-    public static final String IS_UPLOAD = "is_upload";
+    public static final String TAG = "ly13172";
     public static final String LOGOUT_REASON = "logout_reason";
     public static String tv_username,tv_appkey;
     private TextView mTv_showOfflineMsg;
@@ -118,10 +109,9 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     public static final String TRANS_COMMAND_TYPE = "trans_command_type";
     public static final String TRANS_COMMAND_CMD = "trans_command_cmd";
     private RecyclerView recyclerView;
-    private personAdapter adapter;
-    private personMsg h1;
-
-    private List<personMsg> personList=new ArrayList<>();
+    public static personAdapter adapter;
+    public static personMsg friendList[];
+    public static List<personMsg> personList=new ArrayList<>();
     private DrawerLayout drawerLayout;
     private IntentFilter intentFilter;
     private Localreceiver localRceiver;
@@ -129,13 +119,15 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     private CircleImageView circleImageView;
     public static long myUserId;
     public static Bitmap myIcon;
-    public static Bitmap friendsIcon[];
+    public static Bitmap friendsIcon[]=null;
+    //private final Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         JMessageClient.registerEventReceiver(this);
         initView();
+
     }
     private void initView() {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
@@ -251,43 +243,34 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                 startActivity(intent);
             }
         });
-        ContactManager.getFriendList(new GetUserInfoListCallback() {
-            @Override
-            public void gotResult(int i, String s, List<UserInfo> list) {
-                if (i == 0) {
-                    for (int j=0;j<list.size();j++) {
-                        // friendsIcon[j]=BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath());
-                        Log.d("pIcon", list.get(j).getAvatarFile().getPath()+"//"+j);
-                        personList.add(new personMsg(list.get(j).getUserID(),null,list.get(j).getUserName(),null,null,null,null));
-                        adapter.notifyItemChanged(personList.size()-1);
-                    }
-                    if (list.size() == 0) {
-                        // mTv_showFriendList.append("没有好友");
-                    }
-                    Toast.makeText(getApplicationContext(), "获取成功", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getApplicationContext(), "获取失败", Toast.LENGTH_SHORT).show();
-                    Log.i("FriendContactManager", "ContactManager.getFriendList" + ", responseCode = " + i + " ; LoginDesc = " + s);
-                }
-            }
-        });
-        /*for(int i=0;i<2;i++){
-            h1=new personMsg(friendsUserId[i],null,friendsName[i],null,null,null,null);
-            personList.add(h1);
-        }*/
-        h1=new personMsg(13172,null,"A235",null,null,null,null);
-        personList.add(0,h1);
-
+        adapter.notifyDataSetChanged();
     }
     @Override
     protected void onResume() {
         super.onResume();
+
         SharedPreferences pref2=this.getSharedPreferences("backdata",0);
         String simpleMessage=pref2.getString("simplemessage","");
         String time=pref2.getString("time","");
-        h1.setTime(time);
-        h1.setSimpleMessage(simpleMessage);
-        adapter.notifyItemChanged(personList.size()-1);
+        Log.d(TAG, "T"+personList.size());
+        //for (int i=0;i<personList.size())
+        //h1.setTime(time);
+        //h1.setSimpleMessage(simpleMessage);
+        Intent intent = getIntent();
+        Gson gson = new Gson();
+        List<DeviceInfo> deviceInfos = gson.fromJson(intent.getStringExtra("deviceInfos"), new TypeToken<List<DeviceInfo>>() {}.getType());
+        if (deviceInfos != null) {
+            for (DeviceInfo deviceInfo : deviceInfos) {
+                tv_deviceInfo.append("设备登陆记录:\n");
+                tv_deviceInfo.append("设备ID: " + deviceInfo.getDeviceID() + " 平台：" + deviceInfo.getPlatformType()
+                        + " 上次登陆时间:" + deviceInfo.getLastLoginTime() + "登陆状态:" + deviceInfo.isLogin() + "在线状态:" + deviceInfo.getOnlineStatus()
+                        + " flag:" + deviceInfo.getFlag());
+            }
+        }
+    }
+    protected void onStart() {
+        super.onStart();
+
         UserInfo info = JMessageClient.getMyInfo();
         if (null != info) {
             myUserId=info.getUserID();
@@ -306,17 +289,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                 }
             });
         }
-        Intent intent = getIntent();
-        Gson gson = new Gson();
-        List<DeviceInfo> deviceInfos = gson.fromJson(intent.getStringExtra("deviceInfos"), new TypeToken<List<DeviceInfo>>() {}.getType());
-        if (deviceInfos != null) {
-            for (DeviceInfo deviceInfo : deviceInfos) {
-                tv_deviceInfo.append("设备登陆记录:\n");
-                tv_deviceInfo.append("设备ID: " + deviceInfo.getDeviceID() + " 平台：" + deviceInfo.getPlatformType()
-                        + " 上次登陆时间:" + deviceInfo.getLastLoginTime() + "登陆状态:" + deviceInfo.isLogin() + "在线状态:" + deviceInfo.getOnlineStatus()
-                        + " flag:" + deviceInfo.getFlag());
-            }
-        }
+
     }
     @Override
     protected void onNewIntent(Intent intent) {
@@ -579,7 +552,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         Gson gson = new Gson();
         intent.putExtra("GroupApprovalEvent", gson.toJson(event));
         intent.putExtra(ShowGroupApprovalActivity.EXTRA_EVENT_TYPE, ShowGroupApprovalActivity.TYPE_APPROVAL);
-
         startActivity(intent);
     }
     public void onEvent(final GroupApprovalRefuseEvent event) {
@@ -718,4 +690,54 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         }
 
     }
+    private class MyTask extends AsyncTask<List, Integer, String> {
+
+        // 方法1：onPreExecute（）
+        // 作用：执行 线程任务前的操作
+        @Override
+        protected void onPreExecute() {
+            //text.setText("加载中");
+            // 执行前显示提示
+        }
+
+
+        // 方法2：doInBackground（）
+        // 作用：接收输入参数、执行任务中的耗时操作、返回 线程任务执行的结果
+        // 此处通过计算从而模拟“加载进度”的情况
+        @Override
+        protected String doInBackground(List... params) {
+
+
+            return null;
+        }
+
+        // 方法3：onProgressUpdate（）
+        // 作用：在主线程 显示线程任务执行的进度
+        @Override
+        protected void onProgressUpdate(Integer... progresses) {
+
+            //progressBar.setProgress(progresses[0]);
+            //text.setText("loading..." + progresses[0] + "%");
+
+        }
+
+        // 方法4：onPostExecute（）
+        // 作用：接收线程任务执行结果、将执行结果显示到UI组件
+        @Override
+        protected void onPostExecute(String result) {
+            // 执行完毕后，则更新UI
+            //text.setText("加载完毕");
+        }
+
+        // 方法5：onCancelled()
+        // 作用：将异步任务设置为：取消状态
+        @Override
+        protected void onCancelled() {
+
+            //text.setText("已取消");
+            //progressBar.setProgress(0);
+
+        }
+    }
+
 }
