@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -35,6 +34,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Locale;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import cn.jpush.im.android.api.ContactManager;
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.callback.GetUserInfoListCallback;
@@ -51,11 +51,11 @@ import heath.com.test2_jmessage.utils.AndroidUtils;
 
 import static heath.com.test2_jmessage.activity.TypeActivity.TAG;
 import static heath.com.test2_jmessage.activity.TypeActivity.adapter;
-import static heath.com.test2_jmessage.activity.TypeActivity.friendList;
-import static heath.com.test2_jmessage.activity.TypeActivity.friendsIcon;
+import static heath.com.test2_jmessage.activity.TypeActivity.personIcon;
 import static heath.com.test2_jmessage.activity.TypeActivity.personList;
 
-//import cn.jmessage.common.logger.Logger;
+
+
 
 /**
  * Created by ${chenyn} on 16/3/23.
@@ -70,6 +70,7 @@ public class RegisterAndLoginActivity extends Activity {
     public EditText mEd_password;
     private Button mBt_login;
     private Button mBt_login_with_infos;
+    LocalBroadcastManager localBroadcastManager;
     private Button mBt_gotoRegister;
     private ProgressDialog mProgressDialog = null;
     private RadioGroup mRgType;
@@ -80,7 +81,7 @@ public class RegisterAndLoginActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        Log.d(TAG, "onCreate: Register");
         if (!AndroidUtils.checkPermission(this, REQUIRED_PERMISSIONS)) {
             try {
                 AndroidUtils.requestPermission(this, REQUIRED_PERMISSIONS);
@@ -118,38 +119,47 @@ public class RegisterAndLoginActivity extends Activity {
     private void initData() {
         /**=================     获取个人信息不是null，说明已经登陆，无需再次登陆，则直接进入type界面    =================*/
         UserInfo myInfo = JMessageClient.getMyInfo();
+        final Intent intent = new Intent(RegisterAndLoginActivity.this, TypeActivity.class);
         if (myInfo != null) {
-
+            Log.d(TAG, "initData: no_button");
             ContactManager.getFriendList(new GetUserInfoListCallback() {
                 @Override
                 public void gotResult(int i, String s, List<UserInfo> list) {
-                    friendsIcon=new Bitmap[list.size()];
-                    friendList=new personMsg[list.size()];
-                    if (i == 0) {
+
+                    if (i == 0&&personList.isEmpty()) {
+                        TypeActivity.list=list;
                         for (int j=0;j<list.size();j++) {
-                            friendsIcon[j]= BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath());;
-                            friendList[j]=new personMsg(list.get(j).getUserID(),friendsIcon[j],list.get(j).getUserName(),null,null,null,null);
-                            personList.add(friendList[j]);
-                            //friendList[j].setBitmap(TIcon);
+                            personIcon.add(BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath()));
+                            personList.add(
+                                    new personMsg(
+                                            list.get(j).getUserID()
+                                            ,BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath())
+                                            ,list.get(j).getUserName()
+                                            ,list.get(j).getNotename()
+                                            ,list.get(i).getAppKey()
+                                            ,null
+                                            ,list.get(j).getSignature()
+                                            ,"1/1 00:00"
+                                            ,list.get(j).getSignature()
+                                            ,list.get(i).getGender().toString()
+                                            ,list.get(j).getAddress()
+                                            ,list.get(j).getNoteText()
+                                            ,list.get(j).getBirthday()));
                             adapter.notifyItemChanged(personList.size()-1);
-                            adapter.notifyDataSetChanged();
                         }
                         if (list.size() == 0) {
                             Toast.makeText(getApplicationContext(), "暂无好友", Toast.LENGTH_SHORT).show();
                         }
                         Toast.makeText(getApplicationContext(), "获取成功", Toast.LENGTH_SHORT).show();
-                    } else {
+                    } else if (i!=0){
                         Toast.makeText(getApplicationContext(), "获取失败", Toast.LENGTH_SHORT).show();
                         Log.i("FriendContactManager", "ContactManager.getFriendList" + ", responseCode = " + i + " ; LoginDesc = " + s);
                     }
                 }
             });
-            Intent intent = new Intent(RegisterAndLoginActivity.this, TypeActivity.class);
+
             startActivity(intent);
             finish();
-            Log.d(TAG, "R: "+personList.size());
-
-
         }
         /**=================     调用注册接口    =================*/
         mBt_gotoRegister.setOnClickListener(new View.OnClickListener() {
@@ -163,6 +173,7 @@ public class RegisterAndLoginActivity extends Activity {
         mBt_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 mProgressDialog = ProgressDialog.show(RegisterAndLoginActivity.this, "提示：", "正在加载中。。。");
                 mProgressDialog.setCanceledOnTouchOutside(true);
                 String userName = mEd_userName.getText().toString();
@@ -174,7 +185,41 @@ public class RegisterAndLoginActivity extends Activity {
                         if (responseCode == 0) {
                             mProgressDialog.dismiss();
                             Toast.makeText(getApplicationContext(), "登录成功", Toast.LENGTH_SHORT).show();
-                            Log.i("MainActivity", "JMessageClient.login" + ", responseCode = " + responseCode + " ; LoginDesc = " + LoginDesc);
+                            Log.d(TAG, "gotResult: button_login");
+                            ContactManager.getFriendList(new GetUserInfoListCallback() {
+                                @Override
+                                public void gotResult(int i, String s, List<UserInfo> list) {
+
+                                    if (i == 0&&personList.isEmpty()) {
+                                        TypeActivity.list=list;
+                                        for (int j=0;j<list.size();j++) {
+                                            personIcon.add(BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath()));
+                                            personList.add(new personMsg(
+                                                    list.get(j).getUserID()
+                                                    , BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath()),list.get(j).getUserName()
+                                                    ,list.get(j).getNotename()
+                                                    ,list.get(i).getAppKey()
+                                                    ,null
+                                                    ,list.get(j).getSignature()
+                                                    , "1/1 00:00"
+                                                    , list.get(j).getSignature()
+                                                    , list.get(j).getGender().toString()
+                                                    ,list.get(j).getAddress()
+                                                    ,list.get(j).getNoteText()
+                                                    ,list.get(j).getBirthday()));
+                                            adapter.notifyItemChanged(personList.size()-1);
+                                        }
+                                        if (list.size() == 0) {
+                                            Toast.makeText(getApplicationContext(), "暂无好友", Toast.LENGTH_SHORT).show();
+                                        }
+                                        Toast.makeText(getApplicationContext(), "获取成功", Toast.LENGTH_SHORT).show();
+                                    } else if (i!=0){
+                                        Toast.makeText(getApplicationContext(), "获取失败", Toast.LENGTH_SHORT).show();
+                                        Log.i("FriendContactManager", "ContactManager.getFriendList" + ", responseCode = " + i + " ; LoginDesc = " + s);
+                                    }
+                                }
+                            });
+
                             Intent intent = new Intent();
                             intent.setClass(getApplicationContext(), TypeActivity.class);
                             startActivity(intent);

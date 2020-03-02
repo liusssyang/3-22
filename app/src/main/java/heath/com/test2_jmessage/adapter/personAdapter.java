@@ -15,6 +15,7 @@ import heath.com.test2_jmessage.activity.createmessage.CreateSigTextMessageActiv
 import heath.com.test2_jmessage.application.IMDebugApplication;
 import heath.com.test2_jmessage.recycleView_item.personMsg;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 
 public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder>{
@@ -47,7 +48,9 @@ public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder
                 int position=holder.getAdapterPosition();
                 personMsg personmsg=personMsgList.get(position);
                 Intent intent = new Intent(IMDebugApplication.getContext(), CreateSigTextMessageActivity.class);
-                intent.putExtra("name",personmsg.getName());
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("name",personmsg.getUserName());
+                intent.putExtra("note_name",personmsg.getName());
                 intent.putExtra("position",position);
                 intent.putExtra("userId",personmsg.getUserId());
                 IMDebugApplication.getContext().startActivity(intent);
@@ -62,29 +65,6 @@ public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder
         holder.simpleMessage.setText(msg.getSimpleMessage());
         holder.time.setText(msg.getTime());
         holder.friendsIcon.setImageBitmap(msg.getBitmap());
-        /*if (msg.getType() == Msg.TYPE_RECEIVED) {
-            if (msg.getImageContent()!=null||msg.getContent()==null)
-                holder.leftLayout.setBackgroundColor(Color.parseColor("#00000000"));
-            else
-                holder.leftLayout.setBackgroundResource(R.drawable.left);
-            holder.leftLayout.setVisibility(View.VISIBLE);
-            holder.lefticon.setVisibility(View.VISIBLE);
-            holder.rightLayout.setVisibility(View.GONE);
-            holder.righticon.setVisibility(View.GONE);
-            holder.leftMsg.setText(msg.getContent());
-            holder.leftImg.setImageBitmap(msg.getImageContent());
-        }else if (msg.getType() == Msg.TYPE_SENT) {
-            if (msg.getImageContent()!=null||msg.getContent()==null)
-                holder.leftLayout.setBackgroundColor(Color.parseColor("#00000000"));
-            else
-                holder.leftLayout.setBackgroundResource(R.drawable.right);
-            holder.leftLayout.setVisibility(View.GONE);
-            holder.lefticon.setVisibility(View.GONE);
-            holder.rightLayout.setVisibility(View.VISIBLE);
-            holder.righticon.setVisibility(View.VISIBLE);
-            holder.rightMsg.setText(msg.getContent());
-            holder.rightImg.setImageBitmap(msg.getImageContent());
-        }*/
     }
     public  int getItemCount(){
         return personMsgList.size();

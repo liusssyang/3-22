@@ -4,22 +4,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#ffffff"
     android:id="@+id/sigText_drawerLayout">
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:fitsSystemWindows="true"
-    android:clipToPadding="false">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:fitsSystemWindows="true"
+        android:clipToPadding="false">
     <View
         android:id="@+id/statusbar"
         android:layout_width="match_parent"
-        android:background="@color/colorQQ"
+        android:background="@drawable/toolbar_ground"
         android:layout_height="24dp"/>
     <Toolbar
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#00C4FF"
+        android:background="@drawable/toolbar_ground"
         android:id="@+id/toolbar"
         app:contentInsetLeft="0dp"
         app:contentInsetStart="0dp"
@@ -29,7 +30,6 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:background="@color/colorQQ"
         android:paddingTop="15dp"
         >
         <TextView
@@ -58,20 +58,17 @@
             android:layout_marginEnd="15dp"/>
     </RelativeLayout>
     </Toolbar>
-
     <TextView
         android:id="@+id/tv_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"/>
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="#ffffff">
         <TextView
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:id="@+id/index"
+            android:focusable="true"
+            android:clickable="true"
             android:background="@drawable/background_round_"
             android:layout_marginStart="15dp"
             android:layout_marginEnd="15dp"
@@ -79,18 +76,155 @@
             android:text="🔍搜索"
             android:gravity="center"
         />
+        <LinearLayout
+            android:visibility="gone"
+            android:background="#ffffff"
+            android:id="@+id/index2_linear"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                >
+                <EditText
+                    android:maxLines="1"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:id="@+id/index2"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:background="@drawable/background_round_"
+                    android:layout_marginStart="15dp"
+                    android:theme="@style/MyEditText"
+                    android:layout_marginTop="10dp"
+                    android:hint="🔍找人/群"
+                    android:gravity="center"
+                    />
+                <TextView
+                    android:layout_weight="0"
+                    android:layout_width="50dp"
+                    android:layout_height="40dp"
+                    android:id="@+id/cancel"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:background="#ffffff"
+                    android:layout_marginTop="10dp"
+                    android:text="取消"
+                    android:textSize="16sp"
+                    android:textColor="@color/colorQQ"
+                    android:gravity="center"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:id="@+id/find_visibility">
+            <LinearLayout
+                android:id="@+id/find_single_line"
+                android:layout_marginTop="10dp"
+                android:paddingStart="15dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="30dp"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/single_people"
+                    android:layout_height="30dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:text="找人："
+                    android:textColor="#000000"
+                    android:textSize="16sp"
+                    android:layout_marginStart="10dp"
+                    android:gravity="center_vertical"
+                    />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:text=""
+                    android:maxLines="1"
+                    android:id="@+id/find_single"
+                    android:textColor="#000000"
+                    android:textSize="16sp"
+                    android:gravity="center_vertical"
+                    />
+            </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#f5f6fa"/>
+            <LinearLayout
+                android:id="@+id/find_group_line"
+                android:paddingStart="15dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="25dp"
+                    android:layout_marginStart="5dp"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/group_people"
+                    android:layout_height="25dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:text="找群："
+                    android:textColor="#000000"
+                    android:textSize="16sp"
+                    android:layout_marginStart="10dp"
+                    android:gravity="center_vertical"
+                    />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:text=""
+                    android:maxLines="1"
+                    android:id="@+id/find_group"
+                    android:textColor="#000000"
+                    android:textSize="16sp"
+                    android:gravity="center_vertical"
+                    />
+            </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#f5f6fa"/>
+            </LinearLayout>
+        </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/other_linear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
         <TextView
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:textColor="#000000"
             android:id="@+id/newFriends"
-            android:layout_below="@+id/index"
             android:text="新朋友"
+            android:layout_weight="5"
             android:layout_marginTop="10dp"
             android:textSize="18sp"
             android:gravity="center_vertical"
             android:layout_marginStart="15dp"/>
         <TextView
+            android:layout_weight="0"
             android:layout_marginTop="10dp"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
@@ -99,61 +233,68 @@
             android:background="#ffffff"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="17dp"
-            android:layout_below="@+id/index"/>
+           />
+    </LinearLayout>
         <View
             android:layout_width="match_parent"
             android:layout_height="10dp"
             android:background="#f5f6fa"
-            android:layout_below="@+id/newFriends"/>
-    </RelativeLayout>
-    <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/type_recyclerview"
-        android:background="#ffffff"
+            />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/type_recyclerview"
+            android:background="#ffffff"
         />
-    <Button
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <Button
         android:id="@+id/bt_about_setting"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="设置相关" />
 
-    <Button
+        <Button
         android:id="@+id/bt_create_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="创建消息" />
 
-    <Button
+        <Button
         android:id="@+id/bt_conversation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="会话" />
 
-    <Button
+        <Button
         android:id="@+id/bt_group_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="群组" />
 
-    <Button
+        <Button
         android:id="@+id/bt_friend"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="好友相关" />
 
-    <Button
+        <Button
         android:id="@+id/bt_chatroom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="聊天室相关" />
-    <Button
+        <Button
         android:id="@+id/bt_jmrtc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="实时音视频" />
 
-    <ScrollView
+        <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -164,12 +305,12 @@
             android:layout_height="wrap_content" />
     </ScrollView>
 
-    <TextView
+        <TextView
         android:layout_width="fill_parent"
         android:layout_height="1dp"
         android:background="#000" />
 
-    <ScrollView
+        <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -180,12 +321,12 @@
             android:layout_height="wrap_content" />
     </ScrollView>
 
-    <TextView
+        <TextView
         android:layout_width="fill_parent"
         android:layout_height="1dp"
         android:background="#000" />
 
-    <ScrollView
+        <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -195,6 +336,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </ScrollView>
+    </LinearLayout>
 </LinearLayout>
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"

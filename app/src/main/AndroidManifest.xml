@@ -149,8 +149,7 @@
         <activity android:name="heath.com.test2_jmessage.activity.setting.UpdatePassword" />
         <activity android:name="heath.com.test2_jmessage.activity.setting.UpdateUserInfoActivity" />
         <activity android:name="heath.com.test2_jmessage.activity.createmessage.CreateMessageActivity" />
-        <activity android:name="heath.com.test2_jmessage.activity.createmessage.CreateSigTextMessageActivity"
-                  android:launchMode="singleTask"/>
+        <activity android:name="heath.com.test2_jmessage.activity.createmessage.CreateSigTextMessageActivity" />
         <activity android:name="heath.com.test2_jmessage.activity.groupinfo.GroupInfoActivity" />
         <activity android:name="heath.com.test2_jmessage.activity.groupinfo.CreateGroupActivity" />
         <activity android:name="heath.com.test2_jmessage.activity.groupinfo.GetGroupInfoActivity" />
@@ -216,6 +215,10 @@
             android:name="heath.com.test2_jmessage.activity.showinfo.ShowGroupBlcakListChangedActivity"
             android:launchMode="singleTask" />
         <activity android:name="heath.com.test2_jmessage.activity.showinfo.ShowChatRoomNotificationActivity" />
+        <activity android:name=".activity.friend.ManageFriendActivity" />
+        <activity android:name=".activity.friend.NoteFriend" />
+        <activity android:name=".activity.query.Query" />
+        <activity android:name=".activity.friend.FriendAskManage" />
 
     </application>
 

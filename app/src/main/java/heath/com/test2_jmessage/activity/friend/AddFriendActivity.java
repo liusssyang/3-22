@@ -4,13 +4,17 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import cn.jpush.im.android.api.ContactManager;
 import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.R;
+import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
 
 /**
  * Created by ${chenyn} on 16/7/20.
@@ -34,6 +38,14 @@ public class AddFriendActivity extends Activity {
 
     //发送添加好友请求
     private void initData() {
+        TextView manage_back=findViewById(R.id.manage_back);
+        manage_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+        mEt_userName.setText(getIntent().getStringExtra("username"));
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -56,11 +68,20 @@ public class AddFriendActivity extends Activity {
     }
 
     private void initView() {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(R.layout.activity_add_friend);
+        zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
         mEt_userName = (EditText) findViewById(R.id.et_user_name);
         mEt_appkey = (EditText) findViewById(R.id.et_appkey);
         mEt_reason = (EditText) findViewById(R.id.et_reason);
 
         mButton = (Button) findViewById(R.id.bt_add_friend);
+    }
+    private void zoomInViewSize(int height) {
+        View img1 = findViewById(R.id.statusbar);
+        ViewGroup.LayoutParams  lp = img1.getLayoutParams();
+        lp.height =height;
+        img1.setLayoutParams(lp);
     }
 }

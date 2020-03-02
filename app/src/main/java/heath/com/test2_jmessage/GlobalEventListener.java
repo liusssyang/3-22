@@ -40,6 +40,7 @@ import heath.com.test2_jmessage.application.IMDebugApplication;
 import static android.content.Context.USAGE_STATS_SERVICE;
 import static cn.jpush.im.android.api.jmrtc.JMRTCInternalUse.getApplicationContext;
 import static heath.com.test2_jmessage.activity.TypeActivity.myUserId;
+import static heath.com.test2_jmessage.activity.TypeActivity.personList;
 
 /**
  * 在demo中对于通知栏点击事件和在线消息接收事件，我们都直接在全局监听
@@ -48,25 +49,78 @@ public class GlobalEventListener {
     private Context appContext;
     private final static String TAG = "log1";
     private UsageStatsManager mUsageStatsManager;
-
-
     public GlobalEventListener(Context context) {
         appContext = context;
         JMessageClient.registerEventReceiver(this);
     }
-
     public void onEvent(NotificationClickEvent event) {
         jumpToActivity(event.getMessage());
     }
-
     public void onEvent(MessageEvent event) {
         LocalBroadcastManager localBroadcastManager=LocalBroadcastManager.getInstance(appContext);
         dealing(localBroadcastManager,event);
     }
     private void jumpToActivity(Message msg) {
         UserInfo fromUser = msg.getFromUser();
+        SharedPreferences.Editor editor3=getApplicationContext().getSharedPreferences("backdata"+myUserId,0).edit();
+        long userId=msg.getFromUser().getUserID();
+        Calendar cal;
+        String year, month, day, hour, minute, second, timeA;
+        String total = "";
+        cal = Calendar.getInstance();
+        cal.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
+        year = String.valueOf(cal.get(Calendar.YEAR));
+        month = String.valueOf(cal.get(Calendar.MONTH) + 1);
+        day = String.valueOf(cal.get(Calendar.DATE));
+        if (cal.get(Calendar.AM_PM) == 0)
+            hour = String.valueOf(cal.get(Calendar.HOUR));
+        else
+            hour = String.valueOf(cal.get(Calendar.HOUR) + 12);
+        minute = String.valueOf(cal.get(Calendar.MINUTE));
+        second = String.valueOf(cal.get(Calendar.SECOND));
+        timeA = month + "/" + day + "  " + hour + ":" + minute;
+        editor3.putString("time"+userId,timeA);
+        ContentType contentType=ContentType.valueOf(msg.getContentType().toString());
+        switch (contentType) {
+            case text:
+                TextContent textContent = (TextContent) msg.getContent();
+                String text=textContent.getText();
+                editor3.putString("simplemessage"+userId,text);
+                editor3.apply();
+            case image:
+                String thumbLocalPath = ((ImageContent)msg.getContent()).getLocalThumbnailPath();
+                if (!TextUtils.isEmpty(thumbLocalPath)) {
+                    editor3.putString("simplemessage"+userId,"[图片]");
+                    editor3.apply();
+                }
+                break;
+
+            case voice:
+
+                break;
+
+            case location:
+                break;
+            case file:
+
+                break;
+            case custom:
+                break;
+            case eventNotification:
+                break;
+            case prompt:
+                break;
+            case video:
+
+                break;
+        }
         final Intent notificationIntent = new Intent(appContext, CreateSigTextMessageActivity.class);
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        for (int i=0;i<personList.size();i++){
+            if (personList.get(i).getUserId()==fromUser.getUserID()){
+                notificationIntent.putExtra("position",i);
+            }
+        }
+
         if (msg.getTargetType() == ConversationType.group) {
             GroupInfo groupInfo = (GroupInfo) msg.getTargetInfo();
             notificationIntent.putExtra(ShowMessageActivity.EXTRA_IS_GROUP, true);
@@ -74,10 +128,8 @@ public class GlobalEventListener {
         } else {
             notificationIntent.putExtra(ShowMessageActivity.EXTRA_IS_GROUP, false);
         }
-
-        notificationIntent.putExtra(ShowMessageActivity.EXTRA_FROM_USERNAME, fromUser.getUserName());
-        notificationIntent.putExtra(ShowMessageActivity.EXTRA_FROM_APPKEY, fromUser.getAppKey());
-        notificationIntent.putExtra(ShowMessageActivity.EXTRA_MSG_TYPE, msg.getContentType().toString());
+        notificationIntent.putExtra("name", fromUser.getUserName());
+        notificationIntent.putExtra("userId",fromUser.getUserID());
         notificationIntent.putExtra(ShowMessageActivity.EXTRA_MSGID, msg.getId());
         appContext.startActivity(notificationIntent);
 
@@ -133,6 +185,7 @@ public class GlobalEventListener {
         long userId=event.getMessage().getFromUser().getUserID();
         SharedPreferences.Editor editor2=getApplicationContext().getSharedPreferences("history"+myUserId,0).edit();
         SharedPreferences pref=getApplicationContext().getSharedPreferences("history"+myUserId,0);
+        SharedPreferences.Editor editor3=getApplicationContext().getSharedPreferences("backdata"+myUserId,0).edit();
         String history=pref.getString("historyRecord"+userId," ");
         ContentType contentType=ContentType.valueOf(event.getMessage().getContentType().toString());
         Intent intent=new Intent("message");
@@ -151,7 +204,10 @@ public class GlobalEventListener {
         minute = String.valueOf(cal.get(Calendar.MINUTE));
         second = String.valueOf(cal.get(Calendar.SECOND));
         timeA = month + "/" + day + "  " + hour + ":" + minute;
+        editor3.putString("time"+userId,timeA);
         intent.putExtra("time",timeA);
+        intent.putExtra("userId",userId);
+        intent.putExtra("init","2");
         switch (contentType) {
             case text:
                 TextContent textContent = (TextContent) event.getMessage().getContent();
@@ -160,6 +216,8 @@ public class GlobalEventListener {
                 history=history+text+"text_left%%";
                 editor2.putString("historyRecord"+userId,history);
                 editor2.apply();
+                editor3.putString("simplemessage"+userId,text);
+                editor3.apply();
                 if (text.equals("Ask"))
                     intent.putExtra("SysMessage",SysMessage());
                 else
@@ -176,6 +234,8 @@ public class GlobalEventListener {
                 if (!TextUtils.isEmpty(thumbLocalPath)) {
                     history=history+thumbLocalPath+"image_left%%";
                     editor2.putString("historyRecord"+userId,history);
+                    editor3.putString("simplemessage"+userId,"图片");
+                    editor3.apply();
                     editor2.apply();
                     Bitmap bitmap = BitmapFactory.decodeFile(thumbLocalPath);
                     Mydialog.bitmap=bitmap;
@@ -201,7 +261,7 @@ public class GlobalEventListener {
             case eventNotification:
                 break;
             case prompt:
-               break;
+                break;
             case video:
 
                 break;

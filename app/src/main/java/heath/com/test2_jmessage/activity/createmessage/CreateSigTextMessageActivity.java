@@ -9,10 +9,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
@@ -40,13 +38,16 @@ import cn.jpush.im.android.api.model.Message;
 import cn.jpush.im.android.api.options.MessageSendingOptions;
 import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.R;
-import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
+import heath.com.test2_jmessage.StatusBar.StatusBarUtils;
 import heath.com.test2_jmessage.activity.TypeActivity;
+import heath.com.test2_jmessage.activity.friend.ManageFriendActivity;
 import heath.com.test2_jmessage.adapter.MsgAdapter;
 import heath.com.test2_jmessage.application.IMDebugApplication;
 import heath.com.test2_jmessage.recycleView_item.Msg;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static heath.com.test2_jmessage.activity.TypeActivity.myUserId;
+import static heath.com.test2_jmessage.activity.TypeActivity.personList;
 
 /**
  * Created by ${chenyn} on 16/3/29.
@@ -107,27 +108,30 @@ public class CreateSigTextMessageActivity extends Activity {
     SharedPreferences.Editor editor2,editor3;
     SharedPreferences pref;
     String history;
-    private static int position;
+    public static int position;
     private static long userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_single_text_message);
-        StatusBarUtil.setStatusBarColor(this, Color.parseColor("#00C4FF"));
+        StatusBarUtils.with(this)
+                .setDrawable(getResources().getDrawable(R.drawable.toolbar_ground)).init();
+        //StatusBarUtil.setStatusBarDrawble(this,getResources().getDrawable(R.drawable.toolbar_ground));
+        editor2=getApplicationContext().getSharedPreferences("history",0).edit();
+        pref=getApplicationContext().getSharedPreferences("history",0);
         userId=getIntent().getLongExtra("userId",0);
         editor2=getApplicationContext().getSharedPreferences("history"+myUserId,0).edit();
         pref=getApplicationContext().getSharedPreferences("history"+myUserId,0);
-        editor3=getApplicationContext().getSharedPreferences("backdata",0).edit();
+        editor3=getApplicationContext().getSharedPreferences("backdata"+myUserId,0).edit();
+        history=pref.getString("historyRecord","");
         history=pref.getString("historyRecord"+userId,"");
         String []his=history.split("%%");
         back=findViewById(R.id.back);
         toolbarName=findViewById(R.id.sigText_toolbarName);
         mEt_name = (EditText) findViewById(R.id.et_name);
-        toolbarName.setText(getIntent().getStringExtra("name"));
-        mEt_name.setText(getIntent().getStringExtra("name"));
+        toolbarName.setText(getIntent().getStringExtra("note_name"));
         position=getIntent().getIntExtra("position",0);
-        Log.d("TAG", "onCreate: "+position);
         mEt_text = (EditText) findViewById(R.id.et_text);
         mBt_send = (TextView) findViewById(R.id.bt_send);
         mEt_appkey = (EditText) findViewById(R.id.et_appkey);
@@ -143,7 +147,17 @@ public class CreateSigTextMessageActivity extends Activity {
         mCb_enableCustomNotify = (CheckBox) findViewById(R.id.cb_enableCustomNotify);
         mCb_enableReadReceipt = (CheckBox) findViewById(R.id.cb_needReadReceipt);
         menu=(TextView) findViewById(R.id.menu);
-        //findViewById(R.id.et_custom_notifyAtPrefix).setVisibility(View.GONE);
+        TextView sigText_toolbarMenu=findViewById(R.id.sigText_toolbarMenu);
+        sigText_toolbarMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(getApplication(), ManageFriendActivity.class);
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("userId",userId);
+                intent.putExtra("position",position);
+                startActivity(intent);
+            }
+        });
         msgRecyclerView=findViewById(R.id.msg_recycler_view);
         LinearLayoutManager layoutManager=new LinearLayoutManager(this);
         msgRecyclerView.setLayoutManager(layoutManager);
@@ -153,14 +167,13 @@ public class CreateSigTextMessageActivity extends Activity {
             getTextMessage+=i+"\n"+his[i]+"\n\n";
         }
         for (int i=his.length-1;i>=0;i--){
-            if (position<1)
-                position=1;
+
             if (his[i].contains("text_left")&&!his[i].equals("text_left")){
-                msgList.add(0,new Msg(TypeActivity.friendsIcon[position-1],null,his[i].replace("text_left",""),Msg.TYPE_RECEIVED));
+                msgList.add(0,new Msg(TypeActivity.personIcon.get(position),null,his[i].replace("text_left",""),Msg.TYPE_RECEIVED));
             }
             if (his[i].contains("image_left")&&!his[i].equals("image_left")){
                 Bitmap bitmap= BitmapFactory.decodeFile(his[i].replace("image_left",""));
-                msgList.add(0,new Msg(TypeActivity.friendsIcon[position-1],bitmap,null,Msg.TYPE_RECEIVED));
+                msgList.add(0,new Msg(TypeActivity.personIcon.get(position),bitmap,null,Msg.TYPE_RECEIVED));
             }
             if (his[i].contains("text_right")&&!his[i].equals("text_right")){
                 msgList.add(0,new Msg(null,his[i].replace("text_right",""),Msg.TYPE_SENT));
@@ -205,7 +218,7 @@ public class CreateSigTextMessageActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(IMDebugApplication.getContext(), TypeActivity.class);
-                intent.putExtra("userId",userId);
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 IMDebugApplication.getContext().startActivity(intent);
             }
         });
@@ -258,10 +271,11 @@ public class CreateSigTextMessageActivity extends Activity {
                 minute = String.valueOf(cal.get(Calendar.MINUTE));
                 second = String.valueOf(cal.get(Calendar.SECOND));
                 timeA = month + "/" + day + "  " + hour + ":" + minute;
-                String name = mEt_name.getText().toString();
+                String name =getIntent().getStringExtra("name");
                 String text = mEt_text.getText().toString();
-                editor3.putString("simplemessage",text);
-                editor3.putString("time",timeA);
+                editor3.putString("simplemessage"+userId,text);
+                editor3.putString("time"+userId,timeA);
+                editor3.putInt("position",position);
                 editor3.apply();
                 if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(text)) {
                     String appkey = mEt_appkey.getText().toString();
@@ -297,6 +311,7 @@ public class CreateSigTextMessageActivity extends Activity {
                                 adapter.notifyItemInserted(msgList.size()-1);
                                 msgRecyclerView.scrollToPosition(msgList.size()-1);
                                 history=history+mEt_text.getText().toString()+"text_right%%";
+                                editor2.putString("historyRecord",history);
                                 editor2.putString("historyRecord"+userId,history);
                                 editor2.apply();
                                 mEt_text.setText("");
@@ -412,30 +427,29 @@ public class CreateSigTextMessageActivity extends Activity {
             this.adapter=adapter;
         }
         public void onReceive(Context context, Intent intent) {
-            if (intent.getStringExtra("key")!=null) {
-                Msg msg = new Msg(null, intent.getStringExtra("key"), Msg.TYPE_RECEIVED);
-               if (position>=1)
-                    msg.setIcon(TypeActivity.friendsIcon[position-1]);
-                msgList.add(msg);
-                adapter.notifyItemInserted(msgList.size() - 1);
-                msgRecyclerView.scrollToPosition(msgList.size() - 1);
+            if (intent.getLongExtra("userId",0)==userId){
+                if (intent.getStringExtra("key")!=null) {
+                    Msg msg = new Msg(personList.get(position).getBitmap(),null, intent.getStringExtra("key"), Msg.TYPE_RECEIVED);
+                    msgList.add(msg);
+                    adapter.notifyItemInserted(msgList.size() - 1);
+                    msgRecyclerView.scrollToPosition(msgList.size() - 1);
+                }
+                if (intent.getStringExtra("SysMessage")!=null){
+                    Msg msg2=new Msg(personList.get(position).getBitmap(),null,intent.getStringExtra("SysMessage"),Msg.TYPE_SENT);
+                    msgList.add(msg2);
+                    adapter.notifyItemInserted(msgList.size()-1);
+                    msgRecyclerView.scrollToPosition(msgList.size()-1);
+                    sendMessage(mEt_name.getText().toString(),intent.getStringExtra("SysMessage"),null,null,null,null,null,null,null,null);
+                }
+                if (intent.getByteArrayExtra("image")!=null){
+                    byte[] res=intent.getByteArrayExtra("image");
+                    Bitmap bitmap=getPicFromBytes(res,null);
+                    Msg msg2=new Msg(personList.get(position).getBitmap(),bitmap,null,Msg.TYPE_RECEIVED);
+                    msgList.add(msg2);
+                    adapter.notifyItemInserted(msgList.size()-1);
+                    msgRecyclerView.scrollToPosition(msgList.size()-1);
+                }
             }
-            if (intent.getStringExtra("SysMessage")!=null){
-                Msg msg2=new Msg(null,intent.getStringExtra("SysMessage"),Msg.TYPE_SENT);
-                msgList.add(msg2);
-                adapter.notifyItemInserted(msgList.size()-1);
-                msgRecyclerView.scrollToPosition(msgList.size()-1);
-                sendMessage(mEt_name.getText().toString(),intent.getStringExtra("SysMessage"),null,null,null,null,null,null,null,null);
-            }
-            if (intent.getByteArrayExtra("image")!=null){
-                byte[] res=intent.getByteArrayExtra("image");
-                Bitmap bitmap=getPicFromBytes(res,null);
-                Msg msg2=new Msg(bitmap,null,Msg.TYPE_RECEIVED);
-                msgList.add(msg2);
-                adapter.notifyItemInserted(msgList.size()-1);
-                msgRecyclerView.scrollToPosition(msgList.size()-1);
-            }
-
         }
 
     }
@@ -458,3 +472,4 @@ public class CreateSigTextMessageActivity extends Activity {
     }
 
 }
+

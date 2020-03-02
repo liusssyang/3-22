@@ -14,11 +14,17 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -70,8 +76,10 @@ import heath.com.test2_jmessage.activity.chatroom.ChatRoomActivity;
 import heath.com.test2_jmessage.activity.conversation.ConversationActivity;
 import heath.com.test2_jmessage.activity.createmessage.CreateMessageActivity;
 import heath.com.test2_jmessage.activity.createmessage.ShowTransCommandActivity;
+import heath.com.test2_jmessage.activity.friend.AddFriendActivity;
 import heath.com.test2_jmessage.activity.friend.FriendContactManager;
 import heath.com.test2_jmessage.activity.friend.ShowFriendReasonActivity;
+import heath.com.test2_jmessage.activity.groupinfo.ApplyJoinGroupActivity;
 import heath.com.test2_jmessage.activity.groupinfo.GroupInfoActivity;
 import heath.com.test2_jmessage.activity.groupinfo.ShowGroupApprovalActivity;
 import heath.com.test2_jmessage.activity.groupinfo.ShowMemNicknameChangedActivity;
@@ -88,11 +96,8 @@ import heath.com.test2_jmessage.adapter.personAdapter;
 import heath.com.test2_jmessage.application.IMDebugApplication;
 import heath.com.test2_jmessage.recycleView_item.personMsg;
 
-/**
- * Created by ${chenyn} on 16/3/23.
- *
- * @desc : 各个接口的的引导界面
- */
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 public class TypeActivity extends Activity implements View.OnClickListener {
     public static final String TAG = "ly13172";
     public static final String LOGOUT_REASON = "logout_reason";
@@ -102,7 +107,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     private TextView tv_deviceInfo,newFriends;
     private TextView tv_header,addNew;
     private TextView menu,headusername,headappkey,headvision,signature;
-    public static final String DOWNLOAD_INFO = "download_info";
     public static final String INFO_UPDATE = "info_update";
     public static final String TRANS_COMMAND_SENDER = "trans_command_sender";
     public static final String TRANS_COMMAND_TARGET = "trans_command_target";
@@ -110,31 +114,36 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     public static final String TRANS_COMMAND_CMD = "trans_command_cmd";
     private RecyclerView recyclerView;
     public static personAdapter adapter;
-    public static personMsg friendList[];
+    public static List<Bitmap> personIcon=new ArrayList<>();
     public static List<personMsg> personList=new ArrayList<>();
+    public static List<UserInfo> list=new ArrayList<>();
     private DrawerLayout drawerLayout;
     private IntentFilter intentFilter;
     private Localreceiver localRceiver;
     private LocalBroadcastManager localBroadcastManager;
     private CircleImageView circleImageView;
-    public static long myUserId;
+    public static long myUserId,backUserId;
     public static Bitmap myIcon;
-    public static Bitmap friendsIcon[]=null;
-    //private final Handler handler = new Handler();
+    //public static Bitmap friendsIcon[]=null;
+    private final Handler handler = new Handler();
+    public boolean isReady;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate: ");
         JMessageClient.registerEventReceiver(this);
         initView();
-
+        isReady=false;
+        handler.postDelayed(task, 1);
     }
     private void initView() {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(R.layout.activity_type);
         zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
-        Toolbar toolbar=findViewById(R.id.toolbar);
+        backUserId=getIntent().getLongExtra("userId",0);
+        final Toolbar toolbar=findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.parseColor("#ffffff"));
         setActionBar(toolbar);
         ActionBar actionBar=getActionBar();
@@ -147,6 +156,9 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         headappkey=navHeaderView.findViewById(R.id.head_appkey);
         headvision=navHeaderView.findViewById(R.id.head_vision);
         signature=navHeaderView.findViewById(R.id.signature);
+        final TextView index=findViewById(R.id.index);
+
+
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
@@ -162,12 +174,18 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                         JMessageClient.logout();
                         Toast.makeText(getApplicationContext(), "登出成功", Toast.LENGTH_SHORT).show();
                         intent.setClass(TypeActivity.this, RegisterAndLoginActivity.class);
-                        setResult(8);
                         startActivity(intent);
+                        personList.clear();
+                        adapter.notifyDataSetChanged();
                         finish();
                     } else {
                         Toast.makeText(TypeActivity.this, "登出失败", Toast.LENGTH_SHORT).show();
                     }
+                }
+                if (item.toString().equals("更多")) {
+                    intent=new Intent(getApplicationContext(),FriendContactManager.class);
+                    intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                   getApplicationContext().startActivity(intent);
                 }
                 if (item.toString().equals("历史纪录")) {
                     SharedPreferences.Editor editor=getApplicationContext().getSharedPreferences("history"+myUserId,0).edit();
@@ -188,16 +206,20 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             @Override
             public void onClick(View v) {
                Intent intent=new Intent(IMDebugApplication.getContext(), UpdateUserInfoActivity.class);
-                IMDebugApplication.getContext().startActivity(intent);
+               intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+               IMDebugApplication.getContext().startActivity(intent);
             }
         });
         circleImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(IMDebugApplication.getContext(), UpdateUserAvatar.class);
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 IMDebugApplication.getContext().startActivity(intent);
             }
         });
+        final LinearLayout index2_linear=findViewById(R.id.index2_linear);
+        final LinearLayout other_linear=findViewById(R.id.other_linear);
         findViewById(R.id.bt_about_setting).setOnClickListener(this);
         findViewById(R.id.bt_create_message).setOnClickListener(this);
         findViewById(R.id.bt_group_info).setOnClickListener(this);
@@ -229,9 +251,10 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         addNew.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent();
-                intent.setClass(getApplicationContext(), FriendContactManager.class);
-                startActivity(intent);
+                other_linear.setVisibility(View.GONE);
+                index.setVisibility(View.GONE);
+                toolbar.setVisibility(View.GONE);
+                index2_linear.setVisibility(View.VISIBLE);
             }
         });
         newFriends=findViewById(R.id.newFriends);
@@ -243,19 +266,83 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                 startActivity(intent);
             }
         });
+        index.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                other_linear.setVisibility(View.GONE);
+                index.setVisibility(View.GONE);
+                toolbar.setVisibility(View.GONE);
+                index2_linear.setVisibility(View.VISIBLE);
+            }
+        });
+        TextView cancel=findViewById(R.id.cancel);
+        final LinearLayout find_visibility=findViewById(R.id.find_visibility);
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideInput();
+                other_linear.setVisibility(View.VISIBLE);
+                index.setVisibility(View.VISIBLE);
+                toolbar.setVisibility(View.VISIBLE);
+                index2_linear.setVisibility(View.GONE);
+                find_visibility.setVisibility(View.GONE);
+            }
+        });
+        final TextView find_single=findViewById(R.id.find_single);
+        final TextView find_group=findViewById(R.id.find_group);
+        final EditText index2=findViewById(R.id.index2);
+        LinearLayout find_single_line=findViewById(R.id.find_single_line);
+        LinearLayout find_group_line=findViewById(R.id.find_group_line);
+        find_group_line.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), ApplyJoinGroupActivity.class);
+                intent.putExtra("groupId",index2.getText().toString());
+                startActivity(intent);
+            }
+        });
+        find_single_line.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), AddFriendActivity.class);
+                intent.putExtra("username",index2.getText().toString());
+                startActivity(intent);
+
+            }
+        });
+        index2.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+            @Override
+            public void afterTextChanged(Editable s) {
+                find_visibility.setVisibility(View.VISIBLE);
+                find_group.setText(s.toString());
+                find_single.setText(s.toString());
+            }
+        });
         adapter.notifyDataSetChanged();
     }
     @Override
     protected void onResume() {
         super.onResume();
-
-        SharedPreferences pref2=this.getSharedPreferences("backdata",0);
-        String simpleMessage=pref2.getString("simplemessage","");
-        String time=pref2.getString("time","");
-        Log.d(TAG, "T"+personList.size());
-        //for (int i=0;i<personList.size())
-        //h1.setTime(time);
-        //h1.setSimpleMessage(simpleMessage);
+        Log.d(TAG, "onResume: ");
+        if (isReady){
+            SharedPreferences pref2=getBaseContext().getSharedPreferences("backdata"+myUserId,0);
+            for (int i=0;i<personList.size();i++) {
+                String simpleMessage=pref2.getString("simplemessage" + personList.get(i).getUserId(), "");
+                String time=pref2.getString("time" +personList.get(i).getUserId(), "");
+                if (!simpleMessage.equals("")) {
+                    personList.get(i).setSimpleMessage(simpleMessage);
+                    adapter.notifyDataSetChanged();
+                }
+                if (!time.equals("")){
+                    personList.get(i).setTime(time);
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        }
         Intent intent = getIntent();
         Gson gson = new Gson();
         List<DeviceInfo> deviceInfos = gson.fromJson(intent.getStringExtra("deviceInfos"), new TypeToken<List<DeviceInfo>>() {}.getType());
@@ -268,9 +355,13 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             }
         }
     }
+    protected void onRestart() {
+        super.onRestart();
+        Log.d(TAG, "onRestart: ");
+    }
     protected void onStart() {
         super.onStart();
-
+        Log.d(TAG, "onStart: ");
         UserInfo info = JMessageClient.getMyInfo();
         if (null != info) {
             myUserId=info.getUserID();
@@ -290,6 +381,12 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             });
         }
 
+    }
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy: ");
+        JMessageClient.unRegisterEventReceiver(this);
+        localBroadcastManager.unregisterReceiver(localRceiver);
     }
     @Override
     protected void onNewIntent(Intent intent) {
@@ -340,6 +437,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         }
     }
     public void onEvent(ContactNotifyEvent event) {
+
         String reason = event.getReason();
         String fromUsername = event.getFromUsername();
         String appkey = event.getfromUserAppKey();
@@ -348,6 +446,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                 getSharedPreferences("friends",0).edit();
         editor.putString(ShowFriendReasonActivity.EXTRA_TYPE, event.getType().toString());
         Intent intent = new Intent(getApplicationContext(), ShowFriendReasonActivity.class);
+        intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(ShowFriendReasonActivity.EXTRA_TYPE, event.getType().toString());
         switch (event.getType()) {
             case invite_received://收到好友邀请
@@ -356,10 +455,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                 editor.putString("appkey", appkey);
                 editor.putString("reason",reason);
                 editor.apply();
-                intent.putExtra("invite_received", "fromUsername = " + fromUsername + "\nfromUserAppKey" + appkey + "\nreason = " + reason);
-                intent.putExtra("username", fromUsername);
-                intent.putExtra("appkey", appkey);
-                //startActivity(intent);
                 break;
             case invite_accepted://对方接收了你的好友邀请
                 intent.putExtra("invite_accepted", "对方接受了你的好友邀请");
@@ -501,7 +596,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             if (context != null) {
                 Intent intent = new Intent(context.getApplicationContext(), ShowChatRoomNotificationActivity.class);
                 intent.putExtra(ShowChatRoomNotificationActivity.SHOW_CHAT_ROOM_NOTIFICATION, builder.toString());
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
             }
         }
@@ -640,7 +735,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             }
             return builder.toString();
         }
-
         @Override
         protected void onPostExecute(String s) {
             Context context = contextWeakReference.get();
@@ -648,16 +742,10 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                 Intent intent = new Intent();
                 intent.setClass(context, ShowMemNicknameChangedActivity.class);
                 intent.putExtra(ShowMemNicknameChangedActivity.SHOW_MEM_NICKNAME_CHANGED, s);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
             }
         }
-    }
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        JMessageClient.unRegisterEventReceiver(this);
-        localBroadcastManager.unregisterReceiver(localRceiver);
     }
     private void zoomInViewSize(int height) {
         View img1 = findViewById(R.id.statusbar);
@@ -676,68 +764,63 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             this.adapter=adapter;
         }
         public void onReceive(Context context, Intent intent) {
-            if (intent.getStringExtra("key")!=null) {
-                msgList.get(0).setSimpleMessage(intent.getStringExtra("key"));
-                msgList.get(0).setTime(intent.getStringExtra("time"));
+            if (intent.getStringExtra("init").equals("1")){
+                Log.d(TAG, "onReceive: ready"+personList.size());
+                SharedPreferences pref2=getBaseContext().getSharedPreferences("backdata"+myUserId,0);
+                for (int i=0;i<personList.size();i++) {
+                    String simpleMessage=pref2.getString("simplemessage" + personList.get(i).getUserId(), "");
+                    String time=pref2.getString("time" +personList.get(i).getUserId(), "");
+
+                    if (!simpleMessage.equals("")) {
+                        personList.get(i).setSimpleMessage(simpleMessage);
+                        adapter.notifyDataSetChanged();
+                    }
+                    if (!time.equals("")){
+                        personList.get(i).setTime(time);
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            }else
+            for (int i=0;i<personList.size();i++){
+
+                if (personList.get(i).getUserId()==intent.getLongExtra("userId",0)){
+                if (intent.getStringExtra("key")!=null) {
+                    msgList.get(i).setSimpleMessage(intent.getStringExtra("key"));
+                    msgList.get(i).setTime(intent.getStringExtra("time"));
+                }
+                if (intent.getStringExtra("SysMessage")!=null){
+                msgList.get(i).setSimpleMessage("[System]");
+                }
+                if (intent.getByteArrayExtra("image")!=null){
+                msgList.get(i).setSimpleMessage("[图片]");
             }
-            if (intent.getStringExtra("SysMessage")!=null){
-                msgList.get(0).setSimpleMessage("[System]");
+                adapter.notifyDataSetChanged();
+                }
+
             }
-            if (intent.getByteArrayExtra("image")!=null){
-                msgList.get(0).setSimpleMessage("[图片]");
-            }
-            adapter.notifyDataSetChanged();
-        }
-
-    }
-    private class MyTask extends AsyncTask<List, Integer, String> {
-
-        // 方法1：onPreExecute（）
-        // 作用：执行 线程任务前的操作
-        @Override
-        protected void onPreExecute() {
-            //text.setText("加载中");
-            // 执行前显示提示
-        }
-
-
-        // 方法2：doInBackground（）
-        // 作用：接收输入参数、执行任务中的耗时操作、返回 线程任务执行的结果
-        // 此处通过计算从而模拟“加载进度”的情况
-        @Override
-        protected String doInBackground(List... params) {
-
-
-            return null;
-        }
-
-        // 方法3：onProgressUpdate（）
-        // 作用：在主线程 显示线程任务执行的进度
-        @Override
-        protected void onProgressUpdate(Integer... progresses) {
-
-            //progressBar.setProgress(progresses[0]);
-            //text.setText("loading..." + progresses[0] + "%");
-
-        }
-
-        // 方法4：onPostExecute（）
-        // 作用：接收线程任务执行结果、将执行结果显示到UI组件
-        @Override
-        protected void onPostExecute(String result) {
-            // 执行完毕后，则更新UI
-            //text.setText("加载完毕");
-        }
-
-        // 方法5：onCancelled()
-        // 作用：将异步任务设置为：取消状态
-        @Override
-        protected void onCancelled() {
-
-            //text.setText("已取消");
-            //progressBar.setProgress(0);
-
         }
     }
-
+    private final Runnable task = new Runnable() {
+        @Override
+        public void run() {
+            // TODO Auto-generated method stub
+            if (personList.size()!=0){
+            Intent intent=new Intent("message");
+            intent.putExtra("init","1");
+            localBroadcastManager.sendBroadcast(intent);
+            isReady=true;
+            }
+            else{
+                handler.postDelayed(this,1);
+                isReady=false;
+            }
+        }
+    };
+    protected void hideInput() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        View v = getWindow().peekDecorView();
+        if (null != v) {
+            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+        }
+    }
 }

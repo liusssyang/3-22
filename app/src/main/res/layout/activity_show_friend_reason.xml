@@ -86,7 +86,6 @@
             android:id="@+id/showFriend_person"
             android:gravity="start|bottom"
             android:textSize="18sp"
-            android:text="A123"
             android:layout_toEndOf="@+id/showFriend_icon"
             android:textColor="#000000"/>
         <TextView
@@ -129,7 +128,6 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:background="#ffffff"
-            android:text="附加消息"
             android:textColor="#000000"
             android:layout_toEndOf="@+id/tiptext1"
             android:id="@+id/tiptext2"
@@ -157,7 +155,6 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:background="#ffffff"
-            android:text="附加消息"
             android:textColor="#000000"
             android:layout_toEndOf="@+id/Appkeytext"
             android:id="@+id/Appkeytext2"

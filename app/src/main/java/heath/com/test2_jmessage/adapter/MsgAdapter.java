@@ -1,10 +1,12 @@
 package heath.com.test2_jmessage.adapter;
 
 import android.graphics.Color;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -56,9 +58,15 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.ViewHolder>{
         holder.leftImg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Mydialog mydialog=new Mydialog(v.getContext());
-                Window window=mydialog.getWindow();
-                window.requestFeature(Window.FEATURE_NO_TITLE);
+                Mydialog mydialog=new Mydialog(v.getContext(),R.style.MyDialogStyle);
+                mydialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                Window dialogWindow = mydialog.getWindow();
+                dialogWindow.setGravity(Gravity.BOTTOM);
+                dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
+                WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+                lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+                lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                dialogWindow.setAttributes(lp);
                 mydialog.show();
             }
         });

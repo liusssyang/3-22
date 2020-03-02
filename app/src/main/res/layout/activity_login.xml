@@ -97,6 +97,7 @@
         android:background="@drawable/background_square_login2">
 
         <Button
+            android:layout_marginStart="0dp"
             android:id="@+id/bt_login"
             android:layout_width="75dp"
             android:layout_height="75dp"

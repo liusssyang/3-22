@@ -1,5 +1,6 @@
 package heath.com.test2_jmessage.MyDialog;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -7,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,7 +28,7 @@ import static cn.jpush.im.android.api.jmrtc.JMRTCInternalUse.getApplicationConte
 public class Mydialog extends Dialog {
     private PhotoView photoView;
     public static Bitmap bitmap;
-    private TextView close,download,tip;
+    private TextView download,tip;
     private Context context;
     public static ImageContent imageContent;
     public static Message message;
@@ -34,16 +36,20 @@ public class Mydialog extends Dialog {
     public Mydialog(Context context){
         super(context);
     }
+    public Mydialog(Context context,int id){
+        super(context,id);
+    }
     public Mydialog(@NonNull Context context,Bitmap bitmap) {
         super(context);
         this.bitmap=bitmap;
         this.context=context;
     }
+    @SuppressLint("ClickableViewAccessibility")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.photoview);
         SharedPreferences pref=getApplicationContext().getSharedPreferences("data",0);
-        close=findViewById(R.id.dialogclose);
+        TextView close=findViewById(R.id.dialogclose);
         download=findViewById(R.id.download);
         tip=findViewById(R.id.tip);
         download.setOnClickListener(new View.OnClickListener() {
@@ -70,12 +76,28 @@ public class Mydialog extends Dialog {
                 });
             }
         });
-        close.setOnClickListener(new View.OnClickListener() {
+        close.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
-                dismiss();
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_UP:
+                        Log.d("ly13172", "onTouch: up");
+                        dismiss();
+                        break;
+                    case MotionEvent.ACTION_DOWN:
+                        Log.d("ly13172", "onTouch: down");
+                        dismiss();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        Log.d("ly13172", "onTouch: move");
+                        break;
+                    default:
+                        throw new IllegalStateException("Unexpected value: " + event.getAction());
+                }
+                return true;
             }
         });
+
         photoView=findViewById(R.id.photo);
         if (pref.getString("filepath",null)==null)
             photoView.setImageBitmap(bitmap);

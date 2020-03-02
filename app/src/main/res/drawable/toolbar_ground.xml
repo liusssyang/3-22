@@ -9,7 +9,7 @@
                 android:color="#00C4FF"/>
 
             <corners
-                android:radius="5dip"
+                android:radius="0dip"
                 />
             <gradient
                 android:startColor="@color/colorQQ"

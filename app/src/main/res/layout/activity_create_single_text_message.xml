@@ -4,16 +4,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:id="@+id/co"
+    android:fitsSystemWindows="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    <LinearLayout
+        android:fitsSystemWindows="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
         <Toolbar
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="#00C4FF"
+            android:background="@drawable/toolbar_ground"
             android:id="@+id/toolbar_sigText"
             app:contentInsetLeft="0dp"
             app:contentInsetStart="0dp"
@@ -23,15 +25,14 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:background="@color/colorQQ"
                 android:paddingTop="15dp"
                 >
                 <TextView
                     android:id="@+id/back"
                     android:focusable="true"
                     android:clickable="true"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
                     android:background="@drawable/back"
                     android:layout_gravity="center"
                     android:textColor="#ffffff"
@@ -42,7 +43,7 @@
                     android:layout_height="match_parent"
                     android:layout_centerInParent="true"
                     android:layout_gravity="center"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:gravity="center"
                     android:textColor="#ffffff"/>
                 <TextView

@@ -46,14 +46,16 @@ public class FriendContactManager extends Activity {
         mBu_showFriendList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mTv_showFriendList.setText("");
+                Log.d("friendlist", "gotResult: Start");
                 ContactManager.getFriendList(new GetUserInfoListCallback() {
                     @Override
                     public void gotResult(int i, String s, List<UserInfo> list) {
+                        Log.d("friendlist", "gotResult: "+s);
                         if (i == 0) {
+
                             StringBuilder sb = new StringBuilder();
                             for (UserInfo info : list) {
-                                Log.d("showFriendList", info.getUserName());
+                                Log.d("showFriendList", list.get(1).getBirthday()+"");
                                 sb.append(info);
                                 sb.append("\n" + "\n");
                             }
