@@ -13,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
@@ -22,11 +23,14 @@ import java.util.List;
 import java.util.TimeZone;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import cn.jpush.im.android.api.ContactManager;
 import cn.jpush.im.android.api.JMessageClient;
+import cn.jpush.im.android.api.callback.GetUserInfoListCallback;
 import cn.jpush.im.android.api.content.ImageContent;
 import cn.jpush.im.android.api.content.TextContent;
 import cn.jpush.im.android.api.enums.ContentType;
 import cn.jpush.im.android.api.enums.ConversationType;
+import cn.jpush.im.android.api.event.ContactNotifyEvent;
 import cn.jpush.im.android.api.event.MessageEvent;
 import cn.jpush.im.android.api.event.NotificationClickEvent;
 import cn.jpush.im.android.api.model.GroupInfo;
@@ -35,11 +39,16 @@ import cn.jpush.im.android.api.model.UserInfo;
 import heath.com.test2_jmessage.MyDialog.Mydialog;
 import heath.com.test2_jmessage.activity.createmessage.CreateSigTextMessageActivity;
 import heath.com.test2_jmessage.activity.createmessage.ShowMessageActivity;
+import heath.com.test2_jmessage.activity.friend.ShowFriendReasonActivity;
 import heath.com.test2_jmessage.application.IMDebugApplication;
+import heath.com.test2_jmessage.recycleView_item.personMsg;
 
 import static android.content.Context.USAGE_STATS_SERVICE;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static cn.jpush.im.android.api.jmrtc.JMRTCInternalUse.getApplicationContext;
+import static heath.com.test2_jmessage.activity.TypeActivity.adapter;
 import static heath.com.test2_jmessage.activity.TypeActivity.myUserId;
+import static heath.com.test2_jmessage.activity.TypeActivity.personIcon;
 import static heath.com.test2_jmessage.activity.TypeActivity.personList;
 
 /**
@@ -264,6 +273,104 @@ public class GlobalEventListener {
                 break;
             case video:
 
+                break;
+        }
+    }
+    public void onEvent(ContactNotifyEvent event) {
+        Calendar cal;
+        final String year, month, day, hour, minute, second, timeA;
+        String total = "";
+        cal = Calendar.getInstance();
+        cal.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
+        year = String.valueOf(cal.get(Calendar.YEAR));
+        month = String.valueOf(cal.get(Calendar.MONTH) + 1);
+        day = String.valueOf(cal.get(Calendar.DATE));
+        if (cal.get(Calendar.AM_PM) == 0)
+            hour = String.valueOf(cal.get(Calendar.HOUR));
+        else
+            hour = String.valueOf(cal.get(Calendar.HOUR) + 12);
+        minute = String.valueOf(cal.get(Calendar.MINUTE));
+        second = String.valueOf(cal.get(Calendar.SECOND));
+        timeA = month + "/" + day + "  " + hour + ":" + minute;
+        String reason = event.getReason();
+        final String fromUsername = event.getFromUsername();
+        final String appkey = event.getfromUserAppKey();
+        String s=event.getCreateTime()+"";
+        SharedPreferences.Editor editor=getApplicationContext().
+                getSharedPreferences("friends"+myUserId,0).edit();
+        SharedPreferences pref=getApplicationContext().getSharedPreferences("friends"+myUserId,0);
+        editor.putString(ShowFriendReasonActivity.EXTRA_TYPE, event.getType().toString());
+        String UniqueList=pref.getString("uniqueList"+myUserId,"");
+
+        Intent intent = new Intent(getApplicationContext(), ShowFriendReasonActivity.class);
+        intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(ShowFriendReasonActivity.EXTRA_TYPE, event.getType().toString());
+        switch (event.getType()) {
+            case invite_received://收到好友邀请
+                String unique=fromUsername+appkey;
+                UniqueList=UniqueList+"%%"+unique;
+                editor.putString("uniqueList"+myUserId,UniqueList);
+                editor.putString("username"+unique, fromUsername);
+                editor.putString("appkey"+unique, appkey);
+                editor.putString("reason"+unique,reason);
+                editor.putString("time"+unique,timeA);
+                editor.putString("simplemessage"+unique,"请求添加你为好友！");
+                editor.apply();
+                break;
+            case invite_accepted://对方接收了你的好友邀请
+                ContactManager.getFriendList(new GetUserInfoListCallback() {
+                    @Override
+                    public void gotResult(int i, String s, List<UserInfo> list) {
+                        if (i == 0) {
+                            for (int j=0;j<list.size();j++) {
+                                String s1=list.get(j).getUserName()+list.get(j).getAppKey();
+                                String s2=fromUsername+appkey;
+                                if (s1.equals(s2)){
+                                    personIcon.add(BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath()));
+                                    personList.add(0,new personMsg(
+                                            list.get(j).getUserID()
+                                            , BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath()),list.get(j).getUserName()
+                                            ,list.get(j).getNotename()
+                                            ,list.get(i).getAppKey()
+                                            ,null
+                                            ,"我们已经是好友啦，快来打声招呼吧！"
+                                            , timeA
+                                            , list.get(j).getSignature()
+                                            , list.get(j).getGender().toString()
+                                            ,list.get(j).getAddress()
+                                            ,list.get(j).getNoteText()
+                                            ,list.get(j).getBirthday()));
+                                    adapter.notifyItemChanged(personList.size()-1);
+                                }
+                            }
+                        } else {
+                            Toast.makeText(getApplicationContext(), "获取失败", Toast.LENGTH_SHORT).show();
+                            Log.i("FriendContactManager", "ContactManager.getFriendList" + ", responseCode = " + i + " ; LoginDesc = " + s);
+                        }
+                    }
+                });
+                break;
+            case invite_declined://对方拒绝了你的好友邀请
+                intent.putExtra("invite_declined", "对方拒绝了你的好友邀请\n拒绝原因:" + event.getReason());
+
+                break;
+            case contact_deleted://对方将你从好友中删除
+                for (int i=0;i<personList.size();i++){
+                    String s1=personList.get(i).getUserName()+personList.get(i).getAppkey();
+                    String s2=fromUsername+appkey;
+                    if (s1.equals(s2)){
+                        Toast.makeText(getApplicationContext(), fromUsername+"憾然离场！", Toast.LENGTH_LONG).show();
+                        personList.remove(i);
+                        adapter.notifyDataSetChanged();
+                        break;
+                    }
+                }
+                break;
+            case contact_updated_by_dev_api://好友关系更新，由api管理员操作引起
+                intent.putExtra("contact_updated_by_dev_api", "好友关系被管理员更新");
+                //startActivity(intent);
+                break;
+            default:
                 break;
         }
     }

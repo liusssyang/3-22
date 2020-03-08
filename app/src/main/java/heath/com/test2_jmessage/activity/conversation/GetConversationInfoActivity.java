@@ -233,10 +233,8 @@ public class GetConversationInfoActivity extends Activity {
         List<Message> allMessage = conversation.getAllMessage();
         if (allMessage != null) {
             StringBuilder sb = new StringBuilder();
-            for (Message msg : allMessage) {
-                sb.append("消息ID = " + msg.getId());
-                sb.append("~~~消息发送者 = " + msg.getFromUser().getUserName());
-                sb.append("\n");
+            for (int i=0;i<allMessage.size();i++) {
+                TextContent textContent = (TextContent) allMessage.get(i).getContent();
             }
             mTv_showInfo.setText("");
             mTv_showInfo.append("getAllMessage = " + "\n" + sb.toString());

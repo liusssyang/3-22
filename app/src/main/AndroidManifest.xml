@@ -151,7 +151,8 @@
         <activity android:name="heath.com.test2_jmessage.activity.createmessage.CreateMessageActivity" />
         <activity android:name="heath.com.test2_jmessage.activity.createmessage.CreateSigTextMessageActivity" />
         <activity android:name="heath.com.test2_jmessage.activity.groupinfo.GroupInfoActivity" />
-        <activity android:name="heath.com.test2_jmessage.activity.groupinfo.CreateGroupActivity" />
+        <activity android:name="heath.com.test2_jmessage.activity.groupinfo.CreateGroupActivity"
+                    android:windowSoftInputMode="adjustResize|stateHidden"/>
         <activity android:name="heath.com.test2_jmessage.activity.groupinfo.GetGroupInfoActivity" />
         <activity android:name="heath.com.test2_jmessage.activity.conversation.ConversationActivity" />
         <activity android:name="heath.com.test2_jmessage.activity.groupinfo.AddRemoveGroupMemberActivity" />
@@ -219,6 +220,7 @@
         <activity android:name=".activity.friend.NoteFriend" />
         <activity android:name=".activity.query.Query" />
         <activity android:name=".activity.friend.FriendAskManage" />
+        <activity android:name=".activity.history.MyHistory" />
 
     </application>
 

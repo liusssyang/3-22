@@ -18,9 +18,11 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -52,7 +54,6 @@ import cn.jpush.im.android.api.callback.GetUserInfoCallback;
 import cn.jpush.im.android.api.callback.GetUserInfoListCallback;
 import cn.jpush.im.android.api.event.ChatRoomNotificationEvent;
 import cn.jpush.im.android.api.event.CommandNotificationEvent;
-import cn.jpush.im.android.api.event.ContactNotifyEvent;
 import cn.jpush.im.android.api.event.ConversationRefreshEvent;
 import cn.jpush.im.android.api.event.GroupAnnouncementChangedEvent;
 import cn.jpush.im.android.api.event.GroupApprovalEvent;
@@ -70,15 +71,17 @@ import cn.jpush.im.android.api.model.GroupInfo;
 import cn.jpush.im.android.api.model.Message;
 import cn.jpush.im.android.api.model.UserInfo;
 import de.hdodenhof.circleimageview.CircleImageView;
+import heath.com.test2_jmessage.MyDialog.TypeDialog;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
 import heath.com.test2_jmessage.activity.chatroom.ChatRoomActivity;
 import heath.com.test2_jmessage.activity.conversation.ConversationActivity;
+import heath.com.test2_jmessage.activity.conversation.GetConversationInfoActivity;
 import heath.com.test2_jmessage.activity.createmessage.CreateMessageActivity;
 import heath.com.test2_jmessage.activity.createmessage.ShowTransCommandActivity;
 import heath.com.test2_jmessage.activity.friend.AddFriendActivity;
+import heath.com.test2_jmessage.activity.friend.FriendAskManage;
 import heath.com.test2_jmessage.activity.friend.FriendContactManager;
-import heath.com.test2_jmessage.activity.friend.ShowFriendReasonActivity;
 import heath.com.test2_jmessage.activity.groupinfo.ApplyJoinGroupActivity;
 import heath.com.test2_jmessage.activity.groupinfo.GroupInfoActivity;
 import heath.com.test2_jmessage.activity.groupinfo.ShowGroupApprovalActivity;
@@ -101,11 +104,10 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 public class TypeActivity extends Activity implements View.OnClickListener {
     public static final String TAG = "ly13172";
     public static final String LOGOUT_REASON = "logout_reason";
-    public static String tv_username,tv_appkey;
     private TextView mTv_showOfflineMsg;
     private TextView tv_refreshEvent;
     private TextView tv_deviceInfo,newFriends;
-    private TextView tv_header,addNew;
+    private TextView addNew;
     private TextView menu,headusername,headappkey,headvision,signature;
     public static final String INFO_UPDATE = "info_update";
     public static final String TRANS_COMMAND_SENDER = "trans_command_sender";
@@ -124,6 +126,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     private CircleImageView circleImageView;
     public static long myUserId,backUserId;
     public static Bitmap myIcon;
+    public static int personListSize=0;
     //public static Bitmap friendsIcon[]=null;
     private final Handler handler = new Handler();
     public boolean isReady;
@@ -136,6 +139,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         initView();
         isReady=false;
         handler.postDelayed(task, 1);
+
     }
     private void initView() {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
@@ -147,7 +151,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         toolbar.setTitleTextColor(Color.parseColor("#ffffff"));
         setActionBar(toolbar);
         ActionBar actionBar=getActionBar();
-        tv_header = (TextView) findViewById(R.id.tv_header);
         drawerLayout=findViewById(R.id.sigText_drawerLayout);
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         View navHeaderView = navigationView.inflateHeaderView(R.layout.headlayout);
@@ -168,19 +171,20 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                     intent.setClass(getApplicationContext(), SettingMainActivity.class);
                     startActivityForResult(intent, 0);
                 }
-                if (item.toString().equals("退出")) {
-                    UserInfo myInfo = JMessageClient.getMyInfo();
-                    if (myInfo != null) {
-                        JMessageClient.logout();
-                        Toast.makeText(getApplicationContext(), "登出成功", Toast.LENGTH_SHORT).show();
-                        intent.setClass(TypeActivity.this, RegisterAndLoginActivity.class);
-                        startActivity(intent);
-                        personList.clear();
-                        adapter.notifyDataSetChanged();
-                        finish();
-                    } else {
-                        Toast.makeText(TypeActivity.this, "登出失败", Toast.LENGTH_SHORT).show();
-                    }
+                if (item.toString().equals("群组")) {
+                    intent.setClass(getApplicationContext(), GroupInfoActivity.class);
+                    startActivity(intent);
+                }
+                if (item.toString().equals("聊天室相关")) {
+
+                }
+                if (item.toString().equals("会话")) {
+                    intent.setClass(getApplicationContext(), ConversationActivity.class);
+                    startActivity(intent);                }
+                if (item.toString().equals("添加文件")) {
+                    intent=new Intent(getApplicationContext(), GetConversationInfoActivity.class);
+                    intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                    getApplicationContext().startActivity(intent);
                 }
                 if (item.toString().equals("更多")) {
                     intent=new Intent(getApplicationContext(),FriendContactManager.class);
@@ -208,6 +212,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                Intent intent=new Intent(IMDebugApplication.getContext(), UpdateUserInfoActivity.class);
                intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                IMDebugApplication.getContext().startActivity(intent);
+               overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
             }
         });
         circleImageView.setOnClickListener(new View.OnClickListener() {
@@ -216,6 +221,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                 Intent intent=new Intent(IMDebugApplication.getContext(), UpdateUserAvatar.class);
                 intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 IMDebugApplication.getContext().startActivity(intent);
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
             }
         });
         final LinearLayout index2_linear=findViewById(R.id.index2_linear);
@@ -228,12 +234,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         findViewById(R.id.bt_chatroom).setOnClickListener(this);
         findViewById(R.id.bt_jmrtc).setOnClickListener(this);
         menu=findViewById(R.id.type_menu);
-        menu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                drawerLayout.openDrawer(GravityCompat.START);
-            }
-        });
+        menu.setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) { drawerLayout.openDrawer(GravityCompat.START); }});
         mTv_showOfflineMsg = (TextView) findViewById(R.id.tv_showOfflineMsg);
         tv_refreshEvent = (TextView) findViewById(R.id.tv_refreshEvent);
         tv_deviceInfo = (TextView) findViewById(R.id.tv_deviceInfo);
@@ -251,10 +252,26 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         addNew.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                TypeDialog mydialog=new TypeDialog(v.getContext());
+                mydialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                Window dialogWindow = mydialog.getWindow();
+                dialogWindow.setGravity(Gravity.TOP|Gravity.RIGHT);
+                dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
+                WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+                lp.y=100;
+                lp.width = 350;
+                lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                dialogWindow.setAttributes(lp);
+                dialogWindow.setWindowAnimations(R.style.dialogWindowAnim);
+                mydialog.show();
+
+               /*还可以设置窗口显示动画
+                //
+
                 other_linear.setVisibility(View.GONE);
                 index.setVisibility(View.GONE);
                 toolbar.setVisibility(View.GONE);
-                index2_linear.setVisibility(View.VISIBLE);
+                index2_linear.setVisibility(View.VISIBLE);*/
             }
         });
         newFriends=findViewById(R.id.newFriends);
@@ -262,8 +279,9 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent();
-                intent.setClass(getApplicationContext(), ShowFriendReasonActivity.class);
+                intent.setClass(getApplicationContext(), FriendAskManage.class);
                 startActivity(intent);
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
             }
         });
         index.setOnClickListener(new View.OnClickListener() {
@@ -436,46 +454,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             tv_refreshEvent.setText("");
         }
     }
-    public void onEvent(ContactNotifyEvent event) {
 
-        String reason = event.getReason();
-        String fromUsername = event.getFromUsername();
-        String appkey = event.getfromUserAppKey();
-        String s=event.getCreateTime()+"";
-        SharedPreferences.Editor editor=getApplicationContext().
-                getSharedPreferences("friends",0).edit();
-        editor.putString(ShowFriendReasonActivity.EXTRA_TYPE, event.getType().toString());
-        Intent intent = new Intent(getApplicationContext(), ShowFriendReasonActivity.class);
-        intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(ShowFriendReasonActivity.EXTRA_TYPE, event.getType().toString());
-        switch (event.getType()) {
-            case invite_received://收到好友邀请
-                editor.putString("invite_received", "fromUsername = " + fromUsername + "\nfromUserAppKey" + appkey + "\nreason = " + reason);
-                editor.putString("username", fromUsername);
-                editor.putString("appkey", appkey);
-                editor.putString("reason",reason);
-                editor.apply();
-                break;
-            case invite_accepted://对方接收了你的好友邀请
-                intent.putExtra("invite_accepted", "对方接受了你的好友邀请");
-                startActivity(intent);
-                break;
-            case invite_declined://对方拒绝了你的好友邀请
-                intent.putExtra("invite_declined", "对方拒绝了你的好友邀请\n拒绝原因:" + event.getReason());
-                startActivity(intent);
-                break;
-            case contact_deleted://对方将你从好友中删除
-                intent.putExtra("contact_deleted", "对方将你从好友中删除");
-                startActivity(intent);
-                break;
-            case contact_updated_by_dev_api://好友关系更新，由api管理员操作引起
-                intent.putExtra("contact_updated_by_dev_api", "好友关系被管理员更新");
-                startActivity(intent);
-                break;
-            default:
-                break;
-        }
-    }
     public void onEvent(LoginStateChangeEvent event) {
         LoginStateChangeEvent.Reason reason = event.getReason();
         UserInfo myInfo = event.getMyInfo();
@@ -804,10 +783,13 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         @Override
         public void run() {
             // TODO Auto-generated method stub
-            if (personList.size()!=0){
+            if ( personListSize!=0){
             Intent intent=new Intent("message");
             intent.putExtra("init","1");
             localBroadcastManager.sendBroadcast(intent);
+                for (int i=0;i<personList.size();i++){
+                    Log.d("personList.size", i+"run: "+personList.get(i).getUserId());
+                }
             isReady=true;
             }
             else{

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -18,6 +19,7 @@ import cn.jpush.im.android.api.callback.GetUserInfoListCallback;
 import cn.jpush.im.android.api.model.UserInfo;
 import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.R;
+import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
 
 /**
  * Created by ${chenyn} on 16/7/20.
@@ -175,7 +177,7 @@ public class FriendContactManager extends Activity {
 
     private void initView() {
         setContentView(R.layout.activity_friend_contact_manager);
-
+        zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
         mBu_showFriendList = (Button) findViewById(R.id.bu_show_friend_list);
         mTv_showFriendList = (TextView) findViewById(R.id.tv_show_friend_list);
         mBt_addFriend = (Button) findViewById(R.id.bt_add_friend);
@@ -185,5 +187,11 @@ public class FriendContactManager extends Activity {
         mEt_noteText = (EditText) findViewById(R.id.et_note_text);
         mBt_updateNote = (Button) findViewById(R.id.bt_update_note);
 
+    }
+    private void zoomInViewSize(int height) {
+        View img1 = findViewById(R.id.statusbar);
+        ViewGroup.LayoutParams  lp = img1.getLayoutParams();
+        lp.height =height;
+        img1.setLayoutParams(lp);
     }
 }

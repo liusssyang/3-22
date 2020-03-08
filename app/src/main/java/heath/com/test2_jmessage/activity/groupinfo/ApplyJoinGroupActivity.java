@@ -35,8 +35,10 @@ public class ApplyJoinGroupActivity extends Activity {
     }
 
     private void initData() {
-        mEt_groupID.setText(getIntent().getStringExtra("groupId"));
-        mEt_groupID.setSelection(getIntent().getStringExtra("groupId").length());
+        if (getIntent().getStringExtra("groupId")!=null){
+            mEt_groupID.setText(getIntent().getStringExtra("groupId"));
+            mEt_groupID.setSelection(getIntent().getStringExtra("groupId").length());
+        }
         mBt_applyJoinGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

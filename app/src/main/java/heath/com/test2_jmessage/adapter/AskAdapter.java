@@ -1,7 +1,6 @@
 package heath.com.test2_jmessage.adapter;
 
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,15 +11,14 @@ import java.util.List;
 import androidx.recyclerview.widget.RecyclerView;
 import de.hdodenhof.circleimageview.CircleImageView;
 import heath.com.test2_jmessage.R;
-import heath.com.test2_jmessage.activity.createmessage.CreateSigTextMessageActivity;
+import heath.com.test2_jmessage.activity.friend.ShowFriendReasonActivity;
 import heath.com.test2_jmessage.application.IMDebugApplication;
 import heath.com.test2_jmessage.recycleView_item.personMsg;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static heath.com.test2_jmessage.activity.TypeActivity.personList;
 
 
-public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder>{
+public class AskAdapter extends RecyclerView.Adapter<AskAdapter.ViewHolder>{
     private List<personMsg> personMsgList;
     static class ViewHolder extends RecyclerView.ViewHolder{
         View v;
@@ -37,7 +35,7 @@ public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder
 
         }
     }
-    public  personAdapter(List<personMsg> msgList){
+    public  AskAdapter(List<personMsg> msgList){
         personMsgList=msgList;
     }
     public  ViewHolder onCreateViewHolder(ViewGroup parent,int viewType){
@@ -49,15 +47,14 @@ public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder
             public void onClick(View v) {
                 int position=holder.getAdapterPosition();
                 personMsg personmsg=personMsgList.get(position);
-                Log.d("13172ly", "onClick: "+position+personList.get(position).getUserName());
-                Intent intent = new Intent(IMDebugApplication.getContext(), CreateSigTextMessageActivity.class);
-                intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("name",personmsg.getUserName());
-                intent.putExtra("note_name",personmsg.getName());
-                intent.putExtra("position",position);
-                intent.putExtra("userId",personmsg.getUserId());
-                IMDebugApplication.getContext().startActivity(intent);
-
+                    Intent intent = new Intent(IMDebugApplication.getContext(), ShowFriendReasonActivity.class);
+                    intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("unique",personmsg.getUnique());
+                    intent.putExtra("username",personmsg.getUserName());
+                    intent.putExtra("appkey",personmsg.getAppkey());
+                    intent.putExtra("position",position);
+                    intent.putExtra("other",personmsg.getOther());
+                    IMDebugApplication.getContext().startActivity(intent);
             }
         });
         return  holder;
@@ -65,7 +62,7 @@ public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder
 
     public void onBindViewHolder(ViewHolder holder,int position){
         personMsg msg=personMsgList.get(position);
-        holder.leftMsg.setText(msg.getName());
+        holder.leftMsg.setText(msg.getUserName());
         holder.simpleMessage.setText(msg.getSimpleMessage());
         holder.time.setText(msg.getTime());
         holder.friendsIcon.setImageBitmap(msg.getBitmap());

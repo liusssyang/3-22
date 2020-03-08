@@ -47,6 +47,7 @@ public class NoteFriend extends Activity {
                 intent.putExtra("position",position);
                 intent.putExtra("userId",userId);
                 getApplicationContext().startActivity(intent);
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
             }
         });
         final EditText note_name=findViewById(R.id.note_name);

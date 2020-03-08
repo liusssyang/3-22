@@ -1,36 +1,50 @@
 package heath.com.test2_jmessage.activity.conversation;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.model.Conversation;
 import cn.jpush.im.android.api.model.Message;
 import heath.com.test2_jmessage.R;
+import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
+import heath.com.test2_jmessage.activity.friend.ManageFriendActivity;
+
+import static heath.com.test2_jmessage.activity.TypeActivity.personList;
 
 public class DeleteConversationActivity extends Activity implements View.OnClickListener {
 
     private EditText mEt_username;
     private TextView mTv_info;
     private EditText mEt_group_id;
+    private int position;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        position=getIntent().getIntExtra("position",-1);
         initView();
     }
 
     private void initView() {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(R.layout.activity_delete_conversation);
-
+        zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
+        Log.d("deskij", position+"");
         mEt_username = (EditText) findViewById(R.id.et_username);
         mTv_info = (TextView) findViewById(R.id.tv_info);
         mEt_group_id = (EditText) findViewById(R.id.et_group_id);
@@ -46,11 +60,22 @@ public class DeleteConversationActivity extends Activity implements View.OnClick
         bt_getConversation.setOnClickListener(this);
         bt_getMessage.setOnClickListener(this);
         findViewById(R.id.bt_get_latest_message).setOnClickListener(this);
+        TextView manage_back=findViewById(R.id.manage_back);
+        manage_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(getApplicationContext(), ManageFriendActivity.class);
+                intent.putExtra("position",position);
+                getApplicationContext().startActivity(intent);
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
+            }
+        });
     }
 
     @Override
     public void onClick(View v) {
-        String targetName = mEt_username.getText().toString();
+        String targetName =personList.get(position).getName();
+
         String targetGidString = mEt_group_id.getText().toString();
         Conversation conversation;
         switch (v.getId()) {
@@ -92,6 +117,22 @@ public class DeleteConversationActivity extends Activity implements View.OnClick
                 break;
             case R.id.bt_get_message:
                 getAllMessage(getConversation(targetName, targetGidString));
+                List<Message> list=new ArrayList<>();
+                list=getConversation(targetName, targetGidString).getAllMessage();
+                for (int j=0;j<list.size();j++) {
+                    Log.d("HISTORY_RECORD", list.get(j).getFromUser().getUserName()+"("+list.get(j).getFromName()+")");
+                    Log.d("HISTORY_RECORD", list.get(j).getId()+"|"+list.get(j).getDirect());
+                    Log.d("HISTORY_RECORD", list.get(j).getContent().toJson().intern());
+                    Log.d("HISTORY_RECORD", list.get(j).getCreateTime()+"");
+                    //Log.d("HISTORY_RECORD", list.get(j).toJson());
+                    Log.d("HISTORY_RECORD", "_______________________________\n");
+                    mTv_info.append(list.get(j).getFromUser().getUserName()+"("+list.get(j).getFromName()+")\n");
+                    mTv_info.append(list.get(j).getId()+"|"+list.get(j).getDirect()+"\n");
+                    mTv_info.append(list.get(j).getContent().toJson().intern()+"\n");
+                    mTv_info.append(list.get(j).getCreateTime()+""+"\n");
+                    mTv_info.append("_______________________________\n"+"\n");
+                }
+
                 break;
             case R.id.bt_get_latest_message:
                 conversation = getConversation(targetName, targetGidString);
@@ -134,14 +175,21 @@ public class DeleteConversationActivity extends Activity implements View.OnClick
             mTv_info.setText("");
             StringBuilder sb = new StringBuilder();
             for (Message msg : allMessage) {
-                sb.append("消息ID = " + msg.getId());
+                /*sb.append("消息ID = " + msg.getId());
+                sb.append(msg.getContent());
                 sb.append("~~~消息类型 = " + msg.getContentType());
-                sb.append("\n");
+                sb.append("\n");*/
             }
             mTv_info.append("getAllMessage = " + "\n" + sb.toString());
         } else {
             Toast.makeText(DeleteConversationActivity.this, "未能获取到消息", Toast.LENGTH_SHORT).show();
         }
+    }
+    private void zoomInViewSize(int height) {
+        View img1 = findViewById(R.id.statusbar);
+        ViewGroup.LayoutParams  lp = img1.getLayoutParams();
+        lp.height =height;
+        img1.setLayoutParams(lp);
     }
 
 }

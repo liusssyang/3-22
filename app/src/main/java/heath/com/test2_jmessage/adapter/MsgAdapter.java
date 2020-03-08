@@ -61,11 +61,12 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.ViewHolder>{
                 Mydialog mydialog=new Mydialog(v.getContext(),R.style.MyDialogStyle);
                 mydialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
                 Window dialogWindow = mydialog.getWindow();
-                dialogWindow.setGravity(Gravity.BOTTOM);
+                dialogWindow.setGravity(Gravity.CENTER);
                 dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
                 WindowManager.LayoutParams lp = dialogWindow.getAttributes();
                 lp.width = WindowManager.LayoutParams.MATCH_PARENT;
                 lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                dialogWindow.setWindowAnimations(R.style.dialogWindowAnim);
                 dialogWindow.setAttributes(lp);
                 mydialog.show();
             }

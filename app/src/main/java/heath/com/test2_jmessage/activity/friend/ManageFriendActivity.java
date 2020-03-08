@@ -24,6 +24,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
 import heath.com.test2_jmessage.activity.TypeActivity;
+import heath.com.test2_jmessage.activity.conversation.DeleteConversationActivity;
 import heath.com.test2_jmessage.activity.createmessage.CreateSigTextMessageActivity;
 import heath.com.test2_jmessage.application.IMDebugApplication;
 
@@ -42,8 +43,8 @@ public class ManageFriendActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(R.layout.activity_managefriends);
         position=getIntent().getIntExtra("position",-1);
-        userId=getIntent().getLongExtra("userId",0);
-        Log.d("userId", "onCreate: "+userId);
+        userId=personList.get(position).getUserId();
+
         zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
         TextView manage_back=findViewById(R.id.manage_back);
         manage_back.setOnClickListener(new View.OnClickListener() {
@@ -56,6 +57,7 @@ public class ManageFriendActivity extends Activity {
                 intent.putExtra("position",position);
                 intent.putExtra("userId",personList.get(position).getUserId());
                 IMDebugApplication.getContext().startActivity(intent);
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
             }
         });
         final CircleImageView manage_person_icon=findViewById(R.id.manage_person_icon);
@@ -63,6 +65,18 @@ public class ManageFriendActivity extends Activity {
         final TextView manage_simple_message=findViewById(R.id.manage_simple_message);
         RelativeLayout personal_information=findViewById(R.id.personal_information);
         TextView manage_noteFriends=findViewById(R.id.manage_noteFriends);
+        TextView manage_HistoryFriends=findViewById(R.id.manage_HistoryFriends);
+        manage_HistoryFriends.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("55555", "onClick: ");
+                Intent intent=new Intent(getApplicationContext(), DeleteConversationActivity.class);
+                //intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("position",position);
+                getApplicationContext().startActivity(intent);
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
+            }
+        });
         manage_noteFriends.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -73,6 +87,7 @@ public class ManageFriendActivity extends Activity {
                 if (userId!=0)
                     intent.putExtra("userId",userId);
                 getApplicationContext().startActivity(intent);
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
             }
         });
         if (position>=0){
@@ -105,7 +120,6 @@ public class ManageFriendActivity extends Activity {
                                            personList.get(position).setBitmap(bitmap);
                                            adapter.notifyDataSetChanged();
                                        }
-                                       Log.d("MFBitmip", "gotResult: "+s);
                                    }
                                });
                                 }
@@ -182,6 +196,7 @@ public class ManageFriendActivity extends Activity {
                 if (userId!=0)
                     intent.putExtra("userId",userId);
                 getApplicationContext().startActivity(intent);
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
             }
 
         });

@@ -8,12 +8,12 @@
     <View
         android:id="@+id/statusbar"
         android:layout_width="match_parent"
-        android:background="@color/colorQQ"
+        android:background="@drawable/toolbar_ground"
         android:layout_height="24dp"/>
     <Toolbar
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#00C4FF"
+        android:background="@drawable/toolbar_ground"
         android:id="@+id/manage_toolbar_sigText"
         app:contentInsetLeft="0dp"
         app:contentInsetStart="0dp"
@@ -23,7 +23,6 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:background="@color/colorQQ"
             android:paddingTop="15dp"
             >
             <TextView

@@ -53,8 +53,7 @@ import static heath.com.test2_jmessage.activity.TypeActivity.TAG;
 import static heath.com.test2_jmessage.activity.TypeActivity.adapter;
 import static heath.com.test2_jmessage.activity.TypeActivity.personIcon;
 import static heath.com.test2_jmessage.activity.TypeActivity.personList;
-
-
+import static heath.com.test2_jmessage.activity.TypeActivity.personListSize;
 
 
 /**
@@ -126,7 +125,9 @@ public class RegisterAndLoginActivity extends Activity {
                 @Override
                 public void gotResult(int i, String s, List<UserInfo> list) {
 
-                    if (i == 0&&personList.isEmpty()) {
+                    if (i == 0) {
+                        personList.clear();
+                        personListSize=list.size();
                         TypeActivity.list=list;
                         for (int j=0;j<list.size();j++) {
                             personIcon.add(BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath()));
@@ -139,7 +140,7 @@ public class RegisterAndLoginActivity extends Activity {
                                             ,list.get(i).getAppKey()
                                             ,null
                                             ,list.get(j).getSignature()
-                                            ,"1/1 00:00"
+                                            ,""
                                             ,list.get(j).getSignature()
                                             ,list.get(i).getGender().toString()
                                             ,list.get(j).getAddress()
@@ -189,8 +190,9 @@ public class RegisterAndLoginActivity extends Activity {
                             ContactManager.getFriendList(new GetUserInfoListCallback() {
                                 @Override
                                 public void gotResult(int i, String s, List<UserInfo> list) {
-
-                                    if (i == 0&&personList.isEmpty()) {
+                                    if (i == 0) {
+                                        personList.clear();
+                                        personListSize=list.size();
                                         TypeActivity.list=list;
                                         for (int j=0;j<list.size();j++) {
                                             personIcon.add(BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath()));
@@ -201,7 +203,7 @@ public class RegisterAndLoginActivity extends Activity {
                                                     ,list.get(i).getAppKey()
                                                     ,null
                                                     ,list.get(j).getSignature()
-                                                    , "1/1 00:00"
+                                                    , ""
                                                     , list.get(j).getSignature()
                                                     , list.get(j).getGender().toString()
                                                     ,list.get(j).getAddress()
@@ -222,7 +224,9 @@ public class RegisterAndLoginActivity extends Activity {
 
                             Intent intent = new Intent();
                             intent.setClass(getApplicationContext(), TypeActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(intent);
+
                             finish();
                         } else {
                             mProgressDialog.dismiss();

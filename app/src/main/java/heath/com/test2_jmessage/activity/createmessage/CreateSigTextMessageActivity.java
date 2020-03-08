@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
@@ -155,7 +156,9 @@ public class CreateSigTextMessageActivity extends Activity {
                 intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 intent.putExtra("userId",userId);
                 intent.putExtra("position",position);
+                Log.d("13172ly", "onClick: "+position+personList.get(position).getUserName());
                 startActivity(intent);
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
             }
         });
         msgRecyclerView=findViewById(R.id.msg_recycler_view);
@@ -220,6 +223,7 @@ public class CreateSigTextMessageActivity extends Activity {
                 Intent intent=new Intent(IMDebugApplication.getContext(), TypeActivity.class);
                 intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 IMDebugApplication.getContext().startActivity(intent);
+                //overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
         });
         /*behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {

@@ -24,7 +24,7 @@
             android:layout_gravity="left"
             android:background="#00000000">
             <TextView
-                android:layout_marginLeft="5dp"
+                android:layout_marginStart="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:id="@+id/person"
@@ -44,7 +44,7 @@
                 android:layout_alignParentEnd="true"
                 />
             <TextView
-                android:layout_marginLeft="5dp"
+                android:layout_marginStart="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
                 android:id="@+id/simple_message"
@@ -52,5 +52,10 @@
                 android:maxLines="1"/>
         </RelativeLayout>
     </RelativeLayout>
+    <View
+        android:layout_marginStart="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#f5f6fa"/>
 
 </LinearLayout>

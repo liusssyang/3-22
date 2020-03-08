@@ -30,7 +30,8 @@ public class personMsg {
     private String time;
     private long userId,brithday;
     private Bitmap bitmap;
-
+    private String username;
+    private String unique;
     public void saveFriend(String simpleMessage,String time){
 
     }
@@ -52,15 +53,20 @@ public class personMsg {
         this.bitmap=BitmapFactory.decodeFile(list.get(j).getBigAvatarFile().getPath());
         this.userId=list.get(j).getUserID();
     }
-    public personMsg(long userID, Bitmap icon, String userName, String notename, String appKey, String o, String name, String appkey, String sendName, UserInfo.Gender gender){
-        this.name=name;
+    public personMsg( Bitmap icon, String userName, String other,
+                      String appkey,String time,String simpleMessage,String unique){
+        this.bitmap=icon;
+        this.username=userName;
+        this.other=other;
         this.appkey=appkey;
-        this.sendName=sendName;
+        this.time=time;
+        this.simpleMessage=simpleMessage;
+        this.unique=unique;
     }
     public personMsg(long userId,Bitmap icon,String userName,String noteName,String appkey,
                      String sendName,String simpleMessage,String time,String signature,
                      String gender,String adress,String other,long birthday){
-        this.name=userName;
+        this.username=userName;
         this.signature=signature;
         this.notename=noteName;
         this.appkey=appkey;
@@ -74,10 +80,11 @@ public class personMsg {
         this.address=adress;
         this.birthday=birthday;
     }
+    public String getUnique(){return unique;}
     public String getOther(){return  other;}
     public String getAddress(){return address;}
     public String getUserName(){
-        return name;
+        return username;
     }
     public String getGender(){
         if (gender.equals("unknown"))
@@ -87,9 +94,10 @@ public class personMsg {
     public String getSignature(){
         return  signature;
     }
+
     public String getName(){
         if (notename.equals("")){
-            return name;}
+            return username;}
         else{
             Log.d("notename", "getName: "+notename);
             return notename;
