@@ -140,7 +140,8 @@ public class ShowFriendReasonActivity extends Activity {
                                             s2=userName+appKey;
                                                 if (s1.equals(s2)){
                                                     TypeActivity.personList.add(new personMsg(
-                                                            list.get(j).getUserID()
+                                                            list.get(j).getNickname()
+                                                            ,list.get(j).getUserID()
                                                             , null,list.get(j).getUserName()
                                                             ,list.get(j).getNotename()
                                                             ,list.get(i).getAppKey()

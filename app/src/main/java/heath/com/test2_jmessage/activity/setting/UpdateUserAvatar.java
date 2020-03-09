@@ -11,15 +11,19 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import java.io.File;
 
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.R;
+import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
+import heath.com.test2_jmessage.tools.PushToast;
 
 /**
  * Created by ${chenyn} on 16/4/8.
@@ -65,10 +69,10 @@ public class UpdateUserAvatar extends Activity {
                             public void gotResult(int i, String s) {
                                 if (i == 0) {
                                     mProgressDialog.dismiss();
-                                    Toast.makeText(getApplicationContext(), "修改成功", Toast.LENGTH_SHORT).show();
+                                    PushToast.getInstance().createToast("提示","头像修改成功",null,true);
                                 } else {
                                     mProgressDialog.dismiss();
-                                    Toast.makeText(getApplicationContext(), "修改失败", Toast.LENGTH_SHORT).show();
+                                    PushToast.getInstance().createToast("提示","头像修改失败",null,false);
                                     Log.i("UpdateUserAvatar", "JMessageClient.updateUserAvatar" + ", responseCode = " + i + " ; LoginDesc = " + s);
                                 }
                             }
@@ -78,16 +82,29 @@ public class UpdateUserAvatar extends Activity {
                     }
                 } else {
                     mProgressDialog.dismiss();
-                    Toast.makeText(UpdateUserAvatar.this, "请选择图片", Toast.LENGTH_SHORT).show();
+                    PushToast.getInstance().createToast("提示","请选择图片",null,false);
                 }
             }
         });
     }
 
     private void initView() {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(R.layout.activity_update_user_avatar);
+        PushToast.getInstance().init(this);
+        zoomInViewSize(StatusBarUtil.getStatusBarHeight(this),R.id.statusbar);
+        zoomInViewSize(StatusBarUtil.getNavigationBarHeight(this),R.id.nav_bar);
         mBt_localImage = (Button) findViewById(R.id.bt_local_image);
         mBt_update = (Button) findViewById(R.id.bt_update);
+        TextView manage_back=findViewById(R.id.manage_back);
+        manage_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
+            }
+        });
     }
 
     @Override
@@ -110,5 +127,11 @@ public class UpdateUserAvatar extends Activity {
             imageView.setImageBitmap(BitmapFactory.decodeFile(mPicturePath));
         }
 
+    }
+    private void zoomInViewSize(int height,int id) {
+        View img1 = findViewById(id);
+        ViewGroup.LayoutParams  lp = img1.getLayoutParams();
+        lp.height =height;
+        img1.setLayoutParams(lp);
     }
 }

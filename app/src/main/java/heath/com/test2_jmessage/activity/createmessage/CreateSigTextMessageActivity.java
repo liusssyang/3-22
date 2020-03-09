@@ -24,10 +24,9 @@ import android.widget.Toast;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
 
+import androidx.annotation.NonNull;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -45,6 +44,8 @@ import heath.com.test2_jmessage.activity.friend.ManageFriendActivity;
 import heath.com.test2_jmessage.adapter.MsgAdapter;
 import heath.com.test2_jmessage.application.IMDebugApplication;
 import heath.com.test2_jmessage.recycleView_item.Msg;
+import heath.com.test2_jmessage.tools.PushToast;
+import heath.com.test2_jmessage.tools.tools;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static heath.com.test2_jmessage.activity.TypeActivity.myUserId;
@@ -116,9 +117,8 @@ public class CreateSigTextMessageActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_single_text_message);
-        StatusBarUtils.with(this)
-                .setDrawable(getResources().getDrawable(R.drawable.toolbar_ground)).init();
-        //StatusBarUtil.setStatusBarDrawble(this,getResources().getDrawable(R.drawable.toolbar_ground));
+        PushToast.getInstance().init(this);
+        StatusBarUtils.with(this).setDrawable(getResources().getDrawable(R.drawable.toolbar_ground)).init();
         editor2=getApplicationContext().getSharedPreferences("history",0).edit();
         pref=getApplicationContext().getSharedPreferences("history",0);
         userId=getIntent().getLongExtra("userId",0);
@@ -196,7 +196,6 @@ public class CreateSigTextMessageActivity extends Activity {
             public void onClick(View v) {
                 menu.setBackgroundResource(R.drawable.menu);
                 menu.setText(" ");
-                coordinatorLayout.scrollTo(0,0);
             }
         });
         menu.setOnClickListener(new View.OnClickListener() {
@@ -206,14 +205,14 @@ public class CreateSigTextMessageActivity extends Activity {
                 if (menu.getText().toString().equals(" ")){
                     menu.setBackgroundResource(R.drawable.close);
                     menu.setText("  ");
-                    coordinatorLayout.scrollTo(0,500);
-                    //behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                    //coordinatorLayout.scrollTo(0,500);
+                    behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 }
                 else {
                     menu.setBackgroundResource(R.drawable.menu);
                     menu.setText(" ");
-                    coordinatorLayout.scrollTo(0,0);
-                    //behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                    //coordinatorLayout.scrollTo(0,0);
+                    behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                 }
             }
         });
@@ -226,7 +225,7 @@ public class CreateSigTextMessageActivity extends Activity {
                 //overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
         });
-        /*behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+        behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState)
             {
@@ -241,7 +240,7 @@ public class CreateSigTextMessageActivity extends Activity {
                 //这里是拖拽中的回调，根据slideOffset可以做一些动画
                 Log.d("icon_left_default", "onSlide: "+slideOffset);
             }
-        });*/
+        });
         mCb_enableCustomNotify.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -260,25 +259,10 @@ public class CreateSigTextMessageActivity extends Activity {
         mBt_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Calendar cal;
-                String year, month, day, hour, minute, second, timeA;
-                String total = "";
-                cal = Calendar.getInstance();
-                cal.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
-                year = String.valueOf(cal.get(Calendar.YEAR));
-                month = String.valueOf(cal.get(Calendar.MONTH) + 1);
-                day = String.valueOf(cal.get(Calendar.DATE));
-                if (cal.get(Calendar.AM_PM) == 0)
-                    hour = String.valueOf(cal.get(Calendar.HOUR));
-                else
-                    hour = String.valueOf(cal.get(Calendar.HOUR) + 12);
-                minute = String.valueOf(cal.get(Calendar.MINUTE));
-                second = String.valueOf(cal.get(Calendar.SECOND));
-                timeA = month + "/" + day + "  " + hour + ":" + minute;
                 String name =getIntent().getStringExtra("name");
                 String text = mEt_text.getText().toString();
                 editor3.putString("simplemessage"+userId,text);
-                editor3.putString("time"+userId,timeA);
+                editor3.putString("time"+userId,tools.CurrentTime());
                 editor3.putInt("position",position);
                 editor3.apply();
                 if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(text)) {
@@ -319,10 +303,10 @@ public class CreateSigTextMessageActivity extends Activity {
                                 editor2.putString("historyRecord"+userId,history);
                                 editor2.apply();
                                 mEt_text.setText("");
-                                Toast.makeText(getApplicationContext(), "发送成功", Toast.LENGTH_SHORT).show();
+                                PushToast.getInstance().createToast("提示","发送成功",null,true);
                             } else {
                                 //Log.i(TAG, "JMessageClient.createSingleTextMessage" + ", responseCode = " + i + " ; LoginDesc = " + s);
-                                Toast.makeText(getApplicationContext(), "发送失败", Toast.LENGTH_SHORT).show();
+                                PushToast.getInstance().createToast("提示","发送失败",null,false);
                             }
                         }
                     });
@@ -365,57 +349,6 @@ public class CreateSigTextMessageActivity extends Activity {
 
     }
 
-    public void sendMessage(String name, String text, String appkey, String customFromName,
-                            String extraKey, String extraValue, String NotificationTitle,
-                            String NotificationAtPrefix, String NotificationText, String MsgCount){
-        if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(text)) {
-            //通过username和appkey拿到会话对象，通过指定appkey可以创建一个和跨应用用户的会话对象，从而实现跨应用的消息发送
-            Conversation mConversation = JMessageClient.getSingleConversation(name, appkey);
-            if (mConversation == null) {
-                mConversation = Conversation.createSingleConversation(name, appkey);
-            }
-
-            //构造message content对象
-            TextContent textContent = new TextContent(text);
-            //设置自定义的extra参数
-            textContent.setStringExtra(extraKey, extraValue);
-            //创建message实体，设置消息发送回调。
-            final Message message = mConversation.createSendMessage(textContent, customFromName);
-            message.setOnSendCompleteCallback(new BasicCallback() {
-                @Override
-                public void gotResult(int i, String s) {
-                    if (i == 0) {
-                        Toast.makeText(IMDebugApplication.getContext(), "发送成功", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(IMDebugApplication.getContext(), "发送失败", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-            //设置消息发送时的一些控制参数
-            MessageSendingOptions options = new MessageSendingOptions();
-            options.setNeedReadReceipt(true);//是否需要对方用户发送消息已读回执
-            options.setRetainOffline(true);//是否当对方用户不在线时让后台服务区保存这条消息的离线消息
-            options.setShowNotification(true);//是否让对方展示sdk默认的通知栏通知
-            options.setCustomNotificationEnabled(true);//是否需要自定义对方收到这条消息时sdk默认展示的通知栏中的文字
-            if (true) {
-                options.setNotificationTitle(NotificationTitle);//自定义对方收到消息时通知栏展示的title
-                options.setNotificationAtPrefix(NotificationAtPrefix);//自定义对方收到消息时通知栏展示的@信息的前缀
-                options.setNotificationText(NotificationText);//自定义对方收到消息时通知栏展示的text
-            }
-            if (MsgCount!=null) {
-                try {
-                    options.setMsgCount(Integer.valueOf(MsgCount));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            //发送消息
-            JMessageClient.sendMessage(message, options);
-        }
-        else {
-            Toast.makeText(IMDebugApplication.getContext(), "必填字段不能为空", Toast.LENGTH_SHORT).show();
-        }
-    }
     public void onDestroy(){
         super.onDestroy();
         localBroadcastManager.unregisterReceiver(localRceiver);
@@ -443,7 +376,7 @@ public class CreateSigTextMessageActivity extends Activity {
                     msgList.add(msg2);
                     adapter.notifyItemInserted(msgList.size()-1);
                     msgRecyclerView.scrollToPosition(msgList.size()-1);
-                    sendMessage(mEt_name.getText().toString(),intent.getStringExtra("SysMessage"),null,null,null,null,null,null,null,null);
+                    tools.sendMessage(mEt_name.getText().toString(),intent.getStringExtra("SysMessage"),null,null,null,null,null,null,null,null);
                 }
                 if (intent.getByteArrayExtra("image")!=null){
                     byte[] res=intent.getByteArrayExtra("image");

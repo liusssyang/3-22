@@ -47,13 +47,13 @@ import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
 import heath.com.test2_jmessage.activity.setting.RegisterActivity;
 import heath.com.test2_jmessage.application.IMDebugApplication;
 import heath.com.test2_jmessage.recycleView_item.personMsg;
+import heath.com.test2_jmessage.tools.PushToast;
 import heath.com.test2_jmessage.utils.AndroidUtils;
 
 import static heath.com.test2_jmessage.activity.TypeActivity.TAG;
 import static heath.com.test2_jmessage.activity.TypeActivity.adapter;
 import static heath.com.test2_jmessage.activity.TypeActivity.personIcon;
 import static heath.com.test2_jmessage.activity.TypeActivity.personList;
-import static heath.com.test2_jmessage.activity.TypeActivity.personListSize;
 
 
 /**
@@ -124,16 +124,14 @@ public class RegisterAndLoginActivity extends Activity {
             ContactManager.getFriendList(new GetUserInfoListCallback() {
                 @Override
                 public void gotResult(int i, String s, List<UserInfo> list) {
-
                     if (i == 0) {
                         personList.clear();
-                        personListSize=list.size();
-                        TypeActivity.list=list;
                         for (int j=0;j<list.size();j++) {
                             personIcon.add(BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath()));
                             personList.add(
                                     new personMsg(
-                                            list.get(j).getUserID()
+                                            list.get(j).getNickname()
+                                            ,list.get(j).getUserID()
                                             ,BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath())
                                             ,list.get(j).getUserName()
                                             ,list.get(j).getNotename()
@@ -180,57 +178,59 @@ public class RegisterAndLoginActivity extends Activity {
                 String userName = mEd_userName.getText().toString();
                 String password = mEd_password.getText().toString();
                 /**=================     调用SDk登陆接口    =================*/
-                JMessageClient.login(userName, password, new BasicCallback() {
+     /***/           JMessageClient.login("A123", "123456", new BasicCallback() {
                     @Override
                     public void gotResult(int responseCode, String LoginDesc) {
                         if (responseCode == 0) {
                             mProgressDialog.dismiss();
-                            Toast.makeText(getApplicationContext(), "登录成功", Toast.LENGTH_SHORT).show();
+                            PushToast.getInstance().createToast("提示","登陆成功",null,true);
                             Log.d(TAG, "gotResult: button_login");
-                            ContactManager.getFriendList(new GetUserInfoListCallback() {
-                                @Override
-                                public void gotResult(int i, String s, List<UserInfo> list) {
-                                    if (i == 0) {
-                                        personList.clear();
-                                        personListSize=list.size();
-                                        TypeActivity.list=list;
-                                        for (int j=0;j<list.size();j++) {
-                                            personIcon.add(BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath()));
-                                            personList.add(new personMsg(
-                                                    list.get(j).getUserID()
-                                                    , BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath()),list.get(j).getUserName()
-                                                    ,list.get(j).getNotename()
-                                                    ,list.get(i).getAppKey()
-                                                    ,null
-                                                    ,list.get(j).getSignature()
-                                                    , ""
-                                                    , list.get(j).getSignature()
-                                                    , list.get(j).getGender().toString()
-                                                    ,list.get(j).getAddress()
-                                                    ,list.get(j).getNoteText()
-                                                    ,list.get(j).getBirthday()));
-                                            adapter.notifyItemChanged(personList.size()-1);
+                            UserInfo myInfo = JMessageClient.getMyInfo();
+                            final Intent intent = new Intent(RegisterAndLoginActivity.this, TypeActivity.class);
+                            if (myInfo != null) {
+                                Log.d(TAG, "initData: no_button");
+                                ContactManager.getFriendList(new GetUserInfoListCallback() {
+                                    @Override
+                                    public void gotResult(int i, String s, List<UserInfo> list) {
+                                        if (i == 0) {
+                                            personList.clear();
+                                            for (int j=0;j<list.size();j++) {
+                                                personIcon.add(BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath()));
+                                                personList.add(
+                                                        new personMsg(
+                                                                list.get(j).getNickname()
+                                                                ,list.get(j).getUserID()
+                                                                ,BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath())
+                                                                ,list.get(j).getUserName()
+                                                                ,list.get(j).getNotename()
+                                                                ,list.get(j).getAppKey()
+                                                                ,null
+                                                                ,list.get(j).getSignature()
+                                                                ,""
+                                                                ,list.get(j).getSignature()
+                                                                ,list.get(j).getGender().toString()
+                                                                ,list.get(j).getAddress()
+                                                                ,list.get(j).getNoteText()
+                                                                ,list.get(j).getBirthday()));
+                                                adapter.notifyItemChanged(personList.size()-1);
+                                            }
+                                            if (list.size() == 0) {
+                                                PushToast.getInstance().createToast("提示","暂无好友",null,true);
+                                            }
+                                            //PushToast.getInstance().createToast("提示","有"+list.size()+"位好友",null,true);
+                                        } else if (i!=0){
+                                            PushToast.getInstance().createToast("提示","获取好友失败",null,false);
+                                            Log.i("FriendContactManager", "ContactManager.getFriendList" + ", responseCode = " + i + " ; LoginDesc = " + s);
                                         }
-                                        if (list.size() == 0) {
-                                            Toast.makeText(getApplicationContext(), "暂无好友", Toast.LENGTH_SHORT).show();
-                                        }
-                                        Toast.makeText(getApplicationContext(), "获取成功", Toast.LENGTH_SHORT).show();
-                                    } else if (i!=0){
-                                        Toast.makeText(getApplicationContext(), "获取失败", Toast.LENGTH_SHORT).show();
-                                        Log.i("FriendContactManager", "ContactManager.getFriendList" + ", responseCode = " + i + " ; LoginDesc = " + s);
                                     }
-                                }
-                            });
+                                });
 
-                            Intent intent = new Intent();
-                            intent.setClass(getApplicationContext(), TypeActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-
-                            finish();
+                                startActivity(intent);
+                                finish();
+                            }
                         } else {
                             mProgressDialog.dismiss();
-                            Toast.makeText(getApplicationContext(), "登录失败", Toast.LENGTH_SHORT).show();
+                            PushToast.getInstance().createToast("提示","登陆失败",null,false);
                             Log.i("MainActivity", "JMessageClient.login" + ", responseCode = " + responseCode + " ; LoginDesc = " + LoginDesc);
                         }
                     }
@@ -251,7 +251,7 @@ public class RegisterAndLoginActivity extends Activity {
                     public void gotResult(int responseCode, String responseMessage, List<DeviceInfo> result) {
                         if (responseCode == 0) {
                             mProgressDialog.dismiss();
-                            Toast.makeText(getApplicationContext(), "登陆成功", Toast.LENGTH_SHORT).show();
+                            PushToast.getInstance().createToast("提示","登陆成功",null,true);
                             Log.i("MainActivity", "JMessageClient.login" + ", responseCode = " + responseCode + " ; LoginDesc = " + responseMessage);
                             Intent intent = new Intent(getApplicationContext(), TypeActivity.class);
                             Gson gson = new Gson();
@@ -260,7 +260,7 @@ public class RegisterAndLoginActivity extends Activity {
                             finish();
                         } else {
                             mProgressDialog.dismiss();
-                            Toast.makeText(getApplicationContext(), "登陆失败", Toast.LENGTH_SHORT).show();
+                            PushToast.getInstance().createToast("提示","登陆失败",null,false);
                             Log.i("MainActivity", "JMessageClient.login" + ", responseCode = " + responseCode + " ; LoginDesc = " + responseMessage);
                         }
                     }
@@ -289,7 +289,7 @@ public class RegisterAndLoginActivity extends Activity {
 
     private void initView() {
         setContentView(R.layout.activity_login);
-        //permission();
+        PushToast.getInstance().init(this);
         StatusBarUtil.setStatusBarColor(this, Color.parseColor("#00C4FF"));
         mEd_userName = (EditText) findViewById(R.id.ed_login_username);
         mEd_password = (EditText) findViewById(R.id.ed_login_password);
@@ -315,7 +315,7 @@ public class RegisterAndLoginActivity extends Activity {
                 }
             }
         });
-        addLayoutListener(re,mBt_login);
+        //addLayoutListener(re,mBt_login);
         mRgType = (RadioGroup) findViewById(R.id.rg_environment);;
         if (!isTestVisibility) {
             mRgType.setVisibility(View.GONE);

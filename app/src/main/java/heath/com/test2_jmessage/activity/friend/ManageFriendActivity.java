@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ import heath.com.test2_jmessage.activity.TypeActivity;
 import heath.com.test2_jmessage.activity.conversation.DeleteConversationActivity;
 import heath.com.test2_jmessage.activity.createmessage.CreateSigTextMessageActivity;
 import heath.com.test2_jmessage.application.IMDebugApplication;
+import heath.com.test2_jmessage.tools.tools;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static heath.com.test2_jmessage.activity.TypeActivity.adapter;
@@ -44,7 +46,6 @@ public class ManageFriendActivity extends Activity {
         setContentView(R.layout.activity_managefriends);
         position=getIntent().getIntExtra("position",-1);
         userId=personList.get(position).getUserId();
-
         zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
         TextView manage_back=findViewById(R.id.manage_back);
         manage_back.setOnClickListener(new View.OnClickListener() {
@@ -69,10 +70,9 @@ public class ManageFriendActivity extends Activity {
         manage_HistoryFriends.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("55555", "onClick: ");
                 Intent intent=new Intent(getApplicationContext(), DeleteConversationActivity.class);
-                //intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 intent.putExtra("position",position);
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 getApplicationContext().startActivity(intent);
                 overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
             }
@@ -91,17 +91,17 @@ public class ManageFriendActivity extends Activity {
             }
         });
         if (position>=0){
-            String Name,Signature;
-            Signature="[个性签名]  "+personList.get(position).getSignature();
-            if (personList.get(position).getUserName().equals(personList.get(position).getName()))
-                Name=personList.get(position).getUserName();
-            else
-                Name=personList.get(position).getName()+"  ("+personList.get(position).getUserName()+")";
-            manage_Name.setText(Name);
-            manage_simple_message.setText(Signature);
+            if (!TextUtils.isEmpty(personList.get(position).getNickname())){
+                manage_Name.setText(personList.get(position).getNickname());
+                manage_Name.append("("+personList.get(position).getUserName()+")");
+            }else
+                manage_Name.append(personList.get(position).getUserName());
+            manage_simple_message.setText(tools.Age(personList.get(position).getMillisecond())+"岁");
+            if (!TextUtils.isEmpty(personList.get(position).getGender())){
+                manage_simple_message.append("|"+personList.get(position).getGender());
+            }
         }
         if (personIcon.get(position)==null){
-
             ContactManager.getFriendList(
                 new GetUserInfoListCallback() {
                     @Override
@@ -121,8 +121,7 @@ public class ManageFriendActivity extends Activity {
                                            adapter.notifyDataSetChanged();
                                        }
                                    }
-                               });
-                                }
+                               }); }
                                 break;
                             }
                     }
@@ -211,11 +210,9 @@ public class ManageFriendActivity extends Activity {
         personal_information.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 if (state.getText().toString().equals(" ")){
                     state.setText("  ");
                     detail_information.setVisibility(View.GONE);
-
                 }else {
                     state.setText(" ");
                     detail_information.setVisibility(View.VISIBLE);

@@ -4,9 +4,11 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -221,5 +223,36 @@ public class StatusBarUtil {
             result = context.getResources().getDimensionPixelSize(resourceId);
         }
         return result;
+    }
+
+    public static int getNavigationBarHeight(Context context) {
+        if (checkDeviceHasNavigationBar(context)){
+        Resources resources = context.getResources();
+        int resourceId = resources.getIdentifier("navigation_bar_height","dimen", "android");
+        int height = resources.getDimensionPixelSize(resourceId);
+        Log.v("dbw", "Navi height:" + height);
+        return height;}else return 0;
+    }
+
+    public static boolean checkDeviceHasNavigationBar(Context context) {
+        boolean hasNavigationBar = false;
+        Resources rs = context.getResources();
+        int id = rs.getIdentifier("config_showNavigationBar", "bool", "android");
+        if (id > 0) {
+            hasNavigationBar = rs.getBoolean(id);
+        }
+        try {
+            Class systemPropertiesClass = Class.forName("android.os.SystemProperties");
+            Method m = systemPropertiesClass.getMethod("get", String.class);
+            String navBarOverride = (String) m.invoke(systemPropertiesClass, "qemu.hw.mainkeys");
+            if ("1".equals(navBarOverride)) {
+                hasNavigationBar = false;
+            } else if ("0".equals(navBarOverride)) {
+                hasNavigationBar = true;
+            }
+        } catch (Exception e) {
+
+        }
+        return hasNavigationBar;
     }
 }

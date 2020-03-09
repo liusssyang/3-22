@@ -1,34 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+    <View
+        android:id="@+id/statusbar"
+        android:layout_width="match_parent"
+        android:background="@drawable/toolbar_ground"
+        android:layout_height="24dp"/>
+    <Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@drawable/toolbar_ground"
+        android:id="@+id/manage_toolbar_sigText"
+        app:contentInsetLeft="0dp"
+        app:contentInsetStart="0dp"
+        app:contentInsetRight="0dp"
+        app:contentInsetEnd="0dp"
+        >
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:paddingTop="15dp"
+            >
+            <TextView
+                android:id="@+id/manage_back"
+                android:focusable="true"
+                android:clickable="true"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:background="@drawable/back"
+                android:layout_gravity="center"
+                android:textColor="#ffffff"
+                />
+            <TextView
+                android:id="@+id/manage_sigText_toolbarName"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:textSize="18sp"
+                android:text="更换头像"
+
+                android:gravity="center"
+                android:textColor="#ffffff"/>
+        </RelativeLayout>
+    </Toolbar>
 
     <ImageView
         android:id="@+id/iv_show_image"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
 
     <LinearLayout
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <Button
+            android:layout_marginEnd="5dp"
             android:id="@+id/bt_local_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="80dp"
+            android:layout_height="40dp"
             android:layout_weight="1"
+            android:background="@drawable/background_addnew_declined"
             android:text="选择图片"
             />
 
         <Button
+            android:layout_marginStart="5dp"
             android:id="@+id/bt_update"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="80dp"
+            android:layout_height="40dp"
             android:layout_gravity="right"
             android:layout_weight="1"
+            android:textColor="#ffffff"
+            android:background="@drawable/background_addnew_accept"
             android:text="更新"/>
     </LinearLayout>
-
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#74999999"/>
+    <View
+        android:id="@+id/nav_bar"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"/>
 </LinearLayout>

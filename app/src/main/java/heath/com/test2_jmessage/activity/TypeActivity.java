@@ -16,6 +16,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
@@ -98,6 +99,7 @@ import heath.com.test2_jmessage.activity.showinfo.ShowMyInfoUpdateActivity;
 import heath.com.test2_jmessage.adapter.personAdapter;
 import heath.com.test2_jmessage.application.IMDebugApplication;
 import heath.com.test2_jmessage.recycleView_item.personMsg;
+import heath.com.test2_jmessage.tools.PushToast;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
@@ -118,7 +120,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     public static personAdapter adapter;
     public static List<Bitmap> personIcon=new ArrayList<>();
     public static List<personMsg> personList=new ArrayList<>();
-    public static List<UserInfo> list=new ArrayList<>();
     private DrawerLayout drawerLayout;
     private IntentFilter intentFilter;
     private Localreceiver localRceiver;
@@ -126,17 +127,15 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     private CircleImageView circleImageView;
     public static long myUserId,backUserId;
     public static Bitmap myIcon;
-    public static int personListSize=0;
-    //public static Bitmap friendsIcon[]=null;
     private final Handler handler = new Handler();
     public boolean isReady;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate: ");
         JMessageClient.registerEventReceiver(this);
         initView();
+        Log.d(TAG, "TypeActivity_onCreate ");
         isReady=false;
         handler.postDelayed(task, 1);
 
@@ -145,6 +144,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(R.layout.activity_type);
+        PushToast.getInstance().init(this);
         zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
         backUserId=getIntent().getLongExtra("userId",0);
         final Toolbar toolbar=findViewById(R.id.toolbar);
@@ -160,20 +160,32 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         headvision=navHeaderView.findViewById(R.id.head_vision);
         signature=navHeaderView.findViewById(R.id.signature);
         final TextView index=findViewById(R.id.index);
-
-
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
                 drawerLayout.closeDrawers();
                 Intent intent = new Intent();
+                if (item.toString().equals("退出")) {
+                    UserInfo myInfo = JMessageClient.getMyInfo();
+                    if (myInfo != null) {
+                        JMessageClient.logout();
+                        personList.clear();
+                        PushToast.getInstance().createToast("提示","已登出",null,true);
+                        intent.setClass(getApplicationContext(), RegisterAndLoginActivity.class);
+                        setResult(8);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        PushToast.getInstance().createToast("提示","登出失败",null,false);
+                    }
+                }
                 if (item.toString().equals("设置")) {
                     intent.setClass(getApplicationContext(), SettingMainActivity.class);
                     startActivityForResult(intent, 0);
                 }
                 if (item.toString().equals("群组")) {
                     intent.setClass(getApplicationContext(), GroupInfoActivity.class);
-                    startActivity(intent);
+                     startActivity(intent);
                 }
                 if (item.toString().equals("聊天室相关")) {
 
@@ -259,19 +271,11 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                 dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
                 WindowManager.LayoutParams lp = dialogWindow.getAttributes();
                 lp.y=100;
-                lp.width = 350;
+                lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
                 lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
                 dialogWindow.setAttributes(lp);
                 dialogWindow.setWindowAnimations(R.style.dialogWindowAnim);
                 mydialog.show();
-
-               /*还可以设置窗口显示动画
-                //
-
-                other_linear.setVisibility(View.GONE);
-                index.setVisibility(View.GONE);
-                toolbar.setVisibility(View.GONE);
-                index2_linear.setVisibility(View.VISIBLE);*/
             }
         });
         newFriends=findViewById(R.id.newFriends);
@@ -316,7 +320,9 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), ApplyJoinGroupActivity.class);
                 intent.putExtra("groupId",index2.getText().toString());
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
             }
         });
         find_single_line.setOnClickListener(new View.OnClickListener() {
@@ -324,7 +330,9 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), AddFriendActivity.class);
                 intent.putExtra("username",index2.getText().toString());
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
 
             }
         });
@@ -383,8 +391,10 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         UserInfo info = JMessageClient.getMyInfo();
         if (null != info) {
             myUserId=info.getUserID();
-            headappkey.setText("Appkey："+info.getAppKey());
-            headusername.setText(info.getUserName());
+            String detail="当前账号："+info.getUserName()+"\nAppkey：\n"+info.getAppKey();
+            headappkey.setText(detail);
+            String name=TextUtils.isEmpty(info.getNickname())?info.getUserName():info.getNickname();
+            headusername.setText(name);
             signature.setText(info.getSignature());
             headvision.setText("Vision："+JMessageClient.getSdkVersionString());
             info.getAvatarBitmap(new GetAvatarBitmapCallback() {
@@ -410,6 +420,27 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
+        Log.d(TAG, "onNewIntent: here is "+personList.size());
+        /*for (int j=0;j<personList.size();j++) {
+            personIcon.add(BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath()));
+            personList.add(
+                    new personMsg(
+                            list.get(j).getNickname()
+                            ,list.get(j).getUserID()
+                            ,BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath())
+                            ,list.get(j).getUserName()
+                            ,list.get(j).getNotename()
+                            ,list.get(j).getAppKey()
+                            ,null
+                            ,list.get(j).getSignature()
+                            ,""
+                            ,list.get(j).getSignature()
+                            ,list.get(j).getGender().toString()
+                            ,list.get(j).getAddress()
+                            ,list.get(j).getNoteText()
+                            ,list.get(j).getBirthday()));
+            adapter.notifyItemChanged(personList.size()-1);
+        }*/
     }
     @Override
     public void onClick(View v) {
@@ -744,12 +775,11 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         }
         public void onReceive(Context context, Intent intent) {
             if (intent.getStringExtra("init").equals("1")){
-                Log.d(TAG, "onReceive: ready"+personList.size());
+                Log.d(TAG, "onReceive: ready"+"|"+personList.size());
                 SharedPreferences pref2=getBaseContext().getSharedPreferences("backdata"+myUserId,0);
                 for (int i=0;i<personList.size();i++) {
                     String simpleMessage=pref2.getString("simplemessage" + personList.get(i).getUserId(), "");
                     String time=pref2.getString("time" +personList.get(i).getUserId(), "");
-
                     if (!simpleMessage.equals("")) {
                         personList.get(i).setSimpleMessage(simpleMessage);
                         adapter.notifyDataSetChanged();
@@ -761,7 +791,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                 }
             }else
             for (int i=0;i<personList.size();i++){
-
                 if (personList.get(i).getUserId()==intent.getLongExtra("userId",0)){
                 if (intent.getStringExtra("key")!=null) {
                     msgList.get(i).setSimpleMessage(intent.getStringExtra("key"));
@@ -782,17 +811,17 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     private final Runnable task = new Runnable() {
         @Override
         public void run() {
-            // TODO Auto-generated method stub
-            if ( personListSize!=0){
-            Intent intent=new Intent("message");
-            intent.putExtra("init","1");
-            localBroadcastManager.sendBroadcast(intent);
+            if ( personList.size()!=0){
+                Intent intent=new Intent("message");
+                intent.putExtra("init","1");
+                localBroadcastManager.sendBroadcast(intent);
                 for (int i=0;i<personList.size();i++){
-                    Log.d("personList.size", i+"run: "+personList.get(i).getUserId());
+                    Log.d("personList.size", i+"run: "+personList.get(i).getUserName());
                 }
             isReady=true;
             }
             else{
+                Log.d("personList.size", "running");
                 handler.postDelayed(this,1);
                 isReady=false;
             }

@@ -42,6 +42,7 @@ import heath.com.test2_jmessage.activity.createmessage.ShowMessageActivity;
 import heath.com.test2_jmessage.activity.friend.ShowFriendReasonActivity;
 import heath.com.test2_jmessage.application.IMDebugApplication;
 import heath.com.test2_jmessage.recycleView_item.personMsg;
+import heath.com.test2_jmessage.tools.tools;
 
 import static android.content.Context.USAGE_STATS_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -198,23 +199,9 @@ public class GlobalEventListener {
         String history=pref.getString("historyRecord"+userId," ");
         ContentType contentType=ContentType.valueOf(event.getMessage().getContentType().toString());
         Intent intent=new Intent("message");
-        Calendar cal;
-        String year, month, day, hour, minute, second, timeA;
-        String total = "";
-        cal = Calendar.getInstance();
-        cal.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
-        year = String.valueOf(cal.get(Calendar.YEAR));
-        month = String.valueOf(cal.get(Calendar.MONTH) + 1);
-        day = String.valueOf(cal.get(Calendar.DATE));
-        if (cal.get(Calendar.AM_PM) == 0)
-            hour = String.valueOf(cal.get(Calendar.HOUR));
-        else
-            hour = String.valueOf(cal.get(Calendar.HOUR) + 12);
-        minute = String.valueOf(cal.get(Calendar.MINUTE));
-        second = String.valueOf(cal.get(Calendar.SECOND));
-        timeA = month + "/" + day + "  " + hour + ":" + minute;
-        editor3.putString("time"+userId,timeA);
-        intent.putExtra("time",timeA);
+
+        editor3.putString("time"+userId,tools.CurrentTime());
+        intent.putExtra("time",tools.CurrentTime());
         intent.putExtra("userId",userId);
         intent.putExtra("init","2");
         switch (contentType) {
@@ -277,21 +264,7 @@ public class GlobalEventListener {
         }
     }
     public void onEvent(ContactNotifyEvent event) {
-        Calendar cal;
-        final String year, month, day, hour, minute, second, timeA;
-        String total = "";
-        cal = Calendar.getInstance();
-        cal.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
-        year = String.valueOf(cal.get(Calendar.YEAR));
-        month = String.valueOf(cal.get(Calendar.MONTH) + 1);
-        day = String.valueOf(cal.get(Calendar.DATE));
-        if (cal.get(Calendar.AM_PM) == 0)
-            hour = String.valueOf(cal.get(Calendar.HOUR));
-        else
-            hour = String.valueOf(cal.get(Calendar.HOUR) + 12);
-        minute = String.valueOf(cal.get(Calendar.MINUTE));
-        second = String.valueOf(cal.get(Calendar.SECOND));
-        timeA = month + "/" + day + "  " + hour + ":" + minute;
+
         String reason = event.getReason();
         final String fromUsername = event.getFromUsername();
         final String appkey = event.getfromUserAppKey();
@@ -313,7 +286,7 @@ public class GlobalEventListener {
                 editor.putString("username"+unique, fromUsername);
                 editor.putString("appkey"+unique, appkey);
                 editor.putString("reason"+unique,reason);
-                editor.putString("time"+unique,timeA);
+                editor.putString("time"+unique, tools.CurrentTime());
                 editor.putString("simplemessage"+unique,"请求添加你为好友！");
                 editor.apply();
                 break;
@@ -328,13 +301,14 @@ public class GlobalEventListener {
                                 if (s1.equals(s2)){
                                     personIcon.add(BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath()));
                                     personList.add(0,new personMsg(
-                                            list.get(j).getUserID()
+                                            list.get(j).getNickname()
+                                            ,list.get(j).getUserID()
                                             , BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath()),list.get(j).getUserName()
                                             ,list.get(j).getNotename()
                                             ,list.get(i).getAppKey()
                                             ,null
                                             ,"我们已经是好友啦，快来打声招呼吧！"
-                                            , timeA
+                                            , tools.CurrentTime()
                                             , list.get(j).getSignature()
                                             , list.get(j).getGender().toString()
                                             ,list.get(j).getAddress()

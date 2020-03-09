@@ -21,6 +21,7 @@ import cn.jpush.im.android.api.model.UserInfo;
 import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
+import heath.com.test2_jmessage.tools.PushToast;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static heath.com.test2_jmessage.activity.TypeActivity.adapter;
@@ -35,6 +36,7 @@ public class NoteFriend extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(R.layout.activity_note_friends);
+        PushToast.getInstance().init(this);
         position=getIntent().getIntExtra("position",-1);
         userId=getIntent().getLongExtra("userId",0);
         zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
@@ -75,14 +77,14 @@ public class NoteFriend extends Activity {
                                     if (list.get(j).getUserID()==userId){
                                         final UserInfo info=list.get(j);
                                         if (TextUtils.isEmpty(noteName) && TextUtils.isEmpty(noteText)) {
-                                            Toast.makeText(getApplicationContext(), "请输入相关参数", Toast.LENGTH_SHORT).show();
+                                            PushToast.getInstance().createToast("提示","请输入相关参数",null,false);
                                         }
                                         if (!TextUtils.isEmpty(noteName)) {
                                             info.updateNoteName(noteName, new BasicCallback() {
                                                 @Override
                                                 public void gotResult(int i, String s) {
                                                     if (i == 0) {
-                                                        Toast.makeText(getApplicationContext(), "更新 note name 成功", Toast.LENGTH_SHORT).show();
+                                                        PushToast.getInstance().createToast("提示","备注更新成功",null,true);
                                                         personList.get(position).setNotename(noteName);
                                                         adapter.notifyDataSetChanged();
                                                         Intent intent=new Intent(getApplicationContext(),ManageFriendActivity.class);
@@ -90,8 +92,9 @@ public class NoteFriend extends Activity {
                                                         intent.putExtra("position",position);
                                                         intent.putExtra("userId",userId);
                                                         getApplicationContext().startActivity(intent);
+                                                        overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
                                                     } else {
-                                                        Toast.makeText(getApplicationContext(), "更新失败", Toast.LENGTH_SHORT).show();
+                                                        PushToast.getInstance().createToast("提示","备注更新失败",null,false);
                                                     }
                                                 }
                                             });

@@ -7,7 +7,7 @@
     android:background="#00000000">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="140dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="#ffffffff"
@@ -22,7 +22,7 @@
             android:paddingStart="10dp"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
-            android:layout_width="match_parent"
+            android:layout_width="140dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
             <TextView
@@ -50,7 +50,7 @@
             android:paddingStart="15dp"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
             <TextView
@@ -80,7 +80,7 @@
             android:paddingStart="15dp"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
-            android:layout_width="match_parent"
+            android:layout_width="140dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
             <TextView

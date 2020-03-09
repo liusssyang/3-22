@@ -23,6 +23,7 @@ import heath.com.test2_jmessage.activity.friend.AddFriendActivity;
 import heath.com.test2_jmessage.activity.groupinfo.ApplyJoinGroupActivity;
 import heath.com.test2_jmessage.activity.groupinfo.CreateGroupActivity;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static cn.jpush.im.android.api.jmrtc.JMRTCInternalUse.getApplicationContext;
 
 public class TypeDialog extends Dialog {
@@ -59,6 +60,7 @@ public class TypeDialog extends Dialog {
                         break;
                     case MotionEvent.ACTION_DOWN:
                         Intent intent=new Intent(getApplicationContext(), CreateGroupActivity.class);
+                        intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                         getApplicationContext().startActivity(intent);
                         break;
                     case MotionEvent.ACTION_MOVE:
@@ -75,6 +77,7 @@ public class TypeDialog extends Dialog {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(getApplicationContext(), AddFriendActivity.class);
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 getApplicationContext().startActivity(intent);
             }
         });
@@ -83,6 +86,7 @@ public class TypeDialog extends Dialog {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(getApplicationContext(), ApplyJoinGroupActivity.class);
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 getApplicationContext().startActivity(intent);
             }
         });

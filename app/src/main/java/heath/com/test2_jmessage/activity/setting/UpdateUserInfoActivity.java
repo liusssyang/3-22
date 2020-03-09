@@ -2,11 +2,14 @@ package heath.com.test2_jmessage.activity.setting;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,6 +24,12 @@ import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.model.UserInfo;
 import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.R;
+import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
+import heath.com.test2_jmessage.activity.TypeActivity;
+import heath.com.test2_jmessage.tools.PushToast;
+import heath.com.test2_jmessage.tools.tools;
+
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 /**
  * Created by ${chenyn} on 16/3/25.
@@ -45,12 +54,13 @@ public class UpdateUserInfoActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mMyInfo = JMessageClient.getMyInfo();
+
         initView();
         initData();
     }
 
     private void initData() {
+        mMyInfo = JMessageClient.getMyInfo();
         mImm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         mBt_updateUserInfo.setOnClickListener(
                 new View.OnClickListener() {
@@ -62,24 +72,18 @@ public class UpdateUserInfoActivity extends Activity {
                         mTv_updateInfo.setText("");
                         if (mMyInfo != null) {
                             //设置nickname
-                            if (!mMyInfo.setNickname(mEt_nickname.getText().toString())) {
-                                mTv_updateInfo.append("设置nickname失败" + "\n");
-                            }
+                            mMyInfo.setNickname(mEt_nickname.getText().toString());
                             //设置region
-                            if (!mMyInfo.setRegion(mEt_region.getText().toString())) {
-                                mTv_updateInfo.append("设置region失败" + "\n");
-                            }
-
+                            mMyInfo.setRegion(mEt_region.getText().toString());
                             //设置signature
-                            if (!mMyInfo.setSignature(mEt_signature.getText().toString())) {
-                                mTv_updateInfo.append("设置signature失败" + "\n");
-                            }
+                            mMyInfo.setSignature(mEt_signature.getText().toString());
                             //设置birthday
                             String data = mEt_birthday.getText().toString();
                             if (!TextUtils.isEmpty(data)) {
-                                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                                 try {
                                     long time = sdf.parse(data).getTime();
+                                    Log.d("birthday_time", "onClick: "+time);
                                     mMyInfo.setBirthday(time);
                                 } catch (Exception e) {
                                     mTv_updateInfo.append("设置birthday失败" + "\n");
@@ -93,8 +97,10 @@ public class UpdateUserInfoActivity extends Activity {
                                     if (responseCode == 0) {
                                         mTv_updateInfo.append("update userinfo成功" + "\n");
                                         Log.i("UpdateUserInfoActivity", "updateAllUserinfo," + " responseCode = " + responseCode + "; desc = " + responseMessage);
+                                        PushToast.getInstance().createToast("提示","更新资料成功",null,true);
+                                        finish();
                                     } else {
-                                        mTv_updateInfo.append("update Userinfo失败" + "\n");
+                                        PushToast.getInstance().createToast("提示","更新资料失败",null,false);
                                         Log.i("UpdateUserInfoActivity", "updateAllUserinfo," + " responseCode = " + responseCode + "; desc = " + responseMessage);
 
                                     }
@@ -106,7 +112,17 @@ public class UpdateUserInfoActivity extends Activity {
                     }
                 }
         );
-
+        TextView manage_back=findViewById(R.id.manage_back);
+        manage_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClass(getApplicationContext(), TypeActivity.class);
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                getApplicationContext().startActivity(intent);
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
+            }
+        });
         mRg_gender.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -120,24 +136,36 @@ public class UpdateUserInfoActivity extends Activity {
             }
         });
     }
-
-
     private void initView() {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(R.layout.activity_update_user_info);
-
+        zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
+        PushToast.getInstance().init(this);
         mEt_nickname = (EditText) findViewById(R.id.et_nickname);
         mEt_birthday = (EditText) findViewById(R.id.et_birthday);
         mEt_region = (EditText) findViewById(R.id.et_region);
         mEt_signature = (EditText) findViewById(R.id.et_signature);
-
         mTv_updateInfo = (TextView) findViewById(R.id.tv_updateInfo);
-
         mRb_male = (RadioButton) findViewById(R.id.rb_male);
         mRb_female = (RadioButton) findViewById(R.id.rb_female);
         mRb_unknown = (RadioButton) findViewById(R.id.rb_unknown);
         mRg_gender = (RadioGroup) findViewById(R.id.rg_gender);
-
         mBt_updateUserInfo = (Button) findViewById(R.id.bt_update_user_info);
+        TextView update_avatar=findViewById(R.id.update_avatar);
+        mEt_nickname.setText(JMessageClient.getMyInfo().getNickname());
+        mEt_birthday.setText(tools.secondToDate(JMessageClient.getMyInfo().getBirthday(),"yyyy-MM-dd"));
+        mEt_region.setText(JMessageClient.getMyInfo().getRegion());
+        mEt_signature.setText(JMessageClient.getMyInfo().getSignature());
+        update_avatar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(getApplicationContext(), UpdateUserAvatar.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getApplicationContext().startActivity(intent);
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
+            }
+        });
     }
 
 
@@ -150,5 +178,10 @@ public class UpdateUserInfoActivity extends Activity {
         }
         return super.onTouchEvent(event);
     }
-
+    private void zoomInViewSize(int height) {
+        View img1 = findViewById(R.id.statusbar);
+        ViewGroup.LayoutParams  lp = img1.getLayoutParams();
+        lp.height =height;
+        img1.setLayoutParams(lp);
+    }
 }

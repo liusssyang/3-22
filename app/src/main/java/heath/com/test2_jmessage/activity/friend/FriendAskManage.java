@@ -53,6 +53,7 @@ public class FriendAskManage extends Activity {
                 personAskList.clear();
                 personAskAdapter.notifyDataSetChanged();*/
                 Intent intent=new Intent(getApplicationContext(), TypeActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 getApplicationContext().startActivity(intent);
                 overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
             }

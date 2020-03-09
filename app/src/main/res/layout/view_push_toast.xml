@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ll_push_content"
+    android:layout_width="match_parent"
+    android:layout_gravity="center_horizontal"
+
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_push_message"
+    android:orientation="vertical">
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#000000"
+        android:text="提示"
+        android:gravity="center_horizontal"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:textStyle="bold"
+        android:textSize="18sp" />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:id="@+id/tv_content"
+            android:layout_width="wrap_content"
+            android:layout_height="25dp"
+            android:textColor="#000000"
+            android:textSize="13sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_gravity="center_vertical"
+            android:gravity="center"
+             />
+        <View
+
+            android:id="@+id/wrong"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:background="@drawable/wrong"/>
+        <View
+            android:visibility="gone"
+            android:id="@+id/completion"
+            android:layout_width="23dp"
+            android:layout_height="23dp"
+            android:background="@drawable/completion"/>
+
+    </LinearLayout>
+
+
+</LinearLayout>

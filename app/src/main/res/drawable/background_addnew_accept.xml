@@ -12,6 +12,7 @@
                 android:radius="5dip"
                 />
             <gradient
+                android:angle="0"
                 android:startColor="@color/colorQQ"
                 android:endColor="#3F51B5"/>
             <stroke

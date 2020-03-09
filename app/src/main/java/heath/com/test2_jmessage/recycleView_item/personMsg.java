@@ -2,17 +2,11 @@ package heath.com.test2_jmessage.recycleView_item;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
+import android.text.TextUtils;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
-
-import cn.jpush.im.android.api.model.UserInfo;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.application.IMDebugApplication;
+import heath.com.test2_jmessage.tools.tools;
 
 public class personMsg {
 
@@ -32,27 +26,6 @@ public class personMsg {
     private Bitmap bitmap;
     private String username;
     private String unique;
-    public void saveFriend(String simpleMessage,String time){
-
-    }
-
-    public personMsg(List<UserInfo> list,int j){
-        /*this.address=list.get(j).getAddress();
-        this.birthday=list.get(j).getBirthday()+"";
-        this.displayname=list.get(j).getDisplayName();
-        this.notename=list.get(j).getNotename();
-        this.gender= String.valueOf(list.get(j).getGender());
-        this.region=list.get(j).getRegion();
-        this.signature=list.get(j).getSignature();
-        this.nickname=list.get(j).getNickname();
-        this.simpleMessage=list.get(j).getExtra("simpleMessage");
-        this.time=list.get(j).getExtra("time");*/
-        this.name=list.get(j).getUserName();
-        this.appkey=list.get(j).getAppKey();
-
-        this.bitmap=BitmapFactory.decodeFile(list.get(j).getBigAvatarFile().getPath());
-        this.userId=list.get(j).getUserID();
-    }
     public personMsg( Bitmap icon, String userName, String other,
                       String appkey,String time,String simpleMessage,String unique){
         this.bitmap=icon;
@@ -63,7 +36,8 @@ public class personMsg {
         this.simpleMessage=simpleMessage;
         this.unique=unique;
     }
-    public personMsg(long userId,Bitmap icon,String userName,String noteName,String appkey,
+    public personMsg(String nickname,long userId,Bitmap icon,String userName,
+                     String noteName,String appkey,
                      String sendName,String simpleMessage,String time,String signature,
                      String gender,String adress,String other,long birthday){
         this.username=userName;
@@ -79,6 +53,7 @@ public class personMsg {
         this.gender=gender;
         this.address=adress;
         this.birthday=birthday;
+        this.nickname=nickname;
     }
     public String getUnique(){return unique;}
     public String getOther(){return  other;}
@@ -86,36 +61,36 @@ public class personMsg {
     public String getUserName(){
         return username;
     }
+    public String getNotename(){
+        return notename;
+    }
     public String getGender(){
-        if (gender.equals("unknown"))
-            return null;
+        if (gender.equals("female"))
+            return "女";
+        else if (gender.equals("male"))
+            return "男";
         else
-            return gender;}
+            return null;}
     public String getSignature(){
         return  signature;
     }
-
+    public long getMillisecond(){
+        if (birthday<0)
+            return 0;
+        else
+            return birthday;
+    }
     public String getName(){
-        if (notename.equals("")){
-            return username;}
-        else{
-            Log.d("notename", "getName: "+notename);
+        if (!TextUtils.isEmpty(notename)){
             return notename;
+        }else{
+            if (!TextUtils.isEmpty(nickname)){ return nickname;}
+            else{ return username; }
         }
     }
     public String getBirthday(){
-        Calendar cal;
-        int year;
-        cal = Calendar.getInstance();
-        cal.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
-        Date d = new Date(this.birthday);
-
-        year = cal.get(Calendar.YEAR);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        year=year-Integer.parseInt(new SimpleDateFormat("yyyy").format(d));
-        //String s=new java.util.Date(this.birthday).toString();
-        return sdf.format(d)+"  "+year+"岁";}
-    public String getSendName(){return sendName;}
+            return tools.secondToDate(birthday,"yyyy-MM-dd");
+    }
     public String getAppkey(){return appkey;}
     public String getSimpleMessage(){return simpleMessage;}
     public String getTime(){return time;}
@@ -128,6 +103,7 @@ public class personMsg {
     }
     public void setName(String name){this.name=name;}
     public void setNotename(String notename){this.notename=notename;}
+    public String getSendName(){return sendName;}
     public void setSendName(String Sendname){this.sendName=Sendname;}
     public void setAppkey(String Appkey){this.appkey=Appkey;}
     public void setSimpleMessage(String Simplemessage){this.simpleMessage=Simplemessage;}
@@ -138,8 +114,8 @@ public class personMsg {
         else
             this.bitmap=bitmap;
     }
-    public void setUserId(long userId){
-        this.userId=userId;
+    public String getNickname(){
+        return this.nickname;
     }
 
 }
