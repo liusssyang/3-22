@@ -5,7 +5,7 @@ import android.graphics.BitmapFactory;
 import android.text.TextUtils;
 
 import heath.com.test2_jmessage.R;
-import heath.com.test2_jmessage.application.IMDebugApplication;
+import heath.com.test2_jmessage.application.MyApplication;
 import heath.com.test2_jmessage.tools.tools;
 
 public class personMsg {
@@ -18,17 +18,18 @@ public class personMsg {
     private String region;
     private String signature;
     private String notename;
-    private String sendName,displayname,other;
+    private boolean hasInformation=false;
+    private String displayname,other;
     private String simpleMessage;
     private String appkey;
     private String time;
     private long userId,brithday;
-    private Bitmap bitmap;
+    private Bitmap avatar;
     private String username;
     private String unique;
-    public personMsg( Bitmap icon, String userName, String other,
+    public personMsg( Bitmap avatar, String userName, String other,
                       String appkey,String time,String simpleMessage,String unique){
-        this.bitmap=icon;
+        this.avatar=avatar;
         this.username=userName;
         this.other=other;
         this.appkey=appkey;
@@ -36,19 +37,20 @@ public class personMsg {
         this.simpleMessage=simpleMessage;
         this.unique=unique;
     }
-    public personMsg(String nickname,long userId,Bitmap icon,String userName,
+    public personMsg(String nickname,long userId,Bitmap avatar,String userName,
                      String noteName,String appkey,
-                     String sendName,String simpleMessage,String time,String signature,
+                     boolean hasInformation,String simpleMessage,String time,
+                     String signature,
                      String gender,String adress,String other,long birthday){
         this.username=userName;
         this.signature=signature;
         this.notename=noteName;
         this.appkey=appkey;
-        this.sendName=sendName;
+        this.hasInformation=hasInformation;
         this.other=other;
         this.simpleMessage=simpleMessage;
         this.time=time;
-        this.bitmap=icon;
+        this.avatar=avatar;
         this.userId=userId;
         this.gender=gender;
         this.address=adress;
@@ -95,24 +97,25 @@ public class personMsg {
     public String getSimpleMessage(){return simpleMessage;}
     public String getTime(){return time;}
     public long getUserId(){return userId;}
-    public Bitmap getBitmap(){
-        if (this.bitmap==null)
-            return BitmapFactory.decodeResource(IMDebugApplication.getContext().getResources(), R.drawable.icon_right_default);
+    public Bitmap getAvatar(){
+        if (this.avatar==null)
+            return BitmapFactory.decodeResource(MyApplication.getContext().getResources(), R.drawable.icon_right_default);
         else
-            return  bitmap;
+            return  avatar;
     }
     public void setName(String name){this.name=name;}
     public void setNotename(String notename){this.notename=notename;}
-    public String getSendName(){return sendName;}
-    public void setSendName(String Sendname){this.sendName=Sendname;}
+    public boolean getHasInformation(){return hasInformation;}
+    public void setHasInformation(boolean hasInformation){this.hasInformation=hasInformation;}
+
     public void setAppkey(String Appkey){this.appkey=Appkey;}
     public void setSimpleMessage(String Simplemessage){this.simpleMessage=Simplemessage;}
     public void setTime(String time){this.time=time;}
-    public void setBitmap(Bitmap bitmap){
+    public void setAvatar(Bitmap bitmap){
         if (bitmap==null)
-            this.bitmap=BitmapFactory.decodeResource(IMDebugApplication.getContext().getResources(), R.drawable.icon_right_default);
+            this.avatar=BitmapFactory.decodeResource(MyApplication.getContext().getResources(), R.drawable.icon_right_default);
         else
-            this.bitmap=bitmap;
+            this.avatar=bitmap;
     }
     public String getNickname(){
         return this.nickname;

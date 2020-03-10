@@ -1,11 +1,16 @@
 package heath.com.test2_jmessage.activity.conversation;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,64 +18,146 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.model.Conversation;
 import cn.jpush.im.android.api.model.Message;
+import heath.com.test2_jmessage.MyDialog.ConversationDialog;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
+import heath.com.test2_jmessage.StatusBar.StatusBarUtils;
 import heath.com.test2_jmessage.adapter.MsgAdapter;
 import heath.com.test2_jmessage.recycleView_item.Msg;
 import heath.com.test2_jmessage.tools.App;
 import heath.com.test2_jmessage.tools.tools;
-import static heath.com.test2_jmessage.activity.TypeActivity.personList;
+
+import static heath.com.test2_jmessage.application.MyApplication.personList;
+import static heath.com.test2_jmessage.tools.tools.getConversation;
 
 public class DeleteConversationActivity extends Activity implements View.OnClickListener {
 
     private TextView mTv_info;
     private EditText mEt_group_id;
     private int position;
-    public MsgAdapter adapter;
-    private List<Msg> msgList=new ArrayList<>();
+    private TextView none;
+    private MsgAdapter adapter;
+    private List<Msg> msgList = new ArrayList<>();
     private RecyclerView msgRecyclerView;
+    private int X = 0, Y = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        position=getIntent().getIntExtra("position",-1);
+        position = getIntent().getIntExtra("position", -1);
         initView();
+        initData();
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void initData() {
+        Gson gson = new Gson();
+        Conversation conversation = getConversation(personList.get(position).getUserName(), "");
+        if (conversation != null) {
+            List<Message> list;
+            list = getConversation(personList.get(position).getUserName(), "").getAllMessage();
+            none.setVisibility(View.GONE);
+            for (int j = 0; j < list.size(); j++) {
+                Log.d("HISTORY_RECORD", list.get(j).getFromUser().getUserName() + "(" + list.get(j).getFromName() + ")");
+                Log.d("HISTORY_RECORD", list.get(j).getId() + "|" + list.get(j).getDirect());
+                Log.d("HISTORY_RECORD", list.get(j).getCreateTime() + "");
+                App app = gson.fromJson(list.get(j).getContent().toJson(), App.class);
+                Log.d("HISTORY_RECORD", "解析" + app.getText());
+                Log.d("HISTORY_RECORD", "解析" + app.getIsFileUploaded());
+                Log.d("HISTORY_RECORD", "解析" + app.getExtras());
+                Log.d("HISTORY_RECORD", "解析" + app.getHeight());
+                Log.d("HISTORY_RECORD", "解析" + app.getWidth());
+                Log.d("HISTORY_RECORD", "解析" + app.getLocalThumbnailPath());
+                Log.d("HISTORY_RECORD", "_______________________________\n");
+                if (app.getText() != null) {
+                    if (list.get(j).getDirect().toString().equals("receive"))
+                        msgList.add(new Msg(personList.get(position).getUserName(),
+                                personList.get(position).getAppkey(),
+                                personList.get(position).getAvatar(),
+                                null,
+                                list.get(j).getId() + app.getText(),
+                                Msg.TYPE_RECEIVED, list.get(j).getId()));
+                    else
+                        msgList.add(new Msg(personList.get(position).getUserName(),
+                                personList.get(position).getAppkey(),
+                                personList.get(position).getAvatar(),
+                                null,
+                                list.get(j).getId() + app.getText(),
+                                Msg.TYPE_SENT, list.get(j).getId()));
+                    adapter.notifyDataSetChanged();
+                }
+                if (app.getLocalThumbnailPath() != null) {
+                    Bitmap picture = BitmapFactory.decodeFile(app.getLocalThumbnailPath());
+                    msgList.add(new Msg(personList.get(position).getUserName(),
+                            personList.get(position).getAppkey(),
+                            personList.get(position).getAvatar(),
+                            picture,
+                            list.get(j).getId() + "",
+                            Msg.TYPE_RECEIVED,
+                            list.get(j).getId()));
+                    mTv_info.append(app.getIsFileUploaded() + "\n");
+                    mTv_info.append(app.getLocalThumbnailPath() + "\n");
+                }
+                mTv_info.append(tools.secondToDate(list.get(j).getCreateTime(), "hh:mm:ss") + "" + "\n");
+                mTv_info.append("_______________________________\n" + "\n");
+            }
+            msgRecyclerView.scrollToPosition(msgList.size() - 1);
+        } else
+            none.setVisibility(View.VISIBLE);
+        //LinearLayout conversation_dealing = findViewById(R.id.conversation_dealing);
+        /*msgRecyclerView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        X = (int) event.getX();
+                        Y = (int) event.getY();
+                        Log.d("getXY", X+"onTouch: "+Y);
+                        break;
+                    default:
+                        break;
+                }
+                return true;
+            }
+        });*/
     }
 
     private void initView() {
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(R.layout.activity_delete_conversation);
         zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
-        mTv_info = (TextView) findViewById(R.id.tv_info);
-        mEt_group_id = (EditText) findViewById(R.id.et_group_id);
-        msgRecyclerView=findViewById(R.id.msg_recycler_view);
-        LinearLayoutManager layoutManager=new LinearLayoutManager(this);
+        StatusBarUtils.with(this).setDrawable(getResources().getDrawable(R.drawable.toolbar_ground)).init();
+        none = findViewById(R.id.none);
+        mTv_info = findViewById(R.id.tv_info);
+        mEt_group_id = findViewById(R.id.et_group_id);
+        msgRecyclerView = findViewById(R.id.msg_recycler_view);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         msgRecyclerView.setLayoutManager(layoutManager);
-        adapter=new MsgAdapter(msgList);
+        adapter = new MsgAdapter(msgList);
         msgRecyclerView.setAdapter(adapter);
         msgList.clear();
-        Button bt_deleteMessage = (Button) findViewById(R.id.bt_delete_message);
-        Button bt_singleDelete = (Button) findViewById(R.id.bt_single_delete);
-        Button bt_groupDelete = (Button) findViewById(R.id.bt_group_delete);
-        Button bt_getConversation = (Button) findViewById(R.id.bt_get_conversation);
-        Button bt_getMessage = (Button) findViewById(R.id.bt_get_message);
-        TextView manage_sigText_toolbarName=findViewById(R.id.manage_sigText_toolbarName);
-        manage_sigText_toolbarName.setText("与"+personList.get(position).getName()+"的聊天记录");
+        Button bt_deleteMessage = findViewById(R.id.bt_delete_message);
+        Button bt_singleDelete = findViewById(R.id.bt_single_delete);
+        Button bt_groupDelete = findViewById(R.id.bt_group_delete);
+        Button bt_getConversation = findViewById(R.id.bt_get_conversation);
+        Button bt_getMessage = findViewById(R.id.bt_get_message);
+        TextView manage_sigText_toolbarName = findViewById(R.id.manage_sigText_toolbarName);
+        manage_sigText_toolbarName.setText(personList.get(position).getName());
         bt_deleteMessage.setOnClickListener(this);
         bt_singleDelete.setOnClickListener(this);
         bt_groupDelete.setOnClickListener(this);
         bt_getConversation.setOnClickListener(this);
         bt_getMessage.setOnClickListener(this);
         findViewById(R.id.bt_get_latest_message).setOnClickListener(this);
-        TextView manage_back=findViewById(R.id.manage_back);
+        TextView manage_back = findViewById(R.id.manage_back);
         manage_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -78,12 +165,31 @@ public class DeleteConversationActivity extends Activity implements View.OnClick
                 overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
             }
         });
+        TextView manage_message = findViewById(R.id.manage_message);
+        manage_message.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String userName = personList.get(position).getUserName();
+                ConversationDialog mydialog = new ConversationDialog(v.getContext(), userName, none, msgList, adapter);
+                mydialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                Window dialogWindow = mydialog.getWindow();
+                assert dialogWindow != null;
+                dialogWindow.setGravity(Gravity.TOP | Gravity.END);
+                dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
+                WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+                lp.y = tools.getActionBarSize();
+                lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
+                lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                dialogWindow.setAttributes(lp);
+                dialogWindow.setWindowAnimations(R.style.dialogWindowAnim);
+                mydialog.show();
+            }
+        });
     }
 
     @Override
     public void onClick(View v) {
-        Gson gson=new Gson();
-        String targetName =personList.get(position).getUserName();
+        String targetName = personList.get(position).getUserName();
         String targetGidString = mEt_group_id.getText().toString();
         Conversation conversation;
         switch (v.getId()) {
@@ -124,42 +230,7 @@ public class DeleteConversationActivity extends Activity implements View.OnClick
                 }
                 break;
             case R.id.bt_get_message:
-                List<Message> list=new ArrayList<>();
-                Log.d("NaMe", "onClick: "+targetName);
-                list=getConversation(targetName, targetGidString).getAllMessage();
-                if (list!=null)
-                    for (int j=0;j<list.size();j++) {
-                        Log.d("HISTORY_RECORD", list.get(j).getFromUser().getUserName()+"("+list.get(j).getFromName()+")");
-                        Log.d("HISTORY_RECORD", list.get(j).getId()+"|"+list.get(j).getDirect());
-                        Log.d("HISTORY_RECORD", list.get(j).getCreateTime()+"");
-                        App app=gson.fromJson(list.get(j).getContent().toJson(), App.class);
-                        Log.d("HISTORY_RECORD", "解析"+app.getText());
-                        Log.d("HISTORY_RECORD", "解析"+app.getIsFileUploaded());
-                        Log.d("HISTORY_RECORD", "解析"+app.getExtras());
-                        Log.d("HISTORY_RECORD", "解析"+app.getHeight());
-                        Log.d("HISTORY_RECORD", "解析"+app.getWidth());
-                        Log.d("HISTORY_RECORD", "解析"+app.getLocalThumbnailPath());
-                        Log.d("HISTORY_RECORD", "_______________________________\n");
-                        mTv_info.append(list.get(j).getFromUser().getUserName()+"("+list.get(j).getFromName()+")\n");
-                    mTv_info.append(list.get(j).getId()+"|"+list.get(j).getDirect()+"\n");
-                    if (app.getText()!=null){
-                        if (list.get(j).getDirect().toString().equals("receive"))
-                            msgList.add(new Msg(null,null,app.getText(),Msg.TYPE_RECEIVED));
-                        else
-                            msgList.add(new Msg(null,null,app.getText(),Msg.TYPE_SENT));
-                        adapter.notifyDataSetChanged();
-                        mTv_info.append(app.getText()+"\n");
-                    }
-                    if (app.getLocalThumbnailPath()!=null){
-                        mTv_info.append(app.getIsFileUploaded()+"\n");
-                        mTv_info.append(app.getLocalThumbnailPath()+"\n");
-                    }
-                    mTv_info.append(tools.secondToDate(list.get(j).getCreateTime(),"hh:mm:ss")+""+"\n");
-                    mTv_info.append("_______________________________\n"+"\n");
-                }
-                else
-                    mTv_info.append("empty");
-                msgRecyclerView.scrollToPosition(msgList.size()-1);
+
                 break;
             case R.id.bt_get_latest_message:
                 conversation = getConversation(targetName, targetGidString);
@@ -178,45 +249,12 @@ public class DeleteConversationActivity extends Activity implements View.OnClick
         }
     }
 
-    private Conversation getConversation(String targetName, String targetGidString) {
-        Conversation conversation = null;
-        if (!TextUtils.isEmpty(targetName) && TextUtils.isEmpty(targetGidString)) {
-            conversation = JMessageClient.getSingleConversation(targetName);
-        } else if (TextUtils.isEmpty(targetName) && !TextUtils.isEmpty(targetGidString)) {
-            long groupId = Long.parseLong(targetGidString);
-            conversation = JMessageClient.getGroupConversation(groupId);
-        } else {
-            Toast.makeText(getApplicationContext(), "输入相关参数有误", Toast.LENGTH_SHORT).show();
-        }
-        return conversation;
-    }
-
-    private void getAllMessage(Conversation conversation) {
-        if (conversation == null) {
-            Toast.makeText(getApplicationContext(), "会话为空", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        List<Message> allMessage = conversation.getAllMessage();
-        if (allMessage != null) {
-            mTv_info.setText("");
-            StringBuilder sb = new StringBuilder();
-            for (Message msg : allMessage) {
-                /*sb.append("消息ID = " + msg.getId());
-                sb.append(msg.getContent());
-                sb.append("~~~消息类型 = " + msg.getContentType());
-                sb.append("\n");*/
-            }
-            mTv_info.append("getAllMessage = " + "\n" + sb.toString());
-        } else {
-            Toast.makeText(DeleteConversationActivity.this, "未能获取到消息", Toast.LENGTH_SHORT).show();
-        }
-    }
     private void zoomInViewSize(int height) {
         View img1 = findViewById(R.id.statusbar);
-        ViewGroup.LayoutParams  lp = img1.getLayoutParams();
-        lp.height =height;
+        ViewGroup.LayoutParams lp = img1.getLayoutParams();
+        lp.height = height;
         img1.setLayoutParams(lp);
     }
+
 
 }

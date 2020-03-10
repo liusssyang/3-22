@@ -3,7 +3,6 @@ package heath.com.test2_jmessage.activity.friend;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -32,6 +31,7 @@ import heath.com.test2_jmessage.recycleView_item.personMsg;
 import static heath.com.test2_jmessage.activity.TypeActivity.myUserId;
 import static heath.com.test2_jmessage.activity.friend.FriendAskManage.personAskAdapter;
 import static heath.com.test2_jmessage.activity.friend.FriendAskManage.personAskList;
+import static heath.com.test2_jmessage.application.MyApplication.personList;
 
 /**
  * Created by ${chenyn} on 16/4/17.
@@ -139,13 +139,13 @@ public class ShowFriendReasonActivity extends Activity {
                                             s1=list.get(j).getUserName()+list.get(j).getAppKey();
                                             s2=userName+appKey;
                                                 if (s1.equals(s2)){
-                                                    TypeActivity.personList.add(new personMsg(
+                                                    personList.add(new personMsg(
                                                             list.get(j).getNickname()
                                                             ,list.get(j).getUserID()
                                                             , null,list.get(j).getUserName()
                                                             ,list.get(j).getNotename()
                                                             ,list.get(i).getAppKey()
-                                                            ,null
+                                                            ,true
                                                             ,list.get(j).getSignature()
                                                             , timeA
                                                             , list.get(j).getSignature()
@@ -153,8 +153,7 @@ public class ShowFriendReasonActivity extends Activity {
                                                             ,list.get(j).getAddress()
                                                             ,list.get(j).getNoteText()
                                                             ,list.get(j).getBirthday()));
-                                                    TypeActivity.adapter.notifyItemChanged(TypeActivity.personList.size()-1);
-                                                    TypeActivity.personIcon.add(BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath()));
+                                                    TypeActivity.adapter.notifyItemChanged(personList.size()-1);
                                                     break;
                                                 }
                                         }

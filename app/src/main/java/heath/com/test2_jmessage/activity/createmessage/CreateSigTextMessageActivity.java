@@ -19,7 +19,6 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
@@ -42,14 +41,15 @@ import heath.com.test2_jmessage.StatusBar.StatusBarUtils;
 import heath.com.test2_jmessage.activity.TypeActivity;
 import heath.com.test2_jmessage.activity.friend.ManageFriendActivity;
 import heath.com.test2_jmessage.adapter.MsgAdapter;
-import heath.com.test2_jmessage.application.IMDebugApplication;
+import heath.com.test2_jmessage.application.MyApplication;
 import heath.com.test2_jmessage.recycleView_item.Msg;
 import heath.com.test2_jmessage.tools.PushToast;
 import heath.com.test2_jmessage.tools.tools;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static heath.com.test2_jmessage.activity.TypeActivity.myUserId;
-import static heath.com.test2_jmessage.activity.TypeActivity.personList;
+import static heath.com.test2_jmessage.application.MyApplication.personList;
+
 
 /**
  * Created by ${chenyn} on 16/3/29.
@@ -81,7 +81,6 @@ public class CreateSigTextMessageActivity extends Activity {
     private String getTextMessage = "\n";
     private EditText mEt_name;
     public static EditText mEt_text;
-    private TextView mBt_send;
     public static final String TEXT_MESSAGE = "text_message";
     private EditText mEt_appkey;
     private EditText mEt_customName;
@@ -96,17 +95,14 @@ public class CreateSigTextMessageActivity extends Activity {
     private CheckBox mCb_enableCustomNotify;
     private CheckBox mCb_enableReadReceipt;
     private ProgressDialog mProgressDialog;
-    private IntentFilter intentFilter;
     private Localreceiver localRceiver;
     private LocalBroadcastManager localBroadcastManager;
     private List<Msg> msgList=new ArrayList<>();
     private RecyclerView msgRecyclerView;
     private MsgAdapter adapter;
-    private TextView menu,back,toolbarName;
+    private TextView menu;
     private BottomSheetBehavior behavior;
-    //private Button button,button2;
-    private RelativeLayout re;
-    private CoordinatorLayout coordinatorLayout;
+
     SharedPreferences.Editor editor2,editor3;
     SharedPreferences pref;
     String history;
@@ -128,13 +124,13 @@ public class CreateSigTextMessageActivity extends Activity {
         history=pref.getString("historyRecord","");
         history=pref.getString("historyRecord"+userId,"");
         String []his=history.split("%%");
-        back=findViewById(R.id.back);
-        toolbarName=findViewById(R.id.sigText_toolbarName);
+        TextView back=findViewById(R.id.back);
+        TextView toolbarName=findViewById(R.id.sigText_toolbarName);
         mEt_name = (EditText) findViewById(R.id.et_name);
         toolbarName.setText(getIntent().getStringExtra("note_name"));
         position=getIntent().getIntExtra("position",0);
         mEt_text = (EditText) findViewById(R.id.et_text);
-        mBt_send = (TextView) findViewById(R.id.bt_send);
+        TextView  mBt_send = (TextView) findViewById(R.id.bt_send);
         mEt_appkey = (EditText) findViewById(R.id.et_appkey);
         mEt_customName = (EditText) findViewById(R.id.et_custom_name);
         mEt_extraKey = (EditText) findViewById(R.id.et_extra_key);
@@ -172,11 +168,11 @@ public class CreateSigTextMessageActivity extends Activity {
         for (int i=his.length-1;i>=0;i--){
 
             if (his[i].contains("text_left")&&!his[i].equals("text_left")){
-                msgList.add(0,new Msg(TypeActivity.personIcon.get(position),null,his[i].replace("text_left",""),Msg.TYPE_RECEIVED));
+                msgList.add(0,new Msg(personList.get(position).getAvatar(),null,his[i].replace("text_left",""),Msg.TYPE_RECEIVED));
             }
             if (his[i].contains("image_left")&&!his[i].equals("image_left")){
                 Bitmap bitmap= BitmapFactory.decodeFile(his[i].replace("image_left",""));
-                msgList.add(0,new Msg(TypeActivity.personIcon.get(position),bitmap,null,Msg.TYPE_RECEIVED));
+                msgList.add(0,new Msg(personList.get(position).getAvatar(),bitmap,null,Msg.TYPE_RECEIVED));
             }
             if (his[i].contains("text_right")&&!his[i].equals("text_right")){
                 msgList.add(0,new Msg(null,his[i].replace("text_right",""),Msg.TYPE_SENT));
@@ -186,8 +182,8 @@ public class CreateSigTextMessageActivity extends Activity {
         RelativeLayout linearLayout=findViewById(R.id.ll_content_bottom_sheet);
         behavior = BottomSheetBehavior.from(linearLayout);
         behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-        coordinatorLayout=findViewById(R.id.co);
-        re=findViewById(R.id.l1);
+        CoordinatorLayout coordinatorLayout=findViewById(R.id.co);
+        RelativeLayout re=findViewById(R.id.l1);
 
 // 得到参数
         final CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(re.getLayoutParams());
@@ -219,9 +215,9 @@ public class CreateSigTextMessageActivity extends Activity {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(IMDebugApplication.getContext(), TypeActivity.class);
+                Intent intent=new Intent(MyApplication.getContext(), TypeActivity.class);
                 intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
-                IMDebugApplication.getContext().startActivity(intent);
+                MyApplication.getContext().startActivity(intent);
                 //overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
         });
@@ -305,7 +301,6 @@ public class CreateSigTextMessageActivity extends Activity {
                                 mEt_text.setText("");
                                 PushToast.getInstance().createToast("提示","发送成功",null,true);
                             } else {
-                                //Log.i(TAG, "JMessageClient.createSingleTextMessage" + ", responseCode = " + i + " ; LoginDesc = " + s);
                                 PushToast.getInstance().createToast("提示","发送失败",null,false);
                             }
                         }
@@ -334,11 +329,11 @@ public class CreateSigTextMessageActivity extends Activity {
                     //发送消息
                     JMessageClient.sendMessage(message, options);
                 } else {
-                    Toast.makeText(getApplicationContext(), "必填字段不能为空", Toast.LENGTH_SHORT).show();
+                    PushToast.getInstance().createToast("提示","未输入文本",null,false);
                 }
             }
         });
-        intentFilter=new IntentFilter();
+        IntentFilter intentFilter=new IntentFilter();
         intentFilter.addAction("message");
         localRceiver =new Localreceiver(msgList,msgRecyclerView,adapter);
         localBroadcastManager=LocalBroadcastManager.getInstance(this);
@@ -366,13 +361,13 @@ public class CreateSigTextMessageActivity extends Activity {
         public void onReceive(Context context, Intent intent) {
             if (intent.getLongExtra("userId",0)==userId){
                 if (intent.getStringExtra("key")!=null) {
-                    Msg msg = new Msg(personList.get(position).getBitmap(),null, intent.getStringExtra("key"), Msg.TYPE_RECEIVED);
+                    Msg msg = new Msg(personList.get(position).getAvatar(),null, intent.getStringExtra("key"), Msg.TYPE_RECEIVED);
                     msgList.add(msg);
                     adapter.notifyItemInserted(msgList.size() - 1);
                     msgRecyclerView.scrollToPosition(msgList.size() - 1);
                 }
                 if (intent.getStringExtra("SysMessage")!=null){
-                    Msg msg2=new Msg(personList.get(position).getBitmap(),null,intent.getStringExtra("SysMessage"),Msg.TYPE_SENT);
+                    Msg msg2=new Msg(personList.get(position).getAvatar(),null,intent.getStringExtra("SysMessage"),Msg.TYPE_SENT);
                     msgList.add(msg2);
                     adapter.notifyItemInserted(msgList.size()-1);
                     msgRecyclerView.scrollToPosition(msgList.size()-1);
@@ -381,7 +376,7 @@ public class CreateSigTextMessageActivity extends Activity {
                 if (intent.getByteArrayExtra("image")!=null){
                     byte[] res=intent.getByteArrayExtra("image");
                     Bitmap bitmap=getPicFromBytes(res,null);
-                    Msg msg2=new Msg(personList.get(position).getBitmap(),bitmap,null,Msg.TYPE_RECEIVED);
+                    Msg msg2=new Msg(personList.get(position).getAvatar(),bitmap,null,Msg.TYPE_RECEIVED);
                     msgList.add(msg2);
                     adapter.notifyItemInserted(msgList.size()-1);
                     msgRecyclerView.scrollToPosition(msgList.size()-1);

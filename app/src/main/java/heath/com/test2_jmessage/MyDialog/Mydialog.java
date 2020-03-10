@@ -33,8 +33,10 @@ public class Mydialog extends Dialog {
     public static ImageContent imageContent;
     public static Message message;
     SharedPreferences.Editor editor=getApplicationContext().getSharedPreferences("data",0).edit();
-    public Mydialog(Context context){
-        super(context);
+
+    public Mydialog(Context context, int id, Bitmap bitmap,int msgId){
+
+        super(context,id);
     }
     public Mydialog(Context context,int id){
         super(context,id);

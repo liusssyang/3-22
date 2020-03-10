@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import heath.com.test2_jmessage.R;
-import heath.com.test2_jmessage.application.IMDebugApplication;
+import heath.com.test2_jmessage.application.MyApplication;
 
 
 public class Msg {
@@ -14,10 +14,23 @@ public class Msg {
     private Bitmap image;
     private Bitmap icon;
     private int type;
+    private int messageId;
+    private String userName;
+    private String appKey;
+
     public Msg(Bitmap image,String content,int type){
         this.content=content;
         this.type=type;
         this.image=image;
+    }
+    public Msg(String userName,String appKey,Bitmap icon,Bitmap image,String content,int type,int messageId){
+        this.content=content;
+        this.type=type;
+        this.image=image;
+        this.icon=icon;
+        this.messageId=messageId;
+        this.userName=userName;
+        this.appKey=appKey;
     }
     public Msg(Bitmap icon,Bitmap image,String content,int type){
         this.content=content;
@@ -25,6 +38,9 @@ public class Msg {
         this.image=image;
         this.icon=icon;
     }
+    public String getUserName(){return userName;}
+    public String getAppKey(){return appKey; }
+    public int getId(){return messageId;}
     public String getContent(){
         return content;
     }
@@ -33,7 +49,7 @@ public class Msg {
     }
     public Bitmap getIconContent(){
         if (this.icon==null)
-            return BitmapFactory.decodeResource(IMDebugApplication.getContext().getResources(), R.drawable.icon_right_default);
+            return BitmapFactory.decodeResource(MyApplication.getContext().getResources(), R.drawable.icon_right_default);
         else
             return this.icon;
     }
@@ -42,7 +58,7 @@ public class Msg {
     }
     public void setIcon(Bitmap icon){
         if (icon==null)
-            this.icon= BitmapFactory.decodeResource(IMDebugApplication.getContext().getResources(), R.drawable.icon_right_default);
+            this.icon= BitmapFactory.decodeResource(MyApplication.getContext().getResources(), R.drawable.icon_right_default);
         else
             this.icon=icon;
     }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/conversation_dealing"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -22,9 +23,10 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:paddingTop="15dp"
+
             >
             <TextView
+                android:layout_marginTop="15dp"
                 android:id="@+id/manage_back"
                 android:focusable="true"
                 android:clickable="true"
@@ -34,23 +36,58 @@
                 android:layout_gravity="center"
                 android:textColor="#ffffff"
                 />
-            <TextView
-                android:id="@+id/manage_sigText_toolbarName"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+            <LinearLayout
+                android:layout_alignParentBottom="true"
                 android:layout_centerInParent="true"
-                android:layout_gravity="center"
-                android:textSize="18sp"
-                android:text="聊天记录"
-                android:gravity="center"
-                android:textColor="#ffffff"/>
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+                <TextView
+                    android:layout_marginTop="15dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textSize="18sp"
+                    android:text="聊天记录"
+                    android:gravity="center"
+                    android:textColor="#ffffff"/>
+                <TextView
+                    android:visibility="gone"
+                    android:layout_marginTop="3dp"
+                    android:id="@+id/manage_sigText_toolbarName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="聊天记录"
+                    android:gravity="center"
+                    android:textColor="#ffffff"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_marginTop="15dp"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:id="@+id/manage_message"
+                android:background="@drawable/col_set_white"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="15dp"/>
         </RelativeLayout>
     </Toolbar>
+    <TextView
+        android:background="#ffffff"
+        android:id="@+id/none"
+        android:visibility="gone"
+        android:layout_marginTop="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:gravity="center"
+        android:text="暂无聊天记录"/>
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/msg_recycler_view"/>
     <ScrollView
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
@@ -79,6 +116,7 @@
         />
 
     <Button
+        android:visibility="gone"
         android:background="@drawable/background_addnew_accept"
         android:id="@+id/bt_delete_message"
         android:layout_width="match_parent"
@@ -86,29 +124,34 @@
         android:text="删除会话中消息"
         />
     <Button
+        android:visibility="gone"
         android:id="@+id/bt_single_delete"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="删除单聊会话"
         />
     <Button
+        android:visibility="gone"
         android:id="@+id/bt_group_delete"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="删除群聊会话"
         />
     <Button
+        android:visibility="gone"
         android:id="@+id/bt_get_conversation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="查询会话"/>
     <Button
+        android:visibility="gone"
         android:id="@+id/bt_get_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="查询消息"
         />
     <Button
+        android:visibility="gone"
         android:id="@+id/bt_get_latest_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -13,11 +13,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import de.hdodenhof.circleimageview.CircleImageView;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.activity.createmessage.CreateSigTextMessageActivity;
-import heath.com.test2_jmessage.application.IMDebugApplication;
+import heath.com.test2_jmessage.application.MyApplication;
 import heath.com.test2_jmessage.recycleView_item.personMsg;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static heath.com.test2_jmessage.activity.TypeActivity.personList;
+import static heath.com.test2_jmessage.application.MyApplication.personList;
 
 
 public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder>{
@@ -50,13 +50,13 @@ public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder
                 int position=holder.getAdapterPosition();
                 personMsg personmsg=personMsgList.get(position);
                 Log.d("13172ly", "onClick: "+position+personList.get(position).getUserName());
-                Intent intent = new Intent(IMDebugApplication.getContext(), CreateSigTextMessageActivity.class);
+                Intent intent = new Intent(MyApplication.getContext(), CreateSigTextMessageActivity.class);
                 intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 intent.putExtra("name",personmsg.getUserName());
                 intent.putExtra("note_name",personmsg.getName());
                 intent.putExtra("position",position);
                 intent.putExtra("userId",personmsg.getUserId());
-                IMDebugApplication.getContext().startActivity(intent);
+                MyApplication.getContext().startActivity(intent);
 
             }
         });
@@ -68,7 +68,7 @@ public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder
         holder.leftMsg.setText(msg.getName());
         holder.simpleMessage.setText(msg.getSimpleMessage());
         holder.time.setText(msg.getTime());
-        holder.friendsIcon.setImageBitmap(msg.getBitmap());
+        holder.friendsIcon.setImageBitmap(msg.getAvatar());
     }
     public  int getItemCount(){
         return personMsgList.size();

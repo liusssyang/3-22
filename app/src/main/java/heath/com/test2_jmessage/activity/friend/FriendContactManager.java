@@ -19,7 +19,6 @@ import cn.jpush.im.android.api.callback.GetUserInfoListCallback;
 import cn.jpush.im.android.api.model.UserInfo;
 import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.R;
-import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
 
 /**
  * Created by ${chenyn} on 16/7/20.
@@ -177,7 +176,7 @@ public class FriendContactManager extends Activity {
 
     private void initView() {
         setContentView(R.layout.activity_friend_contact_manager);
-        zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
+//        zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
         mBu_showFriendList = (Button) findViewById(R.id.bu_show_friend_list);
         mTv_showFriendList = (TextView) findViewById(R.id.tv_show_friend_list);
         mBt_addFriend = (Button) findViewById(R.id.bt_add_friend);

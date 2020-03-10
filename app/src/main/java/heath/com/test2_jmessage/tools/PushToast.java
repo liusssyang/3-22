@@ -30,7 +30,7 @@ public class PushToast {
     private Method mShow;
     private Method mHide;
     private Field mViewFeild;
-    private long durationTime = 5*1000;
+    private long durationTime = 1*1000;
 
     public static PushToast getInstance() {
         if (mInstance == null) {

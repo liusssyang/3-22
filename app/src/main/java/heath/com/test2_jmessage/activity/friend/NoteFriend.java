@@ -25,7 +25,8 @@ import heath.com.test2_jmessage.tools.PushToast;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static heath.com.test2_jmessage.activity.TypeActivity.adapter;
-import static heath.com.test2_jmessage.activity.TypeActivity.personList;
+import static heath.com.test2_jmessage.application.MyApplication.personList;
+
 
 public class NoteFriend extends Activity {
     private  int position;
@@ -77,6 +78,7 @@ public class NoteFriend extends Activity {
                                     if (list.get(j).getUserID()==userId){
                                         final UserInfo info=list.get(j);
                                         if (TextUtils.isEmpty(noteName) && TextUtils.isEmpty(noteText)) {
+
                                             PushToast.getInstance().createToast("提示","请输入相关参数",null,false);
                                         }
                                         if (!TextUtils.isEmpty(noteName)) {

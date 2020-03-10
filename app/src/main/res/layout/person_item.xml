@@ -29,7 +29,8 @@
                 android:layout_height="30dp"
                 android:id="@+id/person"
                 android:gravity="start|bottom"
-                android:text="A123"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:textSize="18sp"
                 android:layout_toLeftOf="@+id/message_time"
                 android:textColor="#000000"/>
@@ -44,6 +45,7 @@
                 android:layout_alignParentEnd="true"
                 />
             <TextView
+                android:ellipsize="end"
                 android:layout_marginStart="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="20dp"

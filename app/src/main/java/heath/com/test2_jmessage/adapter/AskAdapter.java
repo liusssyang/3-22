@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import de.hdodenhof.circleimageview.CircleImageView;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.activity.friend.ShowFriendReasonActivity;
-import heath.com.test2_jmessage.application.IMDebugApplication;
+import heath.com.test2_jmessage.application.MyApplication;
 import heath.com.test2_jmessage.recycleView_item.personMsg;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -47,14 +47,14 @@ public class AskAdapter extends RecyclerView.Adapter<AskAdapter.ViewHolder>{
             public void onClick(View v) {
                 int position=holder.getAdapterPosition();
                 personMsg personmsg=personMsgList.get(position);
-                    Intent intent = new Intent(IMDebugApplication.getContext(), ShowFriendReasonActivity.class);
+                    Intent intent = new Intent(MyApplication.getContext(), ShowFriendReasonActivity.class);
                     intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("unique",personmsg.getUnique());
                     intent.putExtra("username",personmsg.getUserName());
                     intent.putExtra("appkey",personmsg.getAppkey());
                     intent.putExtra("position",position);
                     intent.putExtra("other",personmsg.getOther());
-                    IMDebugApplication.getContext().startActivity(intent);
+                    MyApplication.getContext().startActivity(intent);
             }
         });
         return  holder;
@@ -65,7 +65,7 @@ public class AskAdapter extends RecyclerView.Adapter<AskAdapter.ViewHolder>{
         holder.leftMsg.setText(msg.getUserName());
         holder.simpleMessage.setText(msg.getSimpleMessage());
         holder.time.setText(msg.getTime());
-        holder.friendsIcon.setImageBitmap(msg.getBitmap());
+        holder.friendsIcon.setImageBitmap(msg.getAvatar());
     }
     public  int getItemCount(){
         return personMsgList.size();

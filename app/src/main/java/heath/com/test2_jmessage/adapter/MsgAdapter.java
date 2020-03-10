@@ -19,13 +19,15 @@ import heath.com.test2_jmessage.MyDialog.Mydialog;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.activity.TypeActivity;
 import heath.com.test2_jmessage.recycleView_item.Msg;
+import heath.com.test2_jmessage.tools.tools;
 
 //import heath.com.test2_jmessage.LocalReceiver.Localreceiver;
 
 
-public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.ViewHolder>{
+public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.ViewHolder> {
     private List<Msg> mMsgList;
-    static class ViewHolder extends RecyclerView.ViewHolder{
+
+    static class ViewHolder extends RecyclerView.ViewHolder {
         LinearLayout leftLayout;
         LinearLayout rightLayout;
         TextView leftMsg;
@@ -34,53 +36,40 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.ViewHolder>{
         ImageView rightImg;
         CircleImageView lefticon;
         CircleImageView righticon;
-        public ViewHolder(View view){
+
+        public ViewHolder(View view) {
             super(view);
-            View itemview=view;
-            leftLayout=(LinearLayout)view.findViewById(R.id.left_layout);
-            rightLayout=(LinearLayout)view.findViewById(R.id.right_layout);
-            leftMsg=view.findViewById(R.id.left_msg);
-            rightMsg=view.findViewById(R.id.right_msg);
-            leftImg=view.findViewById(R.id.left_img);
-            rightImg=view.findViewById(R.id.right_img);
-            lefticon=view.findViewById(R.id.iconleft);
-            righticon=view.findViewById(R.id.iconright);
+            View itemview = view;
+            leftLayout = (LinearLayout) view.findViewById(R.id.left_layout);
+            rightLayout = (LinearLayout) view.findViewById(R.id.right_layout);
+            leftMsg = view.findViewById(R.id.left_msg);
+            rightMsg = view.findViewById(R.id.right_msg);
+            leftImg = view.findViewById(R.id.left_img);
+            rightImg = view.findViewById(R.id.right_img);
+            lefticon = view.findViewById(R.id.iconleft);
+            righticon = view.findViewById(R.id.iconright);
         }
-    }
-    public  MsgAdapter(List<Msg> msgList){
-        mMsgList=msgList;
-    }
-    public  ViewHolder onCreateViewHolder(ViewGroup parent,int viewType){
 
-        View view= LayoutInflater.from(parent.getContext()).
-                inflate(R.layout.msg_item,parent,false);
-        final ViewHolder holder=new ViewHolder(view);
-        holder.leftImg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Mydialog mydialog=new Mydialog(v.getContext(),R.style.MyDialogStyle);
-                mydialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                Window dialogWindow = mydialog.getWindow();
-                dialogWindow.setGravity(Gravity.CENTER);
-                dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
-                WindowManager.LayoutParams lp = dialogWindow.getAttributes();
-                lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-                lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                dialogWindow.setWindowAnimations(R.style.dialogWindowAnim);
-                dialogWindow.setAttributes(lp);
-                mydialog.show();
-            }
-        });
-
-        return  new ViewHolder(view);
     }
 
-    public void onBindViewHolder(ViewHolder holder,int position){
-        Msg msg=mMsgList.get(position);
+    public MsgAdapter(List<Msg> msgList) {
+        mMsgList = msgList;
+    }
+
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+        View view = LayoutInflater.from(parent.getContext()).
+                inflate(R.layout.msg_item, parent, false);
+        final ViewHolder holder = new ViewHolder(view);
+        return new ViewHolder(view);
+    }
+
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
+        final Msg msg = mMsgList.get(position);
         holder.lefticon.setImageBitmap(msg.getIconContent());
         holder.righticon.setImageBitmap(TypeActivity.myIcon);
         if (msg.getType() == Msg.TYPE_RECEIVED) {
-            if (msg.getImageContent()!=null||msg.getContent()==null)
+            if (msg.getImageContent() != null || msg.getContent() == null)
                 holder.leftLayout.setBackgroundColor(Color.parseColor("#00000000"));
             else
                 holder.leftLayout.setBackgroundResource(R.drawable.left);
@@ -90,8 +79,8 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.ViewHolder>{
             holder.righticon.setVisibility(View.GONE);
             holder.leftMsg.setText(msg.getContent());
             holder.leftImg.setImageBitmap(msg.getImageContent());
-        }else if (msg.getType() == Msg.TYPE_SENT) {
-            if (msg.getImageContent()!=null||msg.getContent()==null)
+        } else if (msg.getType() == Msg.TYPE_SENT) {
+            if (msg.getImageContent() != null || msg.getContent() == null)
                 holder.leftLayout.setBackgroundColor(Color.parseColor("#00000000"));
             else
                 holder.leftLayout.setBackgroundResource(R.drawable.right);
@@ -102,8 +91,36 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.ViewHolder>{
             holder.rightMsg.setText(msg.getContent());
             holder.rightImg.setImageBitmap(msg.getImageContent());
         }
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (holder.lefticon != null) {
+                    Mydialog mydialog = new Mydialog(v.getContext(), R.style.MyDialogStyle);
+                    mydialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                    Window dialogWindow = mydialog.getWindow();
+                    dialogWindow.setGravity(Gravity.CENTER);
+                    dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
+                    WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+                    lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+                    lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                    dialogWindow.setWindowAnimations(R.style.dialogWindowAnim);
+                    dialogWindow.setAttributes(lp);
+                    mydialog.show();
+                }
+            }
+        });
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                tools.retractMessage(msg.getUserName(), msg.getAppKey(), msg.getId());
+                return true;
+            }
+        });
     }
-    public  int getItemCount(){
+
+    public int getItemCount() {
         return mMsgList.size();
     }
+
+
 }

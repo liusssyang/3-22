@@ -27,13 +27,13 @@ import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
 import heath.com.test2_jmessage.activity.TypeActivity;
 import heath.com.test2_jmessage.activity.conversation.DeleteConversationActivity;
 import heath.com.test2_jmessage.activity.createmessage.CreateSigTextMessageActivity;
-import heath.com.test2_jmessage.application.IMDebugApplication;
+import heath.com.test2_jmessage.application.MyApplication;
 import heath.com.test2_jmessage.tools.tools;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static heath.com.test2_jmessage.activity.TypeActivity.adapter;
-import static heath.com.test2_jmessage.activity.TypeActivity.personIcon;
-import static heath.com.test2_jmessage.activity.TypeActivity.personList;
+import static heath.com.test2_jmessage.application.MyApplication.personList;
+
 
 public class ManageFriendActivity extends Activity {
     private int position;
@@ -51,13 +51,13 @@ public class ManageFriendActivity extends Activity {
         manage_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(IMDebugApplication.getContext(), CreateSigTextMessageActivity.class);
+                Intent intent = new Intent(MyApplication.getContext(), CreateSigTextMessageActivity.class);
                 intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 intent.putExtra("name",personList.get(position).getUserName());
                 intent.putExtra("note_name",personList.get(position).getName());
                 intent.putExtra("position",position);
                 intent.putExtra("userId",personList.get(position).getUserId());
-                IMDebugApplication.getContext().startActivity(intent);
+                MyApplication.getContext().startActivity(intent);
                 overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
             }
         });
@@ -101,7 +101,7 @@ public class ManageFriendActivity extends Activity {
                 manage_simple_message.append("|"+personList.get(position).getGender());
             }
         }
-        if (personIcon.get(position)==null){
+        if (personList.get(position).getAvatar()==null){
             ContactManager.getFriendList(
                 new GetUserInfoListCallback() {
                     @Override
@@ -116,8 +116,8 @@ public class ManageFriendActivity extends Activity {
                                    public void gotResult(int i, String s, Bitmap bitmap) {
                                        if (i==0){
                                            manage_person_icon.setImageBitmap(bitmap);
-                                           personIcon.set(position,bitmap);
-                                           personList.get(position).setBitmap(bitmap);
+                                           personList.get(position).setAvatar(bitmap);
+                                           personList.get(position).setAvatar(bitmap);
                                            adapter.notifyDataSetChanged();
                                        }
                                    }
@@ -128,7 +128,7 @@ public class ManageFriendActivity extends Activity {
                 });
         }
         else
-            manage_person_icon.setImageBitmap(personIcon.get(position));
+            manage_person_icon.setImageBitmap(personList.get(position).getAvatar());
         final TextView state=findViewById(R.id.state);
         final LinearLayout detail_information=findViewById(R.id.detail_information);
         final TextView UserId=findViewById(R.id.userid);
@@ -160,11 +160,10 @@ public class ManageFriendActivity extends Activity {
                                                 public void gotResult(int i, String s) {
                                                     if (i == 0) {
                                                         personList.remove(position);
-                                                        personIcon.remove(position);
                                                         adapter.notifyDataSetChanged();
-                                                        Intent intent=new Intent(IMDebugApplication.getContext(), TypeActivity.class);
+                                                        Intent intent=new Intent(MyApplication.getContext(), TypeActivity.class);
                                                         intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
-                                                        IMDebugApplication.getContext().startActivity(intent);
+                                                        MyApplication.getContext().startActivity(intent);
                                                         Toast.makeText(getApplicationContext(), "删除成功", Toast.LENGTH_SHORT).show();
                                                     } else {
                                                         Toast.makeText(getApplicationContext(), "删除失败", Toast.LENGTH_SHORT).show();
