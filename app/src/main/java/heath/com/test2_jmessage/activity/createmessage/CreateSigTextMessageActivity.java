@@ -2,8 +2,6 @@ package heath.com.test2_jmessage.activity.createmessage;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -30,12 +28,14 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.content.TextContent;
 import cn.jpush.im.android.api.model.Conversation;
 import cn.jpush.im.android.api.model.Message;
 import cn.jpush.im.android.api.options.MessageSendingOptions;
 import cn.jpush.im.api.BasicCallback;
+import heath.com.test2_jmessage.BroadCast.Localreceiver;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.StatusBar.StatusBarUtils;
 import heath.com.test2_jmessage.activity.TypeActivity;
@@ -97,13 +97,13 @@ public class CreateSigTextMessageActivity extends Activity {
     private ProgressDialog mProgressDialog;
     private Localreceiver localRceiver;
     private LocalBroadcastManager localBroadcastManager;
-    private List<Msg> msgList=new ArrayList<>();
+    private List<Msg> msgList = new ArrayList<>();
     private RecyclerView msgRecyclerView;
     private MsgAdapter adapter;
     private TextView menu;
     private BottomSheetBehavior behavior;
 
-    SharedPreferences.Editor editor2,editor3;
+    SharedPreferences.Editor editor2, editor3;
     SharedPreferences pref;
     String history;
     public static int position;
@@ -115,22 +115,22 @@ public class CreateSigTextMessageActivity extends Activity {
         setContentView(R.layout.activity_create_single_text_message);
         PushToast.getInstance().init(this);
         StatusBarUtils.with(this).setDrawable(getResources().getDrawable(R.drawable.toolbar_ground)).init();
-        editor2=getApplicationContext().getSharedPreferences("history",0).edit();
-        pref=getApplicationContext().getSharedPreferences("history",0);
-        userId=getIntent().getLongExtra("userId",0);
-        editor2=getApplicationContext().getSharedPreferences("history"+myUserId,0).edit();
-        pref=getApplicationContext().getSharedPreferences("history"+myUserId,0);
-        editor3=getApplicationContext().getSharedPreferences("backdata"+myUserId,0).edit();
-        history=pref.getString("historyRecord","");
-        history=pref.getString("historyRecord"+userId,"");
-        String []his=history.split("%%");
-        TextView back=findViewById(R.id.back);
-        TextView toolbarName=findViewById(R.id.sigText_toolbarName);
+        editor2 = getApplicationContext().getSharedPreferences("history", 0).edit();
+        pref = getApplicationContext().getSharedPreferences("history", 0);
+        userId = getIntent().getLongExtra("userId", 0);
+        editor2 = getApplicationContext().getSharedPreferences("history" + myUserId, 0).edit();
+        pref = getApplicationContext().getSharedPreferences("history" + myUserId, 0);
+        editor3 = getApplicationContext().getSharedPreferences("backdata" + myUserId, 0).edit();
+        history = pref.getString("historyRecord", "");
+        history = pref.getString("historyRecord" + userId, "");
+        String[] his = history.split("%%");
+        TextView back = findViewById(R.id.back);
+        TextView toolbarName = findViewById(R.id.sigText_toolbarName);
         mEt_name = (EditText) findViewById(R.id.et_name);
         toolbarName.setText(getIntent().getStringExtra("note_name"));
-        position=getIntent().getIntExtra("position",0);
+        position = getIntent().getIntExtra("position", 0);
         mEt_text = (EditText) findViewById(R.id.et_text);
-        TextView  mBt_send = (TextView) findViewById(R.id.bt_send);
+        TextView mBt_send = (TextView) findViewById(R.id.bt_send);
         mEt_appkey = (EditText) findViewById(R.id.et_appkey);
         mEt_customName = (EditText) findViewById(R.id.et_custom_name);
         mEt_extraKey = (EditText) findViewById(R.id.et_extra_key);
@@ -143,47 +143,46 @@ public class CreateSigTextMessageActivity extends Activity {
         mCb_retainOfflineMsg = (CheckBox) findViewById(R.id.cb_retainOffline);
         mCb_enableCustomNotify = (CheckBox) findViewById(R.id.cb_enableCustomNotify);
         mCb_enableReadReceipt = (CheckBox) findViewById(R.id.cb_needReadReceipt);
-        menu=(TextView) findViewById(R.id.menu);
-        TextView sigText_toolbarMenu=findViewById(R.id.sigText_toolbarMenu);
+        menu = (TextView) findViewById(R.id.menu);
+        TextView sigText_toolbarMenu = findViewById(R.id.sigText_toolbarMenu);
         sigText_toolbarMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(getApplication(), ManageFriendActivity.class);
+                Intent intent = new Intent(getApplication(), ManageFriendActivity.class);
                 intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("userId",userId);
-                intent.putExtra("position",position);
-                Log.d("13172ly", "onClick: "+position+personList.get(position).getUserName());
+                intent.putExtra("userId", userId);
+                intent.putExtra("position", position);
                 startActivity(intent);
                 overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
             }
         });
-        msgRecyclerView=findViewById(R.id.msg_recycler_view);
-        LinearLayoutManager layoutManager=new LinearLayoutManager(this);
+        msgRecyclerView = findViewById(R.id.msg_recycler_view);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         msgRecyclerView.setLayoutManager(layoutManager);
-        adapter=new MsgAdapter(msgList);
+        adapter = new MsgAdapter(msgList);
         msgRecyclerView.setAdapter(adapter);
-        for (int i=0;i<his.length;i++){
-            getTextMessage+=i+"\n"+his[i]+"\n\n";
+        for (int i = 0; i < his.length; i++) {
+            getTextMessage += i + "\n" + his[i] + "\n\n";
         }
-        for (int i=his.length-1;i>=0;i--){
+        for (int i = his.length - 1; i >= 0; i--) {
 
-            if (his[i].contains("text_left")&&!his[i].equals("text_left")){
-                msgList.add(0,new Msg(personList.get(position).getAvatar(),null,his[i].replace("text_left",""),Msg.TYPE_RECEIVED));
+            if (his[i].contains("text_left") && !his[i].equals("text_left")) {
+                msgList.add(0, new Msg(personList.get(position).getAvatar(), null, his[i].replace("text_left", ""), Msg.TYPE_RECEIVED));
             }
-            if (his[i].contains("image_left")&&!his[i].equals("image_left")){
-                Bitmap bitmap= BitmapFactory.decodeFile(his[i].replace("image_left",""));
-                msgList.add(0,new Msg(personList.get(position).getAvatar(),bitmap,null,Msg.TYPE_RECEIVED));
+            if (his[i].contains("image_left") && !his[i].equals("image_left")) {
+                Bitmap bitmap = BitmapFactory.decodeFile(his[i].replace("image_left", ""));
+                msgList.add(0, new Msg(personList.get(position).getAvatar(), bitmap, null, Msg.TYPE_RECEIVED));
             }
-            if (his[i].contains("text_right")&&!his[i].equals("text_right")){
-                msgList.add(0,new Msg(null,his[i].replace("text_right",""),Msg.TYPE_SENT));
+            if (his[i].contains("text_right") && !his[i].equals("text_right")) {
+                msgList.add(0, new Msg(null, his[i].replace("text_right", ""), Msg.TYPE_SENT));
             }
         }
-        msgRecyclerView.scrollToPosition(msgList.size()-1);
-        RelativeLayout linearLayout=findViewById(R.id.ll_content_bottom_sheet);
+        msgRecyclerView.scrollToPosition(msgList.size() - 1);
+        RelativeLayout linearLayout = findViewById(R.id.ll_content_bottom_sheet);
         behavior = BottomSheetBehavior.from(linearLayout);
         behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-        CoordinatorLayout coordinatorLayout=findViewById(R.id.co);
-        RelativeLayout re=findViewById(R.id.l1);
+        CoordinatorLayout coordinatorLayout = findViewById(R.id.co);
+        RelativeLayout re = findViewById(R.id.l1);
 
 // 得到参数
         final CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(re.getLayoutParams());
@@ -198,13 +197,12 @@ public class CreateSigTextMessageActivity extends Activity {
             @Override
             public void onClick(View v) {
                 hideInput();
-                if (menu.getText().toString().equals(" ")){
+                if (menu.getText().toString().equals(" ")) {
                     menu.setBackgroundResource(R.drawable.close);
                     menu.setText("  ");
                     //coordinatorLayout.scrollTo(0,500);
                     behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                }
-                else {
+                } else {
                     menu.setBackgroundResource(R.drawable.menu);
                     menu.setText(" ");
                     //coordinatorLayout.scrollTo(0,0);
@@ -215,7 +213,7 @@ public class CreateSigTextMessageActivity extends Activity {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(MyApplication.getContext(), TypeActivity.class);
+                Intent intent = new Intent(MyApplication.getContext(), TypeActivity.class);
                 intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 MyApplication.getContext().startActivity(intent);
                 //overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
@@ -223,18 +221,16 @@ public class CreateSigTextMessageActivity extends Activity {
         });
         behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
-            public void onStateChanged(@NonNull View bottomSheet, int newState)
-            {
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 //这里是bottomSheet状态的改变
-                if (newState==BottomSheetBehavior.STATE_DRAGGING)
+                if (newState == BottomSheetBehavior.STATE_DRAGGING)
                     behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
 
             @Override
-            public void onSlide(@NonNull View bottomSheet, float slideOffset)
-            {
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
                 //这里是拖拽中的回调，根据slideOffset可以做一些动画
-                Log.d("icon_left_default", "onSlide: "+slideOffset);
+                Log.d("icon_left_default", "onSlide: " + slideOffset);
             }
         });
         mCb_enableCustomNotify.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -255,24 +251,22 @@ public class CreateSigTextMessageActivity extends Activity {
         mBt_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String name =getIntent().getStringExtra("name");
+                String name = getIntent().getStringExtra("name");
                 String text = mEt_text.getText().toString();
-                editor3.putString("simplemessage"+userId,text);
-                editor3.putString("time"+userId,tools.CurrentTime());
-                editor3.putInt("position",position);
+                editor3.putString("simplemessage" + userId, text);
+                editor3.putString("time" + userId, tools.CurrentTime());
+                editor3.putInt("position", position);
                 editor3.apply();
                 if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(text)) {
                     String appkey = mEt_appkey.getText().toString();
                     String customFromName = mEt_customName.getText().toString();
                     String extraKey = mEt_extraKey.getText().toString();
                     String extraValue = mEt_extraValue.getText().toString();
-                    final Msg msg=new Msg(null,text,Msg.TYPE_SENT);
+                    final Msg msg = new Msg(null, text, Msg.TYPE_SENT);
                     boolean retainOfflineMsg = mCb_retainOfflineMsg.isChecked();
                     boolean showNotification = mCb_showNotification.isChecked();
                     boolean enableCustomNotify = mCb_enableCustomNotify.isChecked();
                     boolean needReadReceipt = mCb_enableReadReceipt.isChecked();
-
-                    //通过username和appkey拿到会话对象，通过指定appkey可以创建一个和跨应用用户的会话对象，从而实现跨应用的消息发送
                     Conversation mConversation = JMessageClient.getSingleConversation(name, appkey);
                     if (mConversation == null) {
                         mConversation = Conversation.createSingleConversation(name, appkey);
@@ -292,16 +286,16 @@ public class CreateSigTextMessageActivity extends Activity {
                             if (i == 0) {
                                 //Log.i(TAG, "JMessageClient.createSingleTextMessage" + ", responseCode = " + i + " ; LoginDesc = " + s);
                                 msgList.add(msg);
-                                adapter.notifyItemInserted(msgList.size()-1);
-                                msgRecyclerView.scrollToPosition(msgList.size()-1);
-                                history=history+mEt_text.getText().toString()+"text_right%%";
-                                editor2.putString("historyRecord",history);
-                                editor2.putString("historyRecord"+userId,history);
+                                adapter.notifyItemInserted(msgList.size() - 1);
+                                msgRecyclerView.scrollToPosition(msgList.size() - 1);
+                                history = history + mEt_text.getText().toString() + "text_right%%";
+                                editor2.putString("historyRecord", history);
+                                editor2.putString("historyRecord" + userId, history);
                                 editor2.apply();
                                 mEt_text.setText("");
-                                PushToast.getInstance().createToast("提示","发送成功",null,true);
+                                PushToast.getInstance().createToast("提示", "发送成功", null, true);
                             } else {
-                                PushToast.getInstance().createToast("提示","发送失败",null,false);
+                                PushToast.getInstance().createToast("提示", "发送失败", null, false);
                             }
                         }
                     });
@@ -329,72 +323,46 @@ public class CreateSigTextMessageActivity extends Activity {
                     //发送消息
                     JMessageClient.sendMessage(message, options);
                 } else {
-                    PushToast.getInstance().createToast("提示","未输入文本",null,false);
+                    PushToast.getInstance().createToast("提示", "未输入文本", null, false);
                 }
             }
         });
-        IntentFilter intentFilter=new IntentFilter();
+        IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("message");
-        localRceiver =new Localreceiver(msgList,msgRecyclerView,adapter);
-        localBroadcastManager=LocalBroadcastManager.getInstance(this);
-        localBroadcastManager.registerReceiver(localRceiver,intentFilter);
+        localRceiver = new Localreceiver(position,msgList, msgRecyclerView, adapter);
+        localBroadcastManager = LocalBroadcastManager.getInstance(this);
+        localBroadcastManager.registerReceiver(localRceiver, intentFilter);
+        final SwipeRefreshLayout swipeLayout = findViewById(R.id.swipeLayout);
+        swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if (tools.shownHistory(position, msgList, null)) ;
+                {
+                    PushToast.getInstance().createToast("提示", "刷新成功", null, true);
+                    adapter.notifyDataSetChanged();
+                    msgRecyclerView.scrollToPosition(msgList.size() - 1);
+                }
+                swipeLayout.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        swipeLayout.setRefreshing(false);
+                    }
+                }, 1000);
+            }
+        });
     }
+
     protected void onStop() {
         super.onStop();
 
     }
 
-    public void onDestroy(){
+    public void onDestroy() {
         super.onDestroy();
         localBroadcastManager.unregisterReceiver(localRceiver);
     }
-    class  Localreceiver extends BroadcastReceiver{
-        private List<Msg> msgList;
-        private RecyclerView msgRecyclerView;
-        private MsgAdapter adapter;
 
-        public Localreceiver(List<Msg> msgList,RecyclerView msgRecyclerView,MsgAdapter adapter){
-            this.msgList=msgList;
-            this.msgRecyclerView=msgRecyclerView;
-            this.adapter=adapter;
-        }
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getLongExtra("userId",0)==userId){
-                if (intent.getStringExtra("key")!=null) {
-                    Msg msg = new Msg(personList.get(position).getAvatar(),null, intent.getStringExtra("key"), Msg.TYPE_RECEIVED);
-                    msgList.add(msg);
-                    adapter.notifyItemInserted(msgList.size() - 1);
-                    msgRecyclerView.scrollToPosition(msgList.size() - 1);
-                }
-                if (intent.getStringExtra("SysMessage")!=null){
-                    Msg msg2=new Msg(personList.get(position).getAvatar(),null,intent.getStringExtra("SysMessage"),Msg.TYPE_SENT);
-                    msgList.add(msg2);
-                    adapter.notifyItemInserted(msgList.size()-1);
-                    msgRecyclerView.scrollToPosition(msgList.size()-1);
-                    tools.sendMessage(mEt_name.getText().toString(),intent.getStringExtra("SysMessage"),null,null,null,null,null,null,null,null);
-                }
-                if (intent.getByteArrayExtra("image")!=null){
-                    byte[] res=intent.getByteArrayExtra("image");
-                    Bitmap bitmap=getPicFromBytes(res,null);
-                    Msg msg2=new Msg(personList.get(position).getAvatar(),bitmap,null,Msg.TYPE_RECEIVED);
-                    msgList.add(msg2);
-                    adapter.notifyItemInserted(msgList.size()-1);
-                    msgRecyclerView.scrollToPosition(msgList.size()-1);
-                }
-            }
-        }
 
-    }
-    public  Bitmap getPicFromBytes(byte[] bytes, BitmapFactory.Options opts) {
-
-        if (bytes != null)
-            if (opts != null)
-                return BitmapFactory.decodeByteArray(bytes, 0, bytes.length,  opts);
-            else
-                return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-        return null;
-
-    }
     protected void hideInput() {
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         View v = getWindow().peekDecorView();

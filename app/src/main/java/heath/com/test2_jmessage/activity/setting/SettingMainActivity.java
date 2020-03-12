@@ -7,39 +7,55 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.callback.IntegerCallback;
 import cn.jpush.im.android.api.model.UserInfo;
 import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.R;
+import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
 import heath.com.test2_jmessage.activity.RegisterAndLoginActivity;
 import heath.com.test2_jmessage.activity.notify.NotifyTypeActivity;
+import heath.com.test2_jmessage.application.MyApplication;
+import heath.com.test2_jmessage.tools.tools;
 
 /**
  * Created by ${chenyn} on 16/3/23.
  *
  * @desc : 设置用户信息
  */
-public class SettingMainActivity extends Activity implements View.OnClickListener {
-
+public class SettingMainActivity extends Activity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
+    private int notificationFlag = JMessageClient.getNotificationFlag();
     private EditText mEt_setNoDisturbGlobal;
     private TextView mTv_showNoDisturbGlobal;
+    private Switch cb_sound;
+    private Switch cb_vibrate;
+    private Switch cb_led;
+    private int result=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         initView();
+        /*******initView2设置通知栏********/
+        initView2();
     }
 
     private void initView() {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(R.layout.activity_about_setting);
-
+        zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
+        final LocalBroadcastManager localBroadcastManager=LocalBroadcastManager.getInstance(this);
         mEt_setNoDisturbGlobal = (EditText) findViewById(R.id.et_set_no_disturb_global);
         mTv_showNoDisturbGlobal = (TextView) findViewById(R.id.tv_show_no_disturb_global);
         Button bt_getNoDisturbGlobal = (Button) findViewById(R.id.bt_get_no_disturb_global);
@@ -74,6 +90,88 @@ public class SettingMainActivity extends Activity implements View.OnClickListene
         bt_setNotificationMode.setOnClickListener(this);
         bt_setNoDisturbGlobal.setOnClickListener(this);
         bt_getNoDisturbGlobal.setOnClickListener(this);
+        TextView manage_noteFriends = findViewById(R.id.manage_noteFriends);
+        manage_noteFriends.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClass(getApplicationContext(), UpdateUserInfoActivity.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
+            }
+        });
+        TextView manage_HistoryFriends = findViewById(R.id.manage_HistoryFriends);
+        manage_HistoryFriends.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClass(SettingMainActivity.this, UpdateUserExtras.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
+            }
+        });
+        TextView manage_message_notify = findViewById(R.id.manage_message_notify);
+        manage_message_notify.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClass(SettingMainActivity.this, UpdatePassword.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
+            }
+        });
+
+        TextView manage_back=findViewById(R.id.manage_back);
+        manage_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
+            }
+        });
+        Switch no_disturb = findViewById(R.id.no_disturb);
+        if (MyApplication.getNoDisturbToMyselfResult ==1)
+            no_disturb.setChecked(true);
+        else
+            no_disturb.setChecked(false);
+        no_disturb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    MyApplication.getNoDisturbToMyselfResult=1;
+                    tools.setNoDisturbToMyself(1);
+                } else {
+                    MyApplication.getNoDisturbToMyselfResult=0;
+                    tools.setNoDisturbToMyself(0);
+                }
+            }
+        });
+    }
+
+    private void initView2() {
+        Switch cb_enable = findViewById(R.id.cb_notify_enable);
+        cb_sound = findViewById(R.id.cb_notify_sound);
+        cb_vibrate = findViewById(R.id.cb_notify_vibrate);
+        cb_led = findViewById(R.id.cb_notify_led);
+
+        //初始化几个cb的选中状态，需要在下面setOnCheckedChangeListener之前进行。
+        boolean isDisable = 0 != (notificationFlag & JMessageClient.FLAG_NOTIFY_DISABLE);
+        cb_enable.setChecked(!isDisable);
+        cb_sound.setEnabled(!isDisable);
+        cb_vibrate.setEnabled(!isDisable);
+        cb_led.setEnabled(!isDisable);
+
+        boolean isSoundEnable = 0 != (notificationFlag & JMessageClient.FLAG_NOTIFY_WITH_SOUND);
+        boolean isVibrateEnable = 0 != (notificationFlag & JMessageClient.FLAG_NOTIFY_WITH_VIBRATE);
+        boolean isLedEnable = 0 != (notificationFlag & JMessageClient.FLAG_NOTIFY_WITH_LED);
+        cb_sound.setChecked(isSoundEnable);
+        cb_vibrate.setChecked(isVibrateEnable);
+        cb_led.setChecked(isLedEnable);
+
+        cb_enable.setOnCheckedChangeListener(this);
+        cb_sound.setOnCheckedChangeListener(this);
+        cb_vibrate.setOnCheckedChangeListener(this);
+        cb_led.setOnCheckedChangeListener(this);
     }
 
     @Override
@@ -196,6 +294,57 @@ public class SettingMainActivity extends Activity implements View.OnClickListene
                 });
                 break;
             default:
+                break;
+        }
+    }
+
+    private void zoomInViewSize(int height) {
+        View img1 = findViewById(R.id.statusbar);
+        ViewGroup.LayoutParams lp = img1.getLayoutParams();
+        lp.height = height;
+        img1.setLayoutParams(lp);
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        switch (buttonView.getId()) {
+            case R.id.cb_notify_enable:
+                if (isChecked) {
+                    notificationFlag ^= JMessageClient.FLAG_NOTIFY_DISABLE;
+                } else {
+                    cb_sound.setChecked(false);
+                    cb_vibrate.setChecked(false);
+                    cb_led.setChecked(false);
+                    notificationFlag |= JMessageClient.FLAG_NOTIFY_DISABLE;
+                }
+                cb_sound.setEnabled(isChecked);
+                cb_vibrate.setEnabled(isChecked);
+                cb_led.setEnabled(isChecked);
+                JMessageClient.setNotificationFlag(notificationFlag);
+                break;
+            case R.id.cb_notify_sound:
+                if (isChecked) {
+                    notificationFlag |= JMessageClient.FLAG_NOTIFY_WITH_SOUND;
+                } else {
+                    notificationFlag ^= JMessageClient.FLAG_NOTIFY_WITH_SOUND;
+                }
+                JMessageClient.setNotificationFlag(notificationFlag);
+                break;
+            case R.id.cb_notify_vibrate:
+                if (isChecked) {
+                    notificationFlag |= JMessageClient.FLAG_NOTIFY_WITH_VIBRATE;
+                } else {
+                    notificationFlag ^= JMessageClient.FLAG_NOTIFY_WITH_VIBRATE;
+                }
+                JMessageClient.setNotificationFlag(notificationFlag);
+                break;
+            case R.id.cb_notify_led:
+                if (isChecked) {
+                    notificationFlag |= JMessageClient.FLAG_NOTIFY_WITH_LED;
+                } else {
+                    notificationFlag ^= JMessageClient.FLAG_NOTIFY_WITH_LED;
+                }
+                JMessageClient.setNotificationFlag(notificationFlag);
                 break;
         }
     }

@@ -65,7 +65,7 @@ public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder
 
     public void onBindViewHolder(ViewHolder holder,int position){
         personMsg msg=personMsgList.get(position);
-        holder.leftMsg.setText(msg.getName());
+        holder.leftMsg.setText(msg.getName()+"("+msg.getUserName()+")");
         holder.simpleMessage.setText(msg.getSimpleMessage());
         holder.time.setText(msg.getTime());
         holder.friendsIcon.setImageBitmap(msg.getAvatar());

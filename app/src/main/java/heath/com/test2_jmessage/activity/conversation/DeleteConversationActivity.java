@@ -2,11 +2,8 @@ package heath.com.test2_jmessage.activity.conversation;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,8 +13,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +28,6 @@ import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
 import heath.com.test2_jmessage.StatusBar.StatusBarUtils;
 import heath.com.test2_jmessage.adapter.MsgAdapter;
 import heath.com.test2_jmessage.recycleView_item.Msg;
-import heath.com.test2_jmessage.tools.App;
 import heath.com.test2_jmessage.tools.tools;
 
 import static heath.com.test2_jmessage.application.MyApplication.personList;
@@ -60,75 +54,9 @@ public class DeleteConversationActivity extends Activity implements View.OnClick
 
     @SuppressLint("ClickableViewAccessibility")
     private void initData() {
-        Gson gson = new Gson();
-        Conversation conversation = getConversation(personList.get(position).getUserName(), "");
-        if (conversation != null) {
-            List<Message> list;
-            list = getConversation(personList.get(position).getUserName(), "").getAllMessage();
-            none.setVisibility(View.GONE);
-            for (int j = 0; j < list.size(); j++) {
-                Log.d("HISTORY_RECORD", list.get(j).getFromUser().getUserName() + "(" + list.get(j).getFromName() + ")");
-                Log.d("HISTORY_RECORD", list.get(j).getId() + "|" + list.get(j).getDirect());
-                Log.d("HISTORY_RECORD", list.get(j).getCreateTime() + "");
-                App app = gson.fromJson(list.get(j).getContent().toJson(), App.class);
-                Log.d("HISTORY_RECORD", "解析" + app.getText());
-                Log.d("HISTORY_RECORD", "解析" + app.getIsFileUploaded());
-                Log.d("HISTORY_RECORD", "解析" + app.getExtras());
-                Log.d("HISTORY_RECORD", "解析" + app.getHeight());
-                Log.d("HISTORY_RECORD", "解析" + app.getWidth());
-                Log.d("HISTORY_RECORD", "解析" + app.getLocalThumbnailPath());
-                Log.d("HISTORY_RECORD", "_______________________________\n");
-                if (app.getText() != null) {
-                    if (list.get(j).getDirect().toString().equals("receive"))
-                        msgList.add(new Msg(personList.get(position).getUserName(),
-                                personList.get(position).getAppkey(),
-                                personList.get(position).getAvatar(),
-                                null,
-                                list.get(j).getId() + app.getText(),
-                                Msg.TYPE_RECEIVED, list.get(j).getId()));
-                    else
-                        msgList.add(new Msg(personList.get(position).getUserName(),
-                                personList.get(position).getAppkey(),
-                                personList.get(position).getAvatar(),
-                                null,
-                                list.get(j).getId() + app.getText(),
-                                Msg.TYPE_SENT, list.get(j).getId()));
-                    adapter.notifyDataSetChanged();
-                }
-                if (app.getLocalThumbnailPath() != null) {
-                    Bitmap picture = BitmapFactory.decodeFile(app.getLocalThumbnailPath());
-                    msgList.add(new Msg(personList.get(position).getUserName(),
-                            personList.get(position).getAppkey(),
-                            personList.get(position).getAvatar(),
-                            picture,
-                            list.get(j).getId() + "",
-                            Msg.TYPE_RECEIVED,
-                            list.get(j).getId()));
-                    mTv_info.append(app.getIsFileUploaded() + "\n");
-                    mTv_info.append(app.getLocalThumbnailPath() + "\n");
-                }
-                mTv_info.append(tools.secondToDate(list.get(j).getCreateTime(), "hh:mm:ss") + "" + "\n");
-                mTv_info.append("_______________________________\n" + "\n");
-            }
-            msgRecyclerView.scrollToPosition(msgList.size() - 1);
-        } else
-            none.setVisibility(View.VISIBLE);
-        //LinearLayout conversation_dealing = findViewById(R.id.conversation_dealing);
-        /*msgRecyclerView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        X = (int) event.getX();
-                        Y = (int) event.getY();
-                        Log.d("getXY", X+"onTouch: "+Y);
-                        break;
-                    default:
-                        break;
-                }
-                return true;
-            }
-        });*/
+       if (tools.shownHistory(position, msgList, null)){
+           none.setVisibility(View.GONE);
+        }else none.setVisibility(View.VISIBLE);
     }
 
     private void initView() {

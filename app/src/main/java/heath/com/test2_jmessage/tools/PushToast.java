@@ -42,7 +42,6 @@ public class PushToast {
     public void init(Context context) {
         mActivity = (Activity)context;
     }
-
     public void createToast(String title, String content, Map<String,String> params,boolean judgment) {
         if (mActivity == null) {
             return;

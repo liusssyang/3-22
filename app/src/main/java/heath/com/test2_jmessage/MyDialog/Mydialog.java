@@ -22,60 +22,68 @@ import cn.jpush.im.android.api.callback.DownloadCompletionCallback;
 import cn.jpush.im.android.api.content.ImageContent;
 import cn.jpush.im.android.api.model.Message;
 import heath.com.test2_jmessage.R;
+import heath.com.test2_jmessage.recycleView_item.Msg;
+import heath.com.test2_jmessage.tools.tools;
 
 import static cn.jpush.im.android.api.jmrtc.JMRTCInternalUse.getApplicationContext;
 
 public class Mydialog extends Dialog {
     private PhotoView photoView;
     public static Bitmap bitmap;
-    private TextView download,tip;
+    private TextView download, tip;
     private Context context;
+    private Msg msg = null;
+    private String IsFileUploaded;
     public static ImageContent imageContent;
     public static Message message;
-    SharedPreferences.Editor editor=getApplicationContext().getSharedPreferences("data",0).edit();
-
-    public Mydialog(Context context, int id, Bitmap bitmap,int msgId){
-
-        super(context,id);
+    private SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences("data", 0).edit();
+    public Mydialog( Context context, int id, Msg msg) {
+        super(context, id);
+        this.msg = msg;
+        this.IsFileUploaded = msg.getIsFileUploaded();
     }
-    public Mydialog(Context context,int id){
-        super(context,id);
+
+    public Mydialog(Context context, int id) {
+        super(context, id);
     }
-    public Mydialog(@NonNull Context context,Bitmap bitmap) {
+
+    public Mydialog(@NonNull Context context, Bitmap bitmap) {
         super(context);
-        this.bitmap=bitmap;
-        this.context=context;
+        this.bitmap = bitmap;
+        this.context = context;
     }
+
     @SuppressLint("ClickableViewAccessibility")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.photoview);
-        SharedPreferences pref=getApplicationContext().getSharedPreferences("data",0);
-        TextView close=findViewById(R.id.dialogclose);
-        download=findViewById(R.id.download);
-        tip=findViewById(R.id.tip);
+        final SharedPreferences pref = getApplicationContext().getSharedPreferences("data", 0);
+        TextView close = findViewById(R.id.dialogclose);
+        download = findViewById(R.id.download);
+        tip = findViewById(R.id.tip);
         download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                imageContent.downloadOriginImage(message, new DownloadCompletionCallback() {
-                    @Override
-                    public void onComplete(int responseCode, String responseMessage, File file) {
-
-                        if (responseCode == 0) {
-                            editor.putString("filepath",file.getPath());
-                            editor.apply();
-                            //mTv_showText.append("原图文件下载成功，路径:" + file.getPath() + "\n");
-                            Toast.makeText(getApplicationContext(), "原图下载成功", Toast.LENGTH_SHORT).show();
-                            Bitmap bitmap= BitmapFactory.decodeFile(file.getPath());
-                            photoView.setImageBitmap(bitmap);
-                            download.setVisibility(View.GONE);
-
-                        } else {
-                            Toast.makeText(getApplicationContext(), "原图下载失败", Toast.LENGTH_SHORT).show();
-                            Log.i("ShowMessageActivity", "downloadFile" + ", responseCode = " + responseCode + " ; Desc = " + responseMessage);
-                        }
-                    }
-                });
+                    if (msg.getMessage() != null) {
+                        tools.getImageContent(msg.getMessage(),photoView);
+                    } else {
+                        imageContent.downloadOriginImage(message, new DownloadCompletionCallback() {
+                            @Override
+                            public void onComplete(int responseCode, String responseMessage, File file) {
+                                if (responseCode == 0) {
+                                    editor.putString("filepath", file.getPath());
+                                    editor.apply();
+                                    Toast.makeText(getApplicationContext(), "原图下载成功", Toast.LENGTH_SHORT).show();
+                                    Bitmap bitmap = BitmapFactory.decodeFile(file.getPath());
+                                    photoView.setImageBitmap(bitmap);
+                                    download.setVisibility(View.GONE);
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "原图下载失败", Toast.LENGTH_SHORT).show();
+                                    Log.i("ShowMessageActivity", "downloadFile" + ", responseCode = " + responseCode + " ; Desc = " + responseMessage);
+                                }
+                            }
+                        });
+                }
             }
         });
         close.setOnTouchListener(new View.OnTouchListener() {
@@ -100,16 +108,20 @@ public class Mydialog extends Dialog {
             }
         });
 
-        photoView=findViewById(R.id.photo);
-        if (pref.getString("filepath",null)==null)
-            photoView.setImageBitmap(bitmap);
-        else{
-            photoView.setImageBitmap(BitmapFactory.decodeFile(pref.getString("filepath",null)));
-            download.setVisibility(View.GONE);
-
+        photoView = findViewById(R.id.photo);
+        if (msg != null) {
+            photoView.setImageBitmap(msg.getImageContent());
+        } else {
+            if (pref.getString("filepath", null) == null)
+                photoView.setImageBitmap(bitmap);
+            else {
+                photoView.setImageBitmap(BitmapFactory.decodeFile(pref.getString("filepath", null)));
+                download.setVisibility(View.GONE);
+            }
         }
     }
-    protected void onStop(){
+
+    protected void onStop() {
         super.onStop();
     }
 

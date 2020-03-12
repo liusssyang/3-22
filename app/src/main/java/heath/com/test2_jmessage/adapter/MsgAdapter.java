@@ -94,8 +94,8 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.ViewHolder> {
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (holder.lefticon != null) {
-                    Mydialog mydialog = new Mydialog(v.getContext(), R.style.MyDialogStyle);
+                if (msg.dialogIsOpen()) {
+                    Mydialog mydialog = new Mydialog(v.getContext(), R.style.MyDialogStyle,msg);
                     mydialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
                     Window dialogWindow = mydialog.getWindow();
                     dialogWindow.setGravity(Gravity.CENTER);

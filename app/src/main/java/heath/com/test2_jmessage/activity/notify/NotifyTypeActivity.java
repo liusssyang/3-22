@@ -24,14 +24,15 @@ public class NotifyTypeActivity extends Activity implements CompoundButton.OnChe
         super.onCreate(savedInstanceState);
 
         initView();
+
     }
 
     private void initView() {
         setContentView(R.layout.activity_notify_type);
         CheckBox cb_enable = (CheckBox) findViewById(R.id.cb_notify_enable);
-        cb_sound = (CheckBox) findViewById(R.id.cb_notify_sound);
-        cb_vibrate = (CheckBox) findViewById(R.id.cb_notify_vibrate);
-        cb_led = (CheckBox) findViewById(R.id.cb_notify_led);
+        cb_sound =findViewById(R.id.cb_notify_sound);
+        cb_vibrate = findViewById(R.id.cb_notify_vibrate);
+        cb_led =  findViewById(R.id.cb_notify_led);
 
         //初始化几个cb的选中状态，需要在下面setOnCheckedChangeListener之前进行。
         boolean isDisable = 0 != (notificationFlag & JMessageClient.FLAG_NOTIFY_DISABLE);
@@ -52,6 +53,7 @@ public class NotifyTypeActivity extends Activity implements CompoundButton.OnChe
         cb_vibrate.setOnCheckedChangeListener(this);
         cb_led.setOnCheckedChangeListener(this);
     }
+
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {

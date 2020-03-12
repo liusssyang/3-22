@@ -26,7 +26,7 @@ import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
 import heath.com.test2_jmessage.activity.RegisterAndLoginActivity;
 import heath.com.test2_jmessage.activity.TypeActivity;
-import heath.com.test2_jmessage.recycleView_item.personMsg;
+import heath.com.test2_jmessage.tools.tools;
 
 import static heath.com.test2_jmessage.activity.TypeActivity.myUserId;
 import static heath.com.test2_jmessage.activity.friend.FriendAskManage.personAskAdapter;
@@ -139,20 +139,7 @@ public class ShowFriendReasonActivity extends Activity {
                                             s1=list.get(j).getUserName()+list.get(j).getAppKey();
                                             s2=userName+appKey;
                                                 if (s1.equals(s2)){
-                                                    personList.add(new personMsg(
-                                                            list.get(j).getNickname()
-                                                            ,list.get(j).getUserID()
-                                                            , null,list.get(j).getUserName()
-                                                            ,list.get(j).getNotename()
-                                                            ,list.get(i).getAppKey()
-                                                            ,true
-                                                            ,list.get(j).getSignature()
-                                                            , timeA
-                                                            , list.get(j).getSignature()
-                                                            , list.get(j).getGender().toString()
-                                                            ,list.get(j).getAddress()
-                                                            ,list.get(j).getNoteText()
-                                                            ,list.get(j).getBirthday()));
+                                                    tools.initPersonlist();
                                                     TypeActivity.adapter.notifyItemChanged(personList.size()-1);
                                                     break;
                                                 }

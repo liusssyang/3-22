@@ -14,13 +14,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.File;
 
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.api.BasicCallback;
+import de.hdodenhof.circleimageview.CircleImageView;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
 import heath.com.test2_jmessage.tools.PushToast;
@@ -123,7 +123,7 @@ public class UpdateUserAvatar extends Activity {
                 cursor.close();
             }
 
-            ImageView imageView = (ImageView) findViewById(R.id.iv_show_image);
+            CircleImageView imageView =  findViewById(R.id.iv_show_image);
             imageView.setImageBitmap(BitmapFactory.decodeFile(mPicturePath));
         }
 

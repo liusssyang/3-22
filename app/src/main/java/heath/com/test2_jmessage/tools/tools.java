@@ -1,11 +1,17 @@
 package heath.com.test2_jmessage.tools;
 
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Switch;
 import android.widget.Toast;
 
+import com.github.chrisbanes.photoview.PhotoView;
+import com.google.gson.Gson;
+
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -14,7 +20,11 @@ import java.util.TimeZone;
 
 import cn.jpush.im.android.api.ContactManager;
 import cn.jpush.im.android.api.JMessageClient;
+import cn.jpush.im.android.api.callback.DownloadCompletionCallback;
+import cn.jpush.im.android.api.callback.GetUserInfoCallback;
 import cn.jpush.im.android.api.callback.GetUserInfoListCallback;
+import cn.jpush.im.android.api.callback.IntegerCallback;
+import cn.jpush.im.android.api.content.ImageContent;
 import cn.jpush.im.android.api.content.TextContent;
 import cn.jpush.im.android.api.model.Conversation;
 import cn.jpush.im.android.api.model.Message;
@@ -22,16 +32,179 @@ import cn.jpush.im.android.api.model.UserInfo;
 import cn.jpush.im.android.api.options.MessageSendingOptions;
 import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.application.MyApplication;
+import heath.com.test2_jmessage.recycleView_item.Msg;
 import heath.com.test2_jmessage.recycleView_item.personMsg;
 
 import static cn.jpush.im.android.api.jmrtc.JMRTCInternalUse.getApplicationContext;
-import static heath.com.test2_jmessage.activity.TypeActivity.adapter;
+import static heath.com.test2_jmessage.application.MyApplication.list;
 import static heath.com.test2_jmessage.application.MyApplication.personList;
-import static heath.com.test2_jmessage.application.MyApplication.sb;
 
 public class tools {
     /**
-     * 撤回单聊消息
+     * Get the no-disturb mode for yourself here,
+     * but this method can only be assigned to global variables in MyApplication.class.
+     */
+    public static void getNoDisturbToMyself(){
+        JMessageClient.getNoDisturbGlobal(new IntegerCallback() {
+            @Override
+            public void gotResult(int i, String s, Integer integer) {
+                if (i == 0) {
+                    MyApplication.getNoDisturbToMyselfResult=integer;
+                    Log.i("SettingMainActivity", "JMessageClient.getNoDisturbGlobal" + ", responseCode = " + i + " ; desc = " + s);
+                } else {
+                    Toast.makeText(getApplicationContext(), "获取失败", Toast.LENGTH_SHORT).show();
+                    Log.i("SettingMainActivity", "JMessageClient.getNoDisturbGlobal" + ", responseCode = " + i + " ; desc = " + s);
+                }
+            }
+        });
+    }
+    /**
+     * Set the no-disturb mode to yourself here.
+     */
+    public  static void setNoDisturbToMyself(int code){
+        JMessageClient.setNoDisturbGlobal(code, new BasicCallback() {
+            @Override
+            public void gotResult(int i, String s) {
+                if (i == 0) {
+                    PushToast.getInstance().createToast("提示", "设置成功", null, true);
+                    Log.i("SettingMainActivity", "JMessageClient.setNoDisturbGlobal" + ", responseCode = " + i + " ; desc = " + s);
+                } else {
+                    PushToast.getInstance().createToast("提示", "设置失败", null, false);
+                    Log.i("SettingMainActivity", "JMessageClient.setNoDisturbGlobal" + ", responseCode = " + i + " ; desc = " + s);
+
+                }
+            }
+        });
+    }
+    /**
+     * History is shown here.
+     * You can query the historical notes of group by enter the groupId,
+     * or query the personal historical notes by enter the position
+     * that confirm the userName.
+     */
+    public static boolean shownHistory(int position, List<Msg> msgList, String groupId) {
+        if (MyApplication.isAvaluable) {
+            Gson gson = new Gson();
+            Conversation conversation = getConversation(personList.get(position).getUserName(), groupId);
+            if (conversation != null) {
+
+                msgList.clear();
+                List<Message> list;
+                list = getConversation(personList.get(position).getUserName(), "").getAllMessage();
+                for (int j = 0; j < list.size(); j++) {
+                    Message message = conversation.getMessage(list.get(j).getId());
+                    Log.d("HISTORY_RECORD", list.get(j).getContent().toJson());
+                    Log.d("HISTORY_RECORD", list.get(j).getFromUser().getUserName() + "(" + list.get(j).getFromName() + ")");
+                    Log.d("HISTORY_RECORD", list.get(j).getId() + "|" + list.get(j).getDirect());
+                    Log.d("HISTORY_RECORD", list.get(j).getCreateTime() + "");
+                    App app = gson.fromJson(list.get(j).getContent().toJson(), App.class);
+                    Log.d("HISTORY_RECORD", "解析" + app.getPromptText());
+                    Log.d("HISTORY_RECORD", "解析" + app.getText());
+                    Log.d("HISTORY_RECORD", "解析" + app.getIsFileUploaded());
+                    Log.d("HISTORY_RECORD", "解析" + app.getExtras());
+                    Log.d("HISTORY_RECORD", "解析" + app.getHeight());
+                    Log.d("HISTORY_RECORD", "解析" + app.getWidth());
+                    Log.d("HISTORY_RECORD", "解析" + app.getLocalThumbnailPath());
+                    Log.d("HISTORY_RECORD", "_______________________________\n");
+                    if (app.getText() != null) {
+                        if (list.get(j).getDirect().toString().equals("receive"))
+                            msgList.add(new Msg(app.getIsFileUploaded(), message,
+                                    personList.get(position).getUserName(),
+                                    personList.get(position).getAppkey(),
+                                    personList.get(position).getAvatar(),
+                                    null,
+                                    app.getText(),
+                                    Msg.TYPE_RECEIVED, list.get(j).getId(),
+                                    false));
+                        else
+                            msgList.add(new Msg(app.getIsFileUploaded(), message,
+                                    personList.get(position).getUserName(),
+                                    personList.get(position).getAppkey(),
+                                    personList.get(position).getAvatar(),
+                                    null,
+                                    app.getText(),
+                                    Msg.TYPE_SENT, list.get(j).getId(),
+                                    false));
+                    }
+                    if (app.getLocalThumbnailPath() != null) {
+                        Bitmap picture = BitmapFactory.decodeFile(app.getLocalThumbnailPath());
+                        msgList.add(new Msg(app.getIsFileUploaded(), message,
+                                personList.get(position).getUserName(),
+                                personList.get(position).getAppkey(),
+                                personList.get(position).getAvatar(),
+                                picture,
+                                null,
+                                Msg.TYPE_RECEIVED,
+                                list.get(j).getId(),
+                                true));
+                    }
+                }
+                return true;
+            } else {
+                  return false;
+            }
+        } else {
+            PushToast.getInstance().createToast("提示", "数据获取失败", null, false);
+            return false;
+        }
+    }
+
+    /**
+     * Set the no-disturb mode to others here.
+     */
+    public static void setNoDisturb(final boolean judgement,final Switch no_disturb, final int code, String userName, String appKey) {
+
+        JMessageClient.getUserInfo(userName, appKey, new GetUserInfoCallback() {
+            @Override
+            public void gotResult(int i, String s, UserInfo userInfo) {
+                if (i == 0) {
+                    Log.i("GetUserInfoActivity", "JMessageClient.getUserInfo" + ", responseCode = " + i + " ; desc = " + s);
+                    userInfo.setNoDisturb(code, new BasicCallback() {
+                        @Override
+                        public void gotResult(int i, String s) {
+                            if (i == 0) {
+                                Log.i("GetUserInfoActivity", "userInfo.setNoDisturb" + ", responseCode = " + i + " ; desc = " + s);
+                                PushToast.getInstance().createToast("提示", "设置成功", null, true);
+                            } else {
+                                Log.i("GetUserInfoActivity", "userInfo.setNoDisturb" + ", responseCode = " + i + " ; desc = " + s);
+                                PushToast.getInstance().createToast("提示", "设置失败", null, false);
+                                no_disturb.setChecked(judgement);
+                            }
+                        }
+                    });
+                } else {
+                    no_disturb.setChecked(judgement);
+                    PushToast.getInstance().createToast("提示", "设置失败", null, false);
+                    Log.i("GetUserInfoActivity", "JMessageClient.getUserInfo" + ", responseCode = " + i + " ; desc = " + s);
+
+                }
+            }
+        });
+    }
+
+    /**
+     * Download the picture here, but the photoView belongs to MyDialog.
+     */
+    public static void getImageContent(final Message message, final PhotoView photoView) {
+
+        ImageContent imageContent = (ImageContent) message.getContent();
+        imageContent.downloadOriginImage(message, new DownloadCompletionCallback() {
+            @Override
+            public void onComplete(int responseCode, String responseMessage, File file) {
+                if (responseCode == 0) {
+                    photoView.setImageBitmap(BitmapFactory.decodeFile(file.getPath()));
+                    Log.i("ShowMessageActivity", file.getPath());
+                    Toast.makeText(getApplicationContext(), "原图下载成功", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "原图下载失败", Toast.LENGTH_SHORT).show();
+                    Log.i("ShowMessageActivity", "downloadFile" + ", responseCode = " + responseCode + " ; Desc = " + responseMessage);
+                }
+            }
+        });
+    }
+
+    /**
+     * Retract the message here, but id of the message can only be your own.
      */
     public static void retractMessage(String userName, String appkey, int msgId) {
         Conversation conv;
@@ -69,7 +242,6 @@ public class tools {
         float h = actionbarSizeTypedArray.getDimension(0, 0);
         return (int) h;
     }
-
     /**
      * 漫游记录对话管理
      */
@@ -85,11 +257,11 @@ public class tools {
         }
         return conversation;
     }
-
     /**
      * 获取好友列表
      */
     public static void getUserInfoList() {
+        getNoDisturbToMyself();
         ContactManager.getFriendList(new GetUserInfoListCallback() {
             @Override
             public void gotResult(int i, String s, List<UserInfo> list) {
@@ -110,66 +282,27 @@ public class tools {
         });
     }
 
-    public static void getUserInfoStringBuilder() {
-        ContactManager.getFriendList(new GetUserInfoListCallback() {
-            @Override
-            public void gotResult(int i, String s, List<UserInfo> list) {
-                if (i == 0) {
-                    for (UserInfo info : list) {
-                        sb.append(info);
-                    }
-                    if (sb.length() == 0) {
-                        sb.append("null");
-                    }
-                    Log.d("getUserInfoList", "获取成功");
-                } else {
-                    Log.d("getUserInfoList", "获取失败");
-                    Log.i("getUserInfoList", "ContactManager.getFriendList" + ", responseCode = " + i + " ; LoginDesc = " + s);
-                }
-            }
-        });
+    public static void initPersonlist() {
+        for (int j = 0; j < list.size(); j++) {
+            personList.add(
+                    new personMsg(
+                            list.get(j).getNoDisturb(),
+                            list.get(j).getNickname()
+                            , list.get(j).getUserID()
+                            , BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath())
+                            , list.get(j).getUserName()
+                            , list.get(j).getNotename()
+                            , list.get(j).getAppKey()
+                            , true
+                            , list.get(j).getSignature()
+                            , ""
+                            , list.get(j).getSignature()
+                            , list.get(j).getGender().toString()
+                            , list.get(j).getAddress()
+                            , list.get(j).getNoteText()
+                            , list.get(j).getBirthday()));
 
-    }
-
-    public static void refreshPersonList() {
-        ContactManager.getFriendList(new GetUserInfoListCallback() {
-            @Override
-            public void gotResult(int i, String s, List<UserInfo> list) {
-                if (i == 0) {
-                    MyApplication.isAvaluable = true;
-                    for (int j = 0; j < list.size(); j++) {
-                        personList.add(
-                                new personMsg(
-                                        list.get(j).getNickname()
-                                        , list.get(j).getUserID()
-                                        , BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath())
-                                        , list.get(j).getUserName()
-                                        , list.get(j).getNotename()
-                                        , list.get(j).getAppKey()
-                                        , true
-                                        , list.get(j).getSignature()
-                                        , ""
-                                        , list.get(j).getSignature()
-                                        , list.get(j).getGender().toString()
-                                        , list.get(j).getAddress()
-                                        , list.get(j).getNoteText()
-                                        , list.get(j).getBirthday()));
-                        adapter.notifyDataSetChanged();
-                    }
-                    if (list.size() == 0) {
-                        personList.add(
-                                new personMsg(null, 0, null, null,
-                                        null, null, true,
-                                        null, null, null,
-                                        null, null, null, 0));
-                    }
-                } else if (i != 0) {
-                    MyApplication.isAvaluable = false;
-                    PushToast.getInstance().createToast("提示", "获取好友失败", null, false);
-                    Log.i("FriendContactManager", "ContactManager.getFriendList" + ", responseCode = " + i + " ; LoginDesc = " + s);
-                }
-            }
-        });
+        }
     }
 
     /**

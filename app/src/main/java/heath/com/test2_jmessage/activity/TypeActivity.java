@@ -81,7 +81,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     public static final String LOGOUT_REASON = "logout_reason";
     private TextView mTv_showOfflineMsg;
     private TextView tv_refreshEvent;
-    private TextView tv_deviceInfo;
+    private TextView tv_deviceInfo,head_state;
     private TextView headusername, headappkey, headvision, signature;
     public static final String INFO_UPDATE = "info_update";
     public static final String TRANS_COMMAND_SENDER = "trans_command_sender";
@@ -122,6 +122,15 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         headappkey = navHeaderView.findViewById(R.id.head_appkey);
         headvision = navHeaderView.findViewById(R.id.head_vision);
         signature = navHeaderView.findViewById(R.id.signature);
+        head_state=navHeaderView.findViewById(R.id.head_state);
+        head_state.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent();
+                intent.setClass(getApplicationContext(), SettingMainActivity.class);
+                startActivityForResult(intent, 0);
+            }
+        });
         swipeRefreshLayout = findViewById(R.id.swipeLayout);
         swipeRefreshLayout.setColorSchemeColors(Color.parseColor("#d7a101"), Color.parseColor("#54c745"), Color.parseColor("#f16161"), Color.BLUE, Color.YELLOW);
 
@@ -378,7 +387,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
 
     protected void onRestart() {
         super.onRestart();
-        Log.d(TAG, "onRestart: ");
+
     }
 
     protected void onStart() {
@@ -405,7 +414,15 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                         myIcon = BitmapFactory.decodeResource(getResources(), R.drawable.icon_left_default);
                 }
             });
+            Log.d(TAG, "onStart:当前免打扰 "+MyApplication.getNoDisturbToMyselfResult);
+            if (MyApplication.getNoDisturbToMyselfResult==1){
+                String state="当前免打扰";
+                head_state.setVisibility(View.VISIBLE);
+                head_state.setText(state);
+            }else head_state.setVisibility(View.GONE);
+
         }
+
 
     }
 
@@ -451,25 +468,8 @@ public class TypeActivity extends Activity implements View.OnClickListener {
 
         public void onReceive(Context context, Intent intent) {
             if (intent.getStringExtra("init").equals("1")) {
-                for (int j = 0; j < list.size(); j++) {
-                    personList.add(
-                            new personMsg(
-                                    list.get(j).getNickname()
-                                    , list.get(j).getUserID()
-                                    , BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath())
-                                    , list.get(j).getUserName()
-                                    , list.get(j).getNotename()
-                                    , list.get(j).getAppKey()
-                                    , true
-                                    , list.get(j).getSignature()
-                                    , ""
-                                    , list.get(j).getSignature()
-                                    , list.get(j).getGender().toString()
-                                    , list.get(j).getAddress()
-                                    , list.get(j).getNoteText()
-                                    , list.get(j).getBirthday()));
-                    adapter.notifyDataSetChanged();
-                }
+                tools.initPersonlist();
+                adapter.notifyDataSetChanged();
                 Log.d(TAG, "onReceive: ready" + "|" + personList.size());
                 SharedPreferences pref2 = getBaseContext().getSharedPreferences("backdata" + myUserId, 0);
                 for (int i = 0; i < personList.size(); i++) {

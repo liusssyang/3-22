@@ -26,6 +26,7 @@ public class MyApplication extends Application {
     public static List<UserInfo> list;
     public static StringBuilder sb= new StringBuilder();
     public static List<personMsg> personList=new ArrayList<>();
+    public static int getNoDisturbToMyselfResult=0;
 
     @Override
     public void onCreate() {
@@ -37,7 +38,9 @@ public class MyApplication extends Application {
         JMessageClient.registerEventReceiver(new GlobalEventListener(getApplicationContext()));
         /**##################################*/
         tools.getUserInfoList();
+        tools.getNoDisturbToMyself();
         Log.i("MyApplication", isAvaluable+"");
+
     }
     @Override
     public void onTerminate() {

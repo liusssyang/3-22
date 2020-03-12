@@ -70,7 +70,7 @@ import heath.com.test2_jmessage.activity.showinfo.ShowAnnouncementChangedActivit
 import heath.com.test2_jmessage.activity.showinfo.ShowChatRoomNotificationActivity;
 import heath.com.test2_jmessage.activity.showinfo.ShowGroupBlcakListChangedActivity;
 import heath.com.test2_jmessage.application.MyApplication;
-import heath.com.test2_jmessage.recycleView_item.personMsg;
+import heath.com.test2_jmessage.tools.DataBean;
 import heath.com.test2_jmessage.tools.tools;
 
 import static android.content.Context.USAGE_STATS_SERVICE;
@@ -95,9 +95,10 @@ public class GlobalEventListener {
     public void onEvent(NotificationClickEvent event) {
         jumpToActivity(event.getMessage());
     }
+    /**#############消息接收通知 #####################*/
     public void onEvent(MessageEvent event) {
         LocalBroadcastManager localBroadcastManager=LocalBroadcastManager.getInstance(appContext);
-        dealing(localBroadcastManager,event);
+        MessageEventHandling(localBroadcastManager,event);
     }
     private void jumpToActivity(Message msg) {
         UserInfo fromUser = msg.getFromUser();
@@ -220,19 +221,24 @@ public class GlobalEventListener {
         if(!isGranted)
             MyApplication.getContext().startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
     }
-    private void dealing(LocalBroadcastManager localBroadcastManager,MessageEvent event){
+    private void MessageEventHandling (LocalBroadcastManager localBroadcastManager,MessageEvent event){
         long userId=event.getMessage().getFromUser().getUserID();
         SharedPreferences.Editor editor2=getApplicationContext().getSharedPreferences("history"+myUserId,0).edit();
         SharedPreferences pref=getApplicationContext().getSharedPreferences("history"+myUserId,0);
         SharedPreferences.Editor editor3=getApplicationContext().getSharedPreferences("backdata"+myUserId,0).edit();
         String history=pref.getString("historyRecord"+userId," ");
+        /***************************************/
         ContentType contentType=ContentType.valueOf(event.getMessage().getContentType().toString());
         Intent intent=new Intent("message");
-
-        editor3.putString("time"+userId,tools.CurrentTime());
-        intent.putExtra("time",tools.CurrentTime());
+        DataBean bean = new DataBean();
+        bean.setMessage(event.getMessage());
+        /***************************************/
+        intent.putExtra("BeanData",bean);
+        editor3.putString("time"+userId, tools.CurrentTime());
+        intent.putExtra("time", tools.CurrentTime());
         intent.putExtra("userId",userId);
         intent.putExtra("init","2");
+
         switch (contentType) {
             case text:
                 TextContent textContent = (TextContent) event.getMessage().getContent();
@@ -297,7 +303,6 @@ public class GlobalEventListener {
         String reason = event.getReason();
         final String fromUsername = event.getFromUsername();
         final String appkey = event.getfromUserAppKey();
-        String s=event.getCreateTime()+"";
         SharedPreferences.Editor editor=getApplicationContext().
                 getSharedPreferences("friends"+myUserId,0).edit();
         SharedPreferences pref=getApplicationContext().getSharedPreferences("friends"+myUserId,0);
@@ -328,20 +333,7 @@ public class GlobalEventListener {
                                 String s1=list.get(j).getUserName()+list.get(j).getAppKey();
                                 String s2=fromUsername+appkey;
                                 if (s1.equals(s2)){
-                                    personList.add(0,new personMsg(
-                                            list.get(j).getNickname()
-                                            ,list.get(j).getUserID()
-                                            , BitmapFactory.decodeFile(list.get(j).getAvatarFile().getPath()),list.get(j).getUserName()
-                                            ,list.get(j).getNotename()
-                                            ,list.get(i).getAppKey()
-                                            ,true
-                                            ,"我们已经是好友啦，快来打声招呼吧！"
-                                            , tools.CurrentTime()
-                                            , list.get(j).getSignature()
-                                            , list.get(j).getGender().toString()
-                                            ,list.get(j).getAddress()
-                                            ,list.get(j).getNoteText()
-                                            ,list.get(j).getBirthday()));
+                                    tools.initPersonlist();
                                     adapter.notifyItemChanged(personList.size()-1);
                                 }
                             }

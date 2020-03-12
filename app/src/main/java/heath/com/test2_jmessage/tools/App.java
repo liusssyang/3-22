@@ -3,7 +3,7 @@ package heath.com.test2_jmessage.tools;
 public class App {
     private App2 extras;
     private String text;
-
+    private String promptText;
     private String height;
     private String localThumbnailPath;
     private String width;
@@ -11,6 +11,8 @@ public class App {
     private String isFileUploaded;
     private String media_crc32;
     private String media_id;
+    public void setPromptText(String promptText){this.promptText=promptText;}
+    public String getPromptText(){return this.promptText;}
     public String getWidth(){
         return this.width;
     }

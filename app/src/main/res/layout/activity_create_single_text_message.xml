@@ -1,135 +1,150 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:id="@+id/co"
-    android:fitsSystemWindows="true"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <LinearLayout
-        android:fitsSystemWindows="true"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-        <Toolbar
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@drawable/toolbar_ground"
-            android:id="@+id/toolbar_sigText"
-            app:contentInsetLeft="0dp"
-            app:contentInsetStart="0dp"
-            app:contentInsetRight="0dp"
-            app:contentInsetEnd="0dp"
-            >
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:paddingTop="15dp"
-                >
-                <TextView
-                    android:id="@+id/back"
-                    android:focusable="true"
-                    android:clickable="true"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:background="@drawable/back"
-                    android:layout_gravity="center"
-                    android:textColor="#ffffff"
-                    />
-                <TextView
-                    android:id="@+id/sigText_toolbarName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_centerInParent="true"
-                    android:layout_gravity="center"
-                    android:textSize="18sp"
-                    android:gravity="center"
-                    android:textColor="#ffffff"/>
-                <TextView
-                    android:id="@+id/sigText_toolbarMenu"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_alignParentEnd="true"
-                    android:background="@drawable/col_set_white"
-                    android:layout_gravity="center"
-                    android:textSize="16sp"
-                    android:layout_marginEnd="20dp"
-                    android:gravity="center"
-                    android:textColor="#ffffff"/>
-            </RelativeLayout>
-        </Toolbar>
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/msg_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-       >
+
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true"
             android:orientation="vertical">
 
-            <EditText
-                android:id="@+id/et_name"
+            <Toolbar
+                android:id="@+id/toolbar_sigText"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="A123"
-                android:visibility="gone"/>
-            <RelativeLayout
-                android:id="@+id/l1"
-                android:paddingRight="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="#F8F7F7"
-                >
-                <TextView
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:background="@drawable/menu"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginStart="10dp"
-                    android:id="@+id/menu"
-                    android:text=" "
-                    />
-                <TextView
-                    android:id="@+id/bt_send"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:background="@drawable/send4"
-                    android:layout_marginTop="10dp"
-                    android:layout_alignParentEnd="true"/>
-                <TextView
-                    android:layout_toLeftOf="@+id/bt_send"
-                    android:id="@+id/expression"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginRight="10dp"
-                    android:background="@drawable/expression"
-                    android:layout_marginTop="10dp"
-                    />
-                <EditText
-                    android:id="@+id/et_text"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@drawable/toolbar_ground"
+                app:contentInsetEnd="0dp"
+                app:contentInsetLeft="0dp"
+                app:contentInsetRight="0dp"
+                app:contentInsetStart="0dp">
+
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:layout_toLeftOf="@+id/expression"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="10dp"
-                    android:layout_toRightOf="@+id/menu"
-                    android:layout_marginLeft="10dp"
-                    android:background="@drawable/background_square"
-                    android:inputType="text"
-                    android:textColor="#000000"
-                    android:theme="@style/MyEditText" />
-            </RelativeLayout>
-            <include layout="@layout/message_sending_options_layout" />
+                    android:layout_height="50dp"
+                    android:paddingTop="15dp">
+
+                    <TextView
+                        android:id="@+id/back"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/back"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:textColor="#ffffff" />
+
+                    <TextView
+                        android:id="@+id/sigText_toolbarName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_centerInParent="true"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:textColor="#ffffff"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/sigText_toolbarMenu"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_gravity="center"
+                        android:layout_marginEnd="20dp"
+                        android:background="@drawable/col_set_white"
+                        android:gravity="center"
+                        android:textColor="#ffffff"
+                        android:textSize="16sp" />
+                </RelativeLayout>
+            </Toolbar>
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:id="@+id/swipeLayout"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/msg_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                 />
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <EditText
+                        android:id="@+id/et_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="A123"
+                        android:visibility="gone" />
+
+                    <RelativeLayout
+                        android:id="@+id/l1"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="#F8F7F7"
+                        android:paddingRight="10dp">
+
+                        <TextView
+                            android:id="@+id/menu"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginTop="10dp"
+                            android:background="@drawable/menu"
+                            android:text=" " />
+
+                        <TextView
+                            android:id="@+id/bt_send"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_marginTop="10dp"
+                            android:background="@drawable/send4" />
+
+                        <TextView
+                            android:id="@+id/expression"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginRight="10dp"
+                            android:layout_toLeftOf="@+id/bt_send"
+                            android:background="@drawable/expression" />
+
+                        <EditText
+                            android:id="@+id/et_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="30dp"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginRight="10dp"
+                            android:layout_toLeftOf="@+id/expression"
+                            android:layout_toRightOf="@+id/menu"
+                            android:background="@drawable/background_square"
+                            android:inputType="text"
+                            android:textColor="#000000"
+                            android:theme="@style/MyEditText" />
+                    </RelativeLayout>
+
+                    <include layout="@layout/message_sending_options_layout" />
+                </LinearLayout>
+
+            </ScrollView>
         </LinearLayout>
 
-    </ScrollView>
-</LinearLayout>
     <include layout="@layout/bottomsheet" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
