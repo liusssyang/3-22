@@ -92,7 +92,8 @@
                 android:layout_height="wrap_content"
                 android:background="#ffffff"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="gone"
+                >
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -133,8 +134,9 @@
                     android:id="@+id/find_visibility"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:visibility="gone"
                     android:orientation="vertical"
-                    android:visibility="gone">
+                    >
 
                     <LinearLayout
                         android:id="@+id/find_single_line"
@@ -212,11 +214,39 @@
                             android:textColor="#000000"
                             android:textSize="16sp" />
                     </LinearLayout>
-
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="#f5f6fa" />
+
+                    <LinearLayout
+                        android:id="@+id/index_record"
+                        android:layout_width="match_parent"
+                        android:orientation="vertical"
+                        android:layout_height="wrap_content">
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="20dp"
+                            android:background="#f5f6fa" />
+                        <TextView
+                            android:layout_marginTop="10dp"
+                            android:layout_marginStart="15dp"
+                            android:layout_marginBottom="10dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="25dp"
+                            android:text="聊天记录"/>
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/msg_recycler_view"
+                            android:background="#ffffff"
+                            />
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="20dp"
+                            android:background="#f5f6fa" />
+
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
 

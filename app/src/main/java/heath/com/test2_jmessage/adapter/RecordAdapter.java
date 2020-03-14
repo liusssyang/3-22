@@ -1,6 +1,7 @@
 package heath.com.test2_jmessage.adapter;
 
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +17,10 @@ import heath.com.test2_jmessage.application.MyApplication;
 import heath.com.test2_jmessage.recycleView_item.personMsg;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static heath.com.test2_jmessage.application.MyApplication.personList;
 
 
-public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder>{
+public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.ViewHolder>{
     private List<personMsg> personMsgList;
     static class ViewHolder extends RecyclerView.ViewHolder{
         View v;
@@ -32,9 +34,10 @@ public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder
             simpleMessage=view.findViewById(R.id.simple_message);
             time=view.findViewById(R.id.message_time);
             friendsIcon=view.findViewById(R.id.person_icon);
+
         }
     }
-    public  personAdapter(List<personMsg> msgList){
+    public  RecordAdapter(List<personMsg> msgList){
         personMsgList=msgList;
     }
     public  ViewHolder onCreateViewHolder(ViewGroup parent,int viewType){
@@ -45,9 +48,14 @@ public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder
             @Override
             public void onClick(View v) {
                 int position=holder.getAdapterPosition();
+                personMsg personmsg=personMsgList.get(position);
+                Log.d("13172ly", "onClick: "+position+personList.get(position).getUserName());
                 Intent intent = new Intent(MyApplication.getContext(), CreateSigTextMessageActivity.class);
                 intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("name",personmsg.getUserName());
+                intent.putExtra("note_name",personmsg.getName());
                 intent.putExtra("position",position);
+                intent.putExtra("userId",personmsg.getUserId());
                 MyApplication.getContext().startActivity(intent);
 
             }

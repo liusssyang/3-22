@@ -1,6 +1,8 @@
 package heath.com.test2_jmessage.adapter;
 
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,8 +20,11 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import heath.com.test2_jmessage.MyDialog.Mydialog;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.activity.TypeActivity;
+import heath.com.test2_jmessage.activity.createmessage.CreateSigTextMessageActivity;
 import heath.com.test2_jmessage.recycleView_item.Msg;
 import heath.com.test2_jmessage.tools.tools;
+
+import static heath.com.test2_jmessage.application.MyApplication.personList;
 
 //import heath.com.test2_jmessage.LocalReceiver.Localreceiver;
 
@@ -66,19 +71,22 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.ViewHolder> {
 
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         final Msg msg = mMsgList.get(position);
-        holder.lefticon.setImageBitmap(msg.getIconContent());
+
+        holder.lefticon.setImageBitmap(personList.get(CreateSigTextMessageActivity.position).getAvatar());
+        holder.righticon.setImageBitmap(TypeActivity.myIcon);
         holder.righticon.setImageBitmap(TypeActivity.myIcon);
         if (msg.getType() == Msg.TYPE_RECEIVED) {
-            if (msg.getImageContent() != null || msg.getContent() == null)
+            if (msg.getLocalThumbnailPath() != null || msg.getContent() == null)
                 holder.leftLayout.setBackgroundColor(Color.parseColor("#00000000"));
             else
                 holder.leftLayout.setBackgroundResource(R.drawable.left);
             holder.leftLayout.setVisibility(View.VISIBLE);
+            holder.leftLayout.setBackgroundResource(R.drawable.left);
             holder.lefticon.setVisibility(View.VISIBLE);
             holder.rightLayout.setVisibility(View.GONE);
             holder.righticon.setVisibility(View.GONE);
             holder.leftMsg.setText(msg.getContent());
-            holder.leftImg.setImageBitmap(msg.getImageContent());
+            holder.leftImg.setImageBitmap(BitmapFactory.decodeFile(msg.getLocalThumbnailPath()));
         } else if (msg.getType() == Msg.TYPE_SENT) {
             if (msg.getImageContent() != null || msg.getContent() == null)
                 holder.leftLayout.setBackgroundColor(Color.parseColor("#00000000"));
@@ -86,6 +94,7 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.ViewHolder> {
                 holder.leftLayout.setBackgroundResource(R.drawable.right);
             holder.leftLayout.setVisibility(View.GONE);
             holder.lefticon.setVisibility(View.GONE);
+            holder.rightLayout.setBackgroundResource(R.drawable.right);
             holder.rightLayout.setVisibility(View.VISIBLE);
             holder.righticon.setVisibility(View.VISIBLE);
             holder.rightMsg.setText(msg.getContent());
@@ -112,7 +121,8 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.ViewHolder> {
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                tools.retractMessage(msg.getUserName(), msg.getAppKey(), msg.getId());
+                tools.retractMessage(personList.get(CreateSigTextMessageActivity.position).getUserName(), msg.getAppKey(), msg.getId());
+                Log.d("ly67676", msg.getUserName()+msg.getAppKey()+msg.getId());
                 return true;
             }
         });

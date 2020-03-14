@@ -28,6 +28,14 @@ public class personMsg {
     private String username;
     private String unique;
     private int isDistubed;
+    private int messageId;
+    private String avatarLocalpath;
+
+    public personMsg(Bitmap avatar,String username,String simpleMessage){
+        this.avatar=avatar;
+        this.username=username;
+        this.simpleMessage=simpleMessage;
+    }
 
     public personMsg(Bitmap avatar, String userName, String other,
                      String appkey, String time, String simpleMessage, String unique) {

@@ -1,7 +1,7 @@
 package heath.com.test2_jmessage.tools;
 
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
+import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.text.TextUtils;
 import android.util.Log;
@@ -10,6 +10,8 @@ import android.widget.Toast;
 
 import com.github.chrisbanes.photoview.PhotoView;
 import com.google.gson.Gson;
+
+import org.litepal.crud.DataSupport;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -40,6 +42,27 @@ import static heath.com.test2_jmessage.application.MyApplication.list;
 import static heath.com.test2_jmessage.application.MyApplication.personList;
 
 public class tools {
+    /**
+     * Read the history from the databases here.
+     * Don't change the contents of the method easily.
+     */
+    public static void getLocalHistoryFromDataBases(List<Msg> msgList,int position){
+        Cursor c= DataSupport.findBySQL("select *from LocalHistory where userId=?",personList.get(position).getUserId()+"");
+        if (c.moveToFirst()){
+            do{
+                boolean dialogIsOpen=c.getInt(c.getColumnIndex("dialogisopen"))==1;
+                String IsFileUploaded=c.getString(c.getColumnIndex("isfileuploaded"));
+                String LocalThumbnailPath=c.getString(c.getColumnIndex("localthumbnailpath"));
+                String UserName=c.getString(c.getColumnIndex("username"));
+                String appKey=c.getString(c.getColumnIndex("appkey"));
+                String content=c.getString(c.getColumnIndex("content"));
+                int type=c.getInt(c.getColumnIndex("type"));
+                int messageId=c.getInt(c.getColumnIndex("messageid"));
+                msgList.add(new Msg(IsFileUploaded, LocalThumbnailPath, UserName, appKey, content, type, messageId, dialogIsOpen));
+            }while (c.moveToNext());
+        }
+        c.close();
+    }
     /**
      * Get the no-disturb mode for yourself here,
      * but this method can only be assigned to global variables in MyApplication.class.
@@ -87,7 +110,6 @@ public class tools {
             Gson gson = new Gson();
             Conversation conversation = getConversation(personList.get(position).getUserName(), groupId);
             if (conversation != null) {
-
                 msgList.clear();
                 List<Message> list;
                 list = getConversation(personList.get(position).getUserName(), "").getAllMessage();
@@ -108,35 +130,12 @@ public class tools {
                     Log.d("HISTORY_RECORD", "_______________________________\n");
                     if (app.getText() != null) {
                         if (list.get(j).getDirect().toString().equals("receive"))
-                            msgList.add(new Msg(app.getIsFileUploaded(), message,
-                                    personList.get(position).getUserName(),
-                                    personList.get(position).getAppkey(),
-                                    personList.get(position).getAvatar(),
-                                    null,
-                                    app.getText(),
-                                    Msg.TYPE_RECEIVED, list.get(j).getId(),
-                                    false));
+                            msgList.add(new Msg(message));
                         else
-                            msgList.add(new Msg(app.getIsFileUploaded(), message,
-                                    personList.get(position).getUserName(),
-                                    personList.get(position).getAppkey(),
-                                    personList.get(position).getAvatar(),
-                                    null,
-                                    app.getText(),
-                                    Msg.TYPE_SENT, list.get(j).getId(),
-                                    false));
+                            msgList.add(new Msg(message));
                     }
                     if (app.getLocalThumbnailPath() != null) {
-                        Bitmap picture = BitmapFactory.decodeFile(app.getLocalThumbnailPath());
-                        msgList.add(new Msg(app.getIsFileUploaded(), message,
-                                personList.get(position).getUserName(),
-                                personList.get(position).getAppkey(),
-                                personList.get(position).getAvatar(),
-                                picture,
-                                null,
-                                Msg.TYPE_RECEIVED,
-                                list.get(j).getId(),
-                                true));
+                        msgList.add(new Msg(message));
                     }
                 }
                 return true;
@@ -148,7 +147,38 @@ public class tools {
             return false;
         }
     }
-
+    public static void getLocalHistoryFromCloud2(Message message){
+        LocalHistory localHistory=new LocalHistory(message);
+        localHistory.setMyUserId(JMessageClient.getMyInfo().getUserID());
+        localHistory.setId(0);
+        localHistory.save();
+    }
+    public static void getLocalHistoryFromCloud(int position,String groupId){
+        if (MyApplication.isAvaluable) {
+            List<LocalHistory> localHistories=DataSupport.findAll(LocalHistory.class);
+            Conversation conversation = getConversation(personList.get(position).getUserName(), groupId);
+            if (conversation != null) {
+                List<Message> list;
+                list = getConversation(personList.get(position).getUserName(), "").getAllMessage();
+                for (int j = 0; j < list.size(); j++) {
+                    boolean judgement=true;
+                    for (int i=0;i<localHistories.size();i++){
+                        if (localHistories.get(i).getId()==list.get(j).getId()){
+                            judgement=false;
+                            break;
+                        }
+                    }
+                    if (judgement){
+                        Message message = conversation.getMessage(list.get(j).getId());
+                        LocalHistory localHistory=new LocalHistory(message);
+                        localHistory.setMyUserId(JMessageClient.getMyInfo().getUserID());
+                        localHistory.setId(0);
+                        localHistory.save();
+                    }
+                }
+            }
+        }
+    }
     /**
      * Set the no-disturb mode to others here.
      */
@@ -185,13 +215,17 @@ public class tools {
     /**
      * Download the picture here, but the photoView belongs to MyDialog.
      */
-    public static void getImageContent(final Message message, final PhotoView photoView) {
+    public static void getImageContent(final Message message, final PhotoView photoView, final Msg msg) {
 
         ImageContent imageContent = (ImageContent) message.getContent();
         imageContent.downloadOriginImage(message, new DownloadCompletionCallback() {
             @Override
             public void onComplete(int responseCode, String responseMessage, File file) {
                 if (responseCode == 0) {
+                    LocalHistory localHistory=new LocalHistory();
+                    localHistory.setLocalDownload(file.getPath());
+                    localHistory.updateAll("messageid=?",msg.getId()+"");
+                    Log.d("ly13172", file.getPath()+"onComplete: " +msg.getId());
                     photoView.setImageBitmap(BitmapFactory.decodeFile(file.getPath()));
                     Log.i("ShowMessageActivity", file.getPath());
                     Toast.makeText(getApplicationContext(), "原图下载成功", Toast.LENGTH_SHORT).show();
@@ -207,6 +241,7 @@ public class tools {
      * Retract the message here, but id of the message can only be your own.
      */
     public static void retractMessage(String userName, String appkey, int msgId) {
+        Log.d("retractMessage", userName+msgId);
         Conversation conv;
         if (!TextUtils.isEmpty(userName)) {
             conv = JMessageClient.getSingleConversation(userName, appkey);
@@ -236,7 +271,6 @@ public class tools {
         }
 
     }
-
     public static int getActionBarSize() {
         TypedArray actionbarSizeTypedArray = getApplicationContext().obtainStyledAttributes(new int[]{android.R.attr.actionBarSize});
         float h = actionbarSizeTypedArray.getDimension(0, 0);

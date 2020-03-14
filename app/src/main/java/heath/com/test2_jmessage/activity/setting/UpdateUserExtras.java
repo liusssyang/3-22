@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -16,6 +18,7 @@ import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.model.UserInfo;
 import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.R;
+import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
 
 /**
  * 更新用户扩展字段
@@ -32,7 +35,7 @@ public class UpdateUserExtras extends Activity implements View.OnClickListener {
     private Button mBt_updateUserExtrasFromMap;
     private TextView mTv_getUserExtras;
     private Button mBt_getUserExtras;
-    private Button mBt_getUserExtra;
+    private TextView mBt_getUserExtra;
     private EditText mEt_extraKey;
 
     @Override
@@ -51,8 +54,10 @@ public class UpdateUserExtras extends Activity implements View.OnClickListener {
     }
 
     private void initView() {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(R.layout.activity_update_user_extras);
-
+        zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
         mEt_userExtraKey = (EditText) findViewById(R.id.et_userExtraKey);
         mEt_userExtrasValue = (EditText) findViewById(R.id.et_userExtraValue);
         mBt_updateUserExtras = (Button) findViewById(R.id.bt_update_user_extras);
@@ -61,8 +66,16 @@ public class UpdateUserExtras extends Activity implements View.OnClickListener {
         mBt_updateUserExtrasFromMap = (Button) findViewById(R.id.bt_update_user_extras_form_map);
         mTv_getUserExtras = (TextView) findViewById(R.id.tv_getUserExtras);
         mBt_getUserExtras = (Button) findViewById(R.id.bt_get_user_extras);
-        mBt_getUserExtra = (Button) findViewById(R.id.bt_get_user_extra);
+        mBt_getUserExtra =  findViewById(R.id.bt_get_user_extra);
         mEt_extraKey = (EditText) findViewById(R.id.et_extraKey);
+        TextView manage_back=findViewById(R.id.manage_back);
+        manage_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
+            }
+        });
 
     }
 
@@ -96,7 +109,12 @@ public class UpdateUserExtras extends Activity implements View.OnClickListener {
                 break;
         }
     }
-
+    private void zoomInViewSize(int height) {
+        View img1 = findViewById(R.id.statusbar);
+        ViewGroup.LayoutParams lp = img1.getLayoutParams();
+        lp.height = height;
+        img1.setLayoutParams(lp);
+    }
     private void updateUserExtra(UserInfo userInfo) {
         JMessageClient.updateMyInfo(UserInfo.Field.extras, userInfo, new BasicCallback() {
             @Override

@@ -12,6 +12,7 @@ import cn.jpush.im.android.api.model.Message;
 import heath.com.test2_jmessage.adapter.MsgAdapter;
 import heath.com.test2_jmessage.recycleView_item.Msg;
 import heath.com.test2_jmessage.tools.DataBean;
+import heath.com.test2_jmessage.tools.tools;
 
 import static heath.com.test2_jmessage.application.MyApplication.personList;
 
@@ -33,9 +34,10 @@ public class Localreceiver extends BroadcastReceiver {
         if (se instanceof DataBean && intent.getLongExtra("userId", 0) ==personList.get(position).getUserId()) {
             DataBean db = (DataBean) se;
             Message message = db.getMessage();
-            msgList.add(new Msg(message, position, Msg.TYPE_RECEIVED));
+            msgList.add(new Msg(message));
             adapter.notifyItemInserted(msgList.size() - 1);
             msgRecyclerView.scrollToPosition(msgList.size() - 1);
+
         }
     }
 

@@ -5,8 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -78,10 +76,7 @@ import static heath.com.test2_jmessage.application.MyApplication.personList;
  */
 public class CreateSigTextMessageActivity extends Activity {
 
-    private String getTextMessage = "\n";
-    private EditText mEt_name;
     public static EditText mEt_text;
-    public static final String TEXT_MESSAGE = "text_message";
     private EditText mEt_appkey;
     private EditText mEt_customName;
     private EditText mEt_extraKey;
@@ -102,33 +97,22 @@ public class CreateSigTextMessageActivity extends Activity {
     private MsgAdapter adapter;
     private TextView menu;
     private BottomSheetBehavior behavior;
-
-    SharedPreferences.Editor editor2, editor3;
-    SharedPreferences pref;
-    String history;
+    SharedPreferences.Editor  editor3;
     public static int position;
-    private static long userId;
+    private long userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_single_text_message);
+        position = getIntent().getIntExtra("position", 0);
         PushToast.getInstance().init(this);
         StatusBarUtils.with(this).setDrawable(getResources().getDrawable(R.drawable.toolbar_ground)).init();
-        editor2 = getApplicationContext().getSharedPreferences("history", 0).edit();
-        pref = getApplicationContext().getSharedPreferences("history", 0);
-        userId = getIntent().getLongExtra("userId", 0);
-        editor2 = getApplicationContext().getSharedPreferences("history" + myUserId, 0).edit();
-        pref = getApplicationContext().getSharedPreferences("history" + myUserId, 0);
+        userId = personList.get(position).getUserId();
         editor3 = getApplicationContext().getSharedPreferences("backdata" + myUserId, 0).edit();
-        history = pref.getString("historyRecord", "");
-        history = pref.getString("historyRecord" + userId, "");
-        String[] his = history.split("%%");
         TextView back = findViewById(R.id.back);
         TextView toolbarName = findViewById(R.id.sigText_toolbarName);
-        mEt_name = (EditText) findViewById(R.id.et_name);
-        toolbarName.setText(getIntent().getStringExtra("note_name"));
-        position = getIntent().getIntExtra("position", 0);
+        toolbarName.setText(personList.get(position).getName());
         mEt_text = (EditText) findViewById(R.id.et_text);
         TextView mBt_send = (TextView) findViewById(R.id.bt_send);
         mEt_appkey = (EditText) findViewById(R.id.et_appkey);
@@ -161,22 +145,11 @@ public class CreateSigTextMessageActivity extends Activity {
         msgRecyclerView.setLayoutManager(layoutManager);
         adapter = new MsgAdapter(msgList);
         msgRecyclerView.setAdapter(adapter);
-        for (int i = 0; i < his.length; i++) {
-            getTextMessage += i + "\n" + his[i] + "\n\n";
-        }
-        for (int i = his.length - 1; i >= 0; i--) {
-
-            if (his[i].contains("text_left") && !his[i].equals("text_left")) {
-                msgList.add(0, new Msg(personList.get(position).getAvatar(), null, his[i].replace("text_left", ""), Msg.TYPE_RECEIVED));
-            }
-            if (his[i].contains("image_left") && !his[i].equals("image_left")) {
-                Bitmap bitmap = BitmapFactory.decodeFile(his[i].replace("image_left", ""));
-                msgList.add(0, new Msg(personList.get(position).getAvatar(), bitmap, null, Msg.TYPE_RECEIVED));
-            }
-            if (his[i].contains("text_right") && !his[i].equals("text_right")) {
-                msgList.add(0, new Msg(null, his[i].replace("text_right", ""), Msg.TYPE_SENT));
-            }
-        }
+        /********************
+         *
+         * tools.getLocalHistoryFromDataBases(msgList,position);
+         *
+         */
         msgRecyclerView.scrollToPosition(msgList.size() - 1);
         RelativeLayout linearLayout = findViewById(R.id.ll_content_bottom_sheet);
         behavior = BottomSheetBehavior.from(linearLayout);
@@ -216,7 +189,7 @@ public class CreateSigTextMessageActivity extends Activity {
                 Intent intent = new Intent(MyApplication.getContext(), TypeActivity.class);
                 intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 MyApplication.getContext().startActivity(intent);
-                //overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
         });
         behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
@@ -226,7 +199,6 @@ public class CreateSigTextMessageActivity extends Activity {
                 if (newState == BottomSheetBehavior.STATE_DRAGGING)
                     behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
-
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
                 //这里是拖拽中的回调，根据slideOffset可以做一些动画
@@ -247,11 +219,10 @@ public class CreateSigTextMessageActivity extends Activity {
                 }
             }
         });
-
         mBt_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String name = getIntent().getStringExtra("name");
+                String name = personList.get(position).getUserName();
                 String text = mEt_text.getText().toString();
                 editor3.putString("simplemessage" + userId, text);
                 editor3.putString("time" + userId, tools.CurrentTime());
@@ -262,7 +233,7 @@ public class CreateSigTextMessageActivity extends Activity {
                     String customFromName = mEt_customName.getText().toString();
                     String extraKey = mEt_extraKey.getText().toString();
                     String extraValue = mEt_extraValue.getText().toString();
-                    final Msg msg = new Msg(null, text, Msg.TYPE_SENT);
+
                     boolean retainOfflineMsg = mCb_retainOfflineMsg.isChecked();
                     boolean showNotification = mCb_showNotification.isChecked();
                     boolean enableCustomNotify = mCb_enableCustomNotify.isChecked();
@@ -271,12 +242,10 @@ public class CreateSigTextMessageActivity extends Activity {
                     if (mConversation == null) {
                         mConversation = Conversation.createSingleConversation(name, appkey);
                     }
-
                     //构造message content对象
                     TextContent textContent = new TextContent(text);
                     //设置自定义的extra参数
                     textContent.setStringExtra(extraKey, extraValue);
-
                     //创建message实体，设置消息发送回调。
                     final Message message = mConversation.createSendMessage(textContent, customFromName);
                     message.setOnSendCompleteCallback(new BasicCallback() {
@@ -284,14 +253,11 @@ public class CreateSigTextMessageActivity extends Activity {
                         public void gotResult(int i, String s) {
                             mProgressDialog.dismiss();
                             if (i == 0) {
-                                //Log.i(TAG, "JMessageClient.createSingleTextMessage" + ", responseCode = " + i + " ; LoginDesc = " + s);
+                                final Msg msg = new Msg(message);
+                                tools.getLocalHistoryFromCloud2(message);
                                 msgList.add(msg);
                                 adapter.notifyItemInserted(msgList.size() - 1);
                                 msgRecyclerView.scrollToPosition(msgList.size() - 1);
-                                history = history + mEt_text.getText().toString() + "text_right%%";
-                                editor2.putString("historyRecord", history);
-                                editor2.putString("historyRecord" + userId, history);
-                                editor2.apply();
                                 mEt_text.setText("");
                                 PushToast.getInstance().createToast("提示", "发送成功", null, true);
                             } else {
@@ -299,7 +265,6 @@ public class CreateSigTextMessageActivity extends Activity {
                             }
                         }
                     });
-
                     //设置消息发送时的一些控制参数
                     MessageSendingOptions options = new MessageSendingOptions();
                     options.setNeedReadReceipt(needReadReceipt);//是否需要对方用户发送消息已读回执
@@ -319,7 +284,6 @@ public class CreateSigTextMessageActivity extends Activity {
                         }
                     }
                     mProgressDialog = MsgProgressDialog.show(CreateSigTextMessageActivity.this, message);
-
                     //发送消息
                     JMessageClient.sendMessage(message, options);
                 } else {
@@ -354,7 +318,7 @@ public class CreateSigTextMessageActivity extends Activity {
 
     protected void onStop() {
         super.onStop();
-
+        //tools.getLocalHistoryFromCloud(position,null);
     }
 
     public void onDestroy() {

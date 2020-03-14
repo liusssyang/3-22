@@ -153,7 +153,8 @@ public class UpdateUserInfoActivity extends Activity {
         mRg_gender = (RadioGroup) findViewById(R.id.rg_gender);
         mBt_updateUserInfo = (Button) findViewById(R.id.bt_update_user_info);
         TextView update_avatar=findViewById(R.id.update_avatar);
-        mEt_nickname.setText(JMessageClient.getMyInfo().getNickname());
+        mEt_nickname.setText(!TextUtils.isEmpty(JMessageClient.getMyInfo().getNickname())?
+                JMessageClient.getMyInfo().getNickname():JMessageClient.getMyInfo().getUserName());
         mEt_birthday.setText(tools.secondToDate(JMessageClient.getMyInfo().getBirthday(),"yyyy-MM-dd"));
         mEt_region.setText(JMessageClient.getMyInfo().getRegion());
         mEt_signature.setText(JMessageClient.getMyInfo().getSignature());

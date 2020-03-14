@@ -116,12 +116,10 @@
             />
     </LinearLayout>
     <Button
-
+        android:id="@+id/note_complete"
         android:layout_marginTop="20dp"
-        android:layout_marginStart="5dp"
         android:background="@drawable/background_addnew_accept"
         android:textColor="#ffffff"
-        android:id="@+id/note_complete"
         android:layout_width="140dp"
         android:layout_gravity="center_horizontal"
         android:layout_height="40dp"

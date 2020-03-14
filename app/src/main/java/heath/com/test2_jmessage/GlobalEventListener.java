@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +36,6 @@ import cn.jpush.im.android.api.callback.GetUserInfoListCallback;
 import cn.jpush.im.android.api.content.ImageContent;
 import cn.jpush.im.android.api.content.TextContent;
 import cn.jpush.im.android.api.enums.ContentType;
-import cn.jpush.im.android.api.enums.ConversationType;
 import cn.jpush.im.android.api.event.ChatRoomNotificationEvent;
 import cn.jpush.im.android.api.event.CommandNotificationEvent;
 import cn.jpush.im.android.api.event.ContactNotifyEvent;
@@ -60,7 +58,6 @@ import cn.jpush.im.android.api.model.Message;
 import cn.jpush.im.android.api.model.UserInfo;
 import heath.com.test2_jmessage.MyDialog.Mydialog;
 import heath.com.test2_jmessage.activity.createmessage.CreateSigTextMessageActivity;
-import heath.com.test2_jmessage.activity.createmessage.ShowMessageActivity;
 import heath.com.test2_jmessage.activity.createmessage.ShowTransCommandActivity;
 import heath.com.test2_jmessage.activity.friend.ShowFriendReasonActivity;
 import heath.com.test2_jmessage.activity.groupinfo.ShowGroupApprovalActivity;
@@ -80,13 +77,12 @@ import static heath.com.test2_jmessage.activity.TypeActivity.adapter;
 import static heath.com.test2_jmessage.activity.TypeActivity.myUserId;
 import static heath.com.test2_jmessage.application.MyApplication.personList;
 
-
 /**
  * 在demo中对于通知栏点击事件和在线消息接收事件，我们都直接在全局监听
  */
 public class GlobalEventListener {
     private Context appContext;
-    private final static String TAG = "log1";
+    private final static String TAG = "lOg1";
     private UsageStatsManager mUsageStatsManager;
     public GlobalEventListener(Context context) {
         appContext = context;
@@ -101,37 +97,36 @@ public class GlobalEventListener {
         MessageEventHandling(localBroadcastManager,event);
     }
     private void jumpToActivity(Message msg) {
-        UserInfo fromUser = msg.getFromUser();
+       int position=0;
+       for (int i=0;i<personList.size();i++){
+           if (msg.getFromUser().getUserID()==personList.get(i).getUserId()){
+               position=i;
+               break;
+           }
+       }
+        Log.d(TAG, "jumpToActivity: "+position);
         SharedPreferences.Editor editor3=getApplicationContext().getSharedPreferences("backdata"+myUserId,0).edit();
-        long userId=msg.getFromUser().getUserID();
-        Calendar cal;
-        String year, month, day, hour, minute, second, timeA;
-        String total = "";
-        cal = Calendar.getInstance();
-        cal.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
-        year = String.valueOf(cal.get(Calendar.YEAR));
-        month = String.valueOf(cal.get(Calendar.MONTH) + 1);
-        day = String.valueOf(cal.get(Calendar.DATE));
-        if (cal.get(Calendar.AM_PM) == 0)
-            hour = String.valueOf(cal.get(Calendar.HOUR));
-        else
-            hour = String.valueOf(cal.get(Calendar.HOUR) + 12);
-        minute = String.valueOf(cal.get(Calendar.MINUTE));
-        second = String.valueOf(cal.get(Calendar.SECOND));
-        timeA = month + "/" + day + "  " + hour + ":" + minute;
-        editor3.putString("time"+userId,timeA);
+        editor3.putString("time"+msg.getFromUser().getUserID(),tools.CurrentTime());
         ContentType contentType=ContentType.valueOf(msg.getContentType().toString());
+        final Intent intent = new Intent(appContext, CreateSigTextMessageActivity.class);
+        intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("name",msg.getFromUser().getUserName());
+        intent.putExtra("note_name",msg.getFromUser().getNotename());
+        intent.putExtra("position",position);
+        intent.putExtra("userId",msg.getFromUser().getUserID());
         switch (contentType) {
             case text:
                 TextContent textContent = (TextContent) msg.getContent();
                 String text=textContent.getText();
-                editor3.putString("simplemessage"+userId,text);
+                editor3.putString("simplemessage"+msg.getFromUser().getUserID(),text);
                 editor3.apply();
+                appContext.startActivity(intent);
             case image:
                 String thumbLocalPath = ((ImageContent)msg.getContent()).getLocalThumbnailPath();
                 if (!TextUtils.isEmpty(thumbLocalPath)) {
-                    editor3.putString("simplemessage"+userId,"[图片]");
+                    editor3.putString("simplemessage"+msg.getFromUser().getUserID(),"[图片]");
                     editor3.apply();
+                    appContext.startActivity(intent);
                 }
                 break;
 
@@ -154,25 +149,6 @@ public class GlobalEventListener {
 
                 break;
         }
-        final Intent notificationIntent = new Intent(appContext, CreateSigTextMessageActivity.class);
-        for (int i=0;i<personList.size();i++){
-            if (personList.get(i).getUserId()==fromUser.getUserID()){
-                notificationIntent.putExtra("position",i);
-            }
-        }
-
-        if (msg.getTargetType() == ConversationType.group) {
-            GroupInfo groupInfo = (GroupInfo) msg.getTargetInfo();
-            notificationIntent.putExtra(ShowMessageActivity.EXTRA_IS_GROUP, true);
-            notificationIntent.putExtra(ShowMessageActivity.EXTRA_GROUPID, groupInfo.getGroupID());
-        } else {
-            notificationIntent.putExtra(ShowMessageActivity.EXTRA_IS_GROUP, false);
-        }
-        notificationIntent.putExtra("name", fromUser.getUserName());
-        notificationIntent.putExtra("userId",fromUser.getUserID());
-        notificationIntent.putExtra(ShowMessageActivity.EXTRA_MSGID, msg.getId());
-        appContext.startActivity(notificationIntent);
-
     }
     private String SysMessage(){
         permission();
@@ -222,11 +198,9 @@ public class GlobalEventListener {
             MyApplication.getContext().startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
     }
     private void MessageEventHandling (LocalBroadcastManager localBroadcastManager,MessageEvent event){
+        tools.getLocalHistoryFromCloud2(event.getMessage());
         long userId=event.getMessage().getFromUser().getUserID();
-        SharedPreferences.Editor editor2=getApplicationContext().getSharedPreferences("history"+myUserId,0).edit();
-        SharedPreferences pref=getApplicationContext().getSharedPreferences("history"+myUserId,0);
         SharedPreferences.Editor editor3=getApplicationContext().getSharedPreferences("backdata"+myUserId,0).edit();
-        String history=pref.getString("historyRecord"+userId," ");
         /***************************************/
         ContentType contentType=ContentType.valueOf(event.getMessage().getContentType().toString());
         Intent intent=new Intent("message");
@@ -244,9 +218,6 @@ public class GlobalEventListener {
                 TextContent textContent = (TextContent) event.getMessage().getContent();
                 String text=textContent.getText();
                 intent.putExtra("key", text);
-                history=history+text+"text_left%%";
-                editor2.putString("historyRecord"+userId,history);
-                editor2.apply();
                 editor3.putString("simplemessage"+userId,text);
                 editor3.apply();
                 if (text.equals("Ask"))
@@ -258,16 +229,10 @@ public class GlobalEventListener {
             case image:
                 Mydialog.imageContent=(ImageContent)event.getMessage().getContent();
                 Mydialog.message=event.getMessage();
-                SharedPreferences.Editor editor=getApplicationContext().getSharedPreferences("data",0).edit();
                 String thumbLocalPath = ((ImageContent)event.getMessage().getContent()).getLocalThumbnailPath();
-                editor.putString("filepath",null);
-                editor.apply();
                 if (!TextUtils.isEmpty(thumbLocalPath)) {
-                    history=history+thumbLocalPath+"image_left%%";
-                    editor2.putString("historyRecord"+userId,history);
                     editor3.putString("simplemessage"+userId,"图片");
                     editor3.apply();
-                    editor2.apply();
                     Bitmap bitmap = BitmapFactory.decodeFile(thumbLocalPath);
                     Mydialog.bitmap=bitmap;
                     ByteArrayOutputStream output = new ByteArrayOutputStream();//初始化一个流对象

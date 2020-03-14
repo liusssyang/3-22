@@ -46,12 +46,6 @@ public class FriendAskManage extends Activity {
         manage_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*SharedPreferences.Editor editor=getApplicationContext().
-                        getSharedPreferences("friends"+myUserId,0).edit();
-                editor.clear();
-                editor.apply();
-                personAskList.clear();
-                personAskAdapter.notifyDataSetChanged();*/
                 Intent intent=new Intent(getApplicationContext(), TypeActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 getApplicationContext().startActivity(intent);

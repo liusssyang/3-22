@@ -28,6 +28,8 @@ import heath.com.test2_jmessage.activity.notify.NotifyTypeActivity;
 import heath.com.test2_jmessage.application.MyApplication;
 import heath.com.test2_jmessage.tools.tools;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 /**
  * Created by ${chenyn} on 16/3/23.
  *
@@ -214,7 +216,9 @@ public class SettingMainActivity extends Activity implements View.OnClickListene
 /**#################    更新密码    #################*/
             case R.id.bt_update_user_password:
                 intent.setClass(SettingMainActivity.this, UpdatePassword.class);
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
                 break;
 /**#################    更新用户信息    #################*/
             case R.id.bt_update_my_info:

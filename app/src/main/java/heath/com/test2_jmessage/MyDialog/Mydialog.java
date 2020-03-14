@@ -65,14 +65,13 @@ public class Mydialog extends Dialog {
             @Override
             public void onClick(View v) {
                     if (msg.getMessage() != null) {
-                        tools.getImageContent(msg.getMessage(),photoView);
+                        tools.getImageContent(msg.getMessage(),photoView,msg);
                     } else {
                         imageContent.downloadOriginImage(message, new DownloadCompletionCallback() {
                             @Override
                             public void onComplete(int responseCode, String responseMessage, File file) {
                                 if (responseCode == 0) {
-                                    editor.putString("filepath", file.getPath());
-                                    editor.apply();
+
                                     Toast.makeText(getApplicationContext(), "原图下载成功", Toast.LENGTH_SHORT).show();
                                     Bitmap bitmap = BitmapFactory.decodeFile(file.getPath());
                                     photoView.setImageBitmap(bitmap);
@@ -110,7 +109,7 @@ public class Mydialog extends Dialog {
 
         photoView = findViewById(R.id.photo);
         if (msg != null) {
-            photoView.setImageBitmap(msg.getImageContent());
+            photoView.setImageBitmap(BitmapFactory.decodeFile(msg.getLocalThumbnailPath()));
         } else {
             if (pref.getString("filepath", null) == null)
                 photoView.setImageBitmap(bitmap);

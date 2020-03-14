@@ -1,9 +1,10 @@
 package heath.com.test2_jmessage.application;
 
-import android.app.Application;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.Log;
+
+import org.litepal.LitePalApplication;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,7 @@ import heath.com.test2_jmessage.tools.tools;
  *
  * @desc :
  */
-public class MyApplication extends Application {
+public class MyApplication extends LitePalApplication {
     private  static Context context;
     private final String TAG="MyApplication";
     public static boolean isAvaluable=false;

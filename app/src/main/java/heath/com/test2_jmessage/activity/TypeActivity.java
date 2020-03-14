@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -28,13 +29,15 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import org.litepal.crud.DataSupport;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.core.view.GravityCompat;
@@ -63,9 +66,11 @@ import heath.com.test2_jmessage.activity.jmrtc.JMRTCActivity;
 import heath.com.test2_jmessage.activity.setting.SettingMainActivity;
 import heath.com.test2_jmessage.activity.setting.UpdateUserAvatar;
 import heath.com.test2_jmessage.activity.setting.UpdateUserInfoActivity;
+import heath.com.test2_jmessage.adapter.RecordAdapter;
 import heath.com.test2_jmessage.adapter.personAdapter;
 import heath.com.test2_jmessage.application.MyApplication;
 import heath.com.test2_jmessage.recycleView_item.personMsg;
+import heath.com.test2_jmessage.tools.LocalHistory;
 import heath.com.test2_jmessage.tools.PushToast;
 import heath.com.test2_jmessage.tools.tools;
 
@@ -81,7 +86,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     public static final String LOGOUT_REASON = "logout_reason";
     private TextView mTv_showOfflineMsg;
     private TextView tv_refreshEvent;
-    private TextView tv_deviceInfo,head_state;
+    private TextView tv_deviceInfo, head_state;
     private TextView headusername, headappkey, headvision, signature;
     public static final String INFO_UPDATE = "info_update";
     public static final String TRANS_COMMAND_SENDER = "trans_command_sender";
@@ -97,6 +102,9 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     public static Bitmap myIcon;
     private final Handler handler = new Handler();
     private SwipeRefreshLayout swipeRefreshLayout;
+    private List<personMsg> recordList = new ArrayList<>();
+    private RecordAdapter recordAdapter;
+    private LinearLayout linearLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,19 +130,17 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         headappkey = navHeaderView.findViewById(R.id.head_appkey);
         headvision = navHeaderView.findViewById(R.id.head_vision);
         signature = navHeaderView.findViewById(R.id.signature);
-        head_state=navHeaderView.findViewById(R.id.head_state);
+        head_state = navHeaderView.findViewById(R.id.head_state);
         head_state.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent();
+                Intent intent = new Intent();
                 intent.setClass(getApplicationContext(), SettingMainActivity.class);
                 startActivityForResult(intent, 0);
             }
         });
         swipeRefreshLayout = findViewById(R.id.swipeLayout);
         swipeRefreshLayout.setColorSchemeColors(Color.parseColor("#d7a101"), Color.parseColor("#54c745"), Color.parseColor("#f16161"), Color.BLUE, Color.YELLOW);
-
-
         final TextView index = findViewById(R.id.index);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -156,8 +162,15 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                         PushToast.getInstance().createToast("提示", "登出失败", null, false);
                     }
                 }
+                if (item.toString().equals("开发者选项")) {
+                    List<LocalHistory> localHistories = DataSupport.where("messageid=?", "15").find(LocalHistory.class);
+                    for (LocalHistory localHistory : localHistories) {
+                        Log.d(TAG, localHistory.getContent());
+                    }
+                }
                 if (item.toString().equals("设置")) {
                     intent.setClass(getApplicationContext(), SettingMainActivity.class);
+                    intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                     startActivityForResult(intent, 0);
                 }
                 if (item.toString().equals("群组")) {
@@ -174,10 +187,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                     getApplicationContext().startActivity(intent);
                 }
                 if (item.toString().equals("历史纪录")) {
-                    SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences("history" + myUserId, 0).edit();
-                    editor.clear();
-                    editor.apply();
-                    Toast.makeText(getApplicationContext(), "cleared", Toast.LENGTH_LONG).show();
+                    DataSupport.deleteAll(LocalHistory.class);
                 }
                 return true;
             }
@@ -230,6 +240,13 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         recyclerView.setLayoutManager(layoutManager);
         adapter = new personAdapter(personList);
         recyclerView.setAdapter(adapter);
+
+        LinearLayoutManager layoutManager2 = new LinearLayoutManager(this);
+        RecyclerView recyclerView2 = findViewById(R.id.msg_recycler_view);
+        recyclerView2.setLayoutManager(layoutManager2);
+        recordAdapter = new RecordAdapter(recordList);
+        recyclerView2.setAdapter(recordAdapter);
+
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("message");
         localRceiver = new Localreceiver(personList, recyclerView, adapter);
@@ -312,6 +329,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
 
             }
         });
+        linearLayout=findViewById(R.id.index_record);
         index2.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -323,11 +341,34 @@ public class TypeActivity extends Activity implements View.OnClickListener {
 
             @Override
             public void afterTextChanged(Editable s) {
+                linearLayout.setVisibility(View.GONE);
                 find_visibility.setVisibility(View.VISIBLE);
                 find_group.setText(s.toString());
                 find_single.setText(s.toString());
+                if (!TextUtils.isEmpty(index2.getText().toString())) {
+                    recordList.clear();
+                    recordAdapter.notifyDataSetChanged();
+                    Cursor c = DataSupport.findBySQL("select *from LocalHistory where content like?", "%" + index2.getText().toString() + "%");
+                    if (c.moveToFirst()) {
+                        do {
+                            boolean dialogIsOpen = c.getInt(c.getColumnIndex("dialogisopen")) == 1;
+                            String IsFileUploaded = c.getString(c.getColumnIndex("isfileuploaded"));
+                            String LocalThumbnailPath = c.getString(c.getColumnIndex("localthumbnailpath"));
+                            String UserName = c.getString(c.getColumnIndex("username"));
+                            String appKey = c.getString(c.getColumnIndex("appkey"));
+                            String content = c.getString(c.getColumnIndex("content"));
+                            int type = c.getInt(c.getColumnIndex("type"));
+                            int messageId = c.getInt(c.getColumnIndex("messageid"));
+                            Log.d(TAG, "afterTextChanged: " + content + "|" + UserName);
+                            recordList.add(new personMsg(null, UserName, content));
+                            recordAdapter.notifyDataSetChanged();
+                        } while (c.moveToNext());
+                    }
+                    c.close();linearLayout.setVisibility(View.VISIBLE);
+                }
             }
         });
+        recordAdapter.notifyDataSetChanged();
         adapter.notifyDataSetChanged();
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -414,12 +455,12 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                         myIcon = BitmapFactory.decodeResource(getResources(), R.drawable.icon_left_default);
                 }
             });
-            Log.d(TAG, "onStart:当前免打扰 "+MyApplication.getNoDisturbToMyselfResult);
-            if (MyApplication.getNoDisturbToMyselfResult==1){
-                String state="当前免打扰";
+            Log.d(TAG, "onStart:免打扰 " + MyApplication.getNoDisturbToMyselfResult);
+            if (MyApplication.getNoDisturbToMyselfResult == 1) {
+                String state = "当前免打扰";
                 head_state.setVisibility(View.VISIBLE);
                 head_state.setText(state);
-            }else head_state.setVisibility(View.GONE);
+            } else head_state.setVisibility(View.GONE);
 
         }
 
