@@ -11,8 +11,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,9 +24,10 @@ import cn.jpush.im.android.api.model.UserInfo;
 import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.R;
 
+import static heath.com.test2_jmessage.application.MyApplication.groupList;
+
 public class SetGroupMemSilenceActivity extends Activity {
     private String TAG = SetGroupMemSilenceActivity.class.getSimpleName();
-    private EditText mEtGroupId;
     private EditText mEtMemberName;
     private EditText mEtMemberAppKey;
     private EditText mEtSilenceTime;
@@ -42,6 +41,7 @@ public class SetGroupMemSilenceActivity extends Activity {
     private long silenceTime;
     private String mNames;
     private String mAppKey;
+    private static int position;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,12 +107,8 @@ public class SetGroupMemSilenceActivity extends Activity {
         mBtGetGroupSilenceList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (TextUtils.isEmpty(mEtGroupId.getText())) {
-                    Toast.makeText(getApplicationContext(), "请输入群组id", Toast.LENGTH_SHORT).show();
-                    return;
-                }
                 mProgressDialog = ProgressDialog.show(SetGroupMemSilenceActivity.this, "提示：", "正在加载中。。。");
-                mGroupID = Long.parseLong(mEtGroupId.getText().toString());
+                mGroupID = groupList.get(position).getGroupId();
                 mTv_showSilenceInfo.setText("");
                 JMessageClient.getGroupInfo(mGroupID, new GetGroupInfoCallback() {
                     @Override
@@ -150,7 +146,7 @@ public class SetGroupMemSilenceActivity extends Activity {
 
     private void initView() {
         setContentView(R.layout.activity_set_group_mem_silence);
-        mEtGroupId = (EditText) findViewById(R.id.et_group_id);
+        position=getIntent().getIntExtra("position",-1);
         mEtMemberName = (EditText) findViewById(R.id.et_member_name);
         mEtMemberAppKey = (EditText) findViewById(R.id.et_member_appkey);
         mEtSilenceTime = (EditText) findViewById(R.id.et_silence_time);
@@ -163,11 +159,7 @@ public class SetGroupMemSilenceActivity extends Activity {
 
     private boolean preparedData() {
         mProgressDialog = ProgressDialog.show(SetGroupMemSilenceActivity.this, "提示：", "正在加载中。。。");
-        if (TextUtils.isEmpty(mEtGroupId.getText()) || TextUtils.isEmpty(mEtMemberName.getText())) {
-            mProgressDialog.dismiss();
-            return false;
-        }
-        mGroupID = Long.parseLong(mEtGroupId.getText().toString());
+        mGroupID =groupList.get(position).getGroupId();
         mNames = mEtMemberName.getText().toString();
         mAppKey = mEtMemberAppKey.getText().toString();
         return true;

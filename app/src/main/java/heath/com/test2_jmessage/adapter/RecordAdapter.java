@@ -1,6 +1,7 @@
 package heath.com.test2_jmessage.adapter;
 
 import android.content.Intent;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,16 +16,16 @@ import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.activity.createmessage.CreateSigTextMessageActivity;
 import heath.com.test2_jmessage.application.MyApplication;
 import heath.com.test2_jmessage.recycleView_item.personMsg;
+import heath.com.test2_jmessage.tools.tools;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static heath.com.test2_jmessage.application.MyApplication.personList;
 
 
 public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.ViewHolder>{
     private List<personMsg> personMsgList;
     static class ViewHolder extends RecyclerView.ViewHolder{
         View v;
-        TextView leftMsg,simpleMessage,time;
+        TextView leftMsg,simpleMessage,time,time2;
         CircleImageView friendsIcon;
 
         public ViewHolder(View view){
@@ -32,7 +33,9 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.ViewHolder
             v=view;
             leftMsg=(TextView) view.findViewById(R.id.person);
             simpleMessage=view.findViewById(R.id.simple_message);
-            time=view.findViewById(R.id.message_time);
+            time=view.findViewById(R.id.time);
+            time2=view.findViewById(R.id.message_time);
+            time2.setVisibility(View.GONE);
             friendsIcon=view.findViewById(R.id.person_icon);
 
         }
@@ -44,31 +47,32 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.ViewHolder
         View view= LayoutInflater.from(parent.getContext()).
                 inflate(R.layout.person_item,parent,false);
         final ViewHolder holder=new ViewHolder(view);
-        holder.v.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int position=holder.getAdapterPosition();
-                personMsg personmsg=personMsgList.get(position);
-                Log.d("13172ly", "onClick: "+position+personList.get(position).getUserName());
-                Intent intent = new Intent(MyApplication.getContext(), CreateSigTextMessageActivity.class);
-                intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("name",personmsg.getUserName());
-                intent.putExtra("note_name",personmsg.getName());
-                intent.putExtra("position",position);
-                intent.putExtra("userId",personmsg.getUserId());
-                MyApplication.getContext().startActivity(intent);
 
-            }
-        });
         return  holder;
     }
 
-    public void onBindViewHolder(ViewHolder holder,int position){
+    public void onBindViewHolder(final ViewHolder holder, final int position){
         personMsg msg=personMsgList.get(position);
         holder.leftMsg.setText(msg.getName()+"("+msg.getUserName()+")");
-        holder.simpleMessage.setText(msg.getSimpleMessage());
-        holder.time.setText(msg.getTime());
+        holder.simpleMessage.setText(Html.fromHtml(msg.getSimpleMessage()));
+        holder.time.setVisibility(View.VISIBLE);
+        holder.time.setText(tools.secondToDate(msg.getCreateMillisecond(),"MM/dd HH:mm"));
         holder.friendsIcon.setImageBitmap(msg.getAvatar());
+        holder.v.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //int position=holder.getAdapterPosition();
+                Intent intent = new Intent(MyApplication.getContext(), CreateSigTextMessageActivity.class);
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                int position2= tools.getPosition(personMsgList.get(position).getUserName(),
+                        personMsgList.get(position).getAppkey());
+                intent.putExtra("position", position2);
+                intent.putExtra("showAllFromDatabases",true);
+                intent.putExtra("msgNumber",personMsgList.get(position).getMsgNumber());
+                Log.d("position", position+"onClick: "+personMsgList.get(position).getMsgNumber());
+                MyApplication.getContext().startActivity(intent);
+            }
+        });
     }
     public  int getItemCount(){
         return personMsgList.size();

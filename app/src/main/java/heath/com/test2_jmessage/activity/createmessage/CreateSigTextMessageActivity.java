@@ -2,6 +2,8 @@ package heath.com.test2_jmessage.activity.createmessage;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -18,6 +20,7 @@ import android.widget.TextView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +36,6 @@ import cn.jpush.im.android.api.model.Conversation;
 import cn.jpush.im.android.api.model.Message;
 import cn.jpush.im.android.api.options.MessageSendingOptions;
 import cn.jpush.im.api.BasicCallback;
-import heath.com.test2_jmessage.BroadCast.Localreceiver;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.StatusBar.StatusBarUtils;
 import heath.com.test2_jmessage.activity.TypeActivity;
@@ -41,6 +43,7 @@ import heath.com.test2_jmessage.activity.friend.ManageFriendActivity;
 import heath.com.test2_jmessage.adapter.MsgAdapter;
 import heath.com.test2_jmessage.application.MyApplication;
 import heath.com.test2_jmessage.recycleView_item.Msg;
+import heath.com.test2_jmessage.tools.DataBean;
 import heath.com.test2_jmessage.tools.PushToast;
 import heath.com.test2_jmessage.tools.tools;
 
@@ -90,14 +93,14 @@ public class CreateSigTextMessageActivity extends Activity {
     private CheckBox mCb_enableCustomNotify;
     private CheckBox mCb_enableReadReceipt;
     private ProgressDialog mProgressDialog;
-    private Localreceiver localRceiver;
+    private LocalRceiver localRceiver;
     private LocalBroadcastManager localBroadcastManager;
     private List<Msg> msgList = new ArrayList<>();
     private RecyclerView msgRecyclerView;
     private MsgAdapter adapter;
     private TextView menu;
     private BottomSheetBehavior behavior;
-    SharedPreferences.Editor  editor3;
+    SharedPreferences.Editor editor3;
     public static int position;
     private long userId;
 
@@ -145,11 +148,7 @@ public class CreateSigTextMessageActivity extends Activity {
         msgRecyclerView.setLayoutManager(layoutManager);
         adapter = new MsgAdapter(msgList);
         msgRecyclerView.setAdapter(adapter);
-        /********************
-         *
-         * tools.getLocalHistoryFromDataBases(msgList,position);
-         *
-         */
+
         msgRecyclerView.scrollToPosition(msgList.size() - 1);
         RelativeLayout linearLayout = findViewById(R.id.ll_content_bottom_sheet);
         behavior = BottomSheetBehavior.from(linearLayout);
@@ -199,6 +198,7 @@ public class CreateSigTextMessageActivity extends Activity {
                 if (newState == BottomSheetBehavior.STATE_DRAGGING)
                     behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
+
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
                 //这里是拖拽中的回调，根据slideOffset可以做一些动画
@@ -247,6 +247,7 @@ public class CreateSigTextMessageActivity extends Activity {
                     //设置自定义的extra参数
                     textContent.setStringExtra(extraKey, extraValue);
                     //创建message实体，设置消息发送回调。
+                    //mConversation.createLocationMessage()
                     final Message message = mConversation.createSendMessage(textContent, customFromName);
                     message.setOnSendCompleteCallback(new BasicCallback() {
                         @Override
@@ -254,7 +255,7 @@ public class CreateSigTextMessageActivity extends Activity {
                             mProgressDialog.dismiss();
                             if (i == 0) {
                                 final Msg msg = new Msg(message);
-                                tools.getLocalHistoryFromCloud2(message);
+                                tools.setLocalHistory(message, position);
                                 msgList.add(msg);
                                 adapter.notifyItemInserted(msgList.size() - 1);
                                 msgRecyclerView.scrollToPosition(msgList.size() - 1);
@@ -293,18 +294,18 @@ public class CreateSigTextMessageActivity extends Activity {
         });
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("message");
-        localRceiver = new Localreceiver(position,msgList, msgRecyclerView, adapter);
+        localRceiver = new LocalRceiver(position, msgList, msgRecyclerView, adapter);
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
         localBroadcastManager.registerReceiver(localRceiver, intentFilter);
         final SwipeRefreshLayout swipeLayout = findViewById(R.id.swipeLayout);
         swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (tools.shownHistory(position, msgList, null)) ;
-                {
+                if (tools.shownHistoryFromCloud(personList.get(position).getUserName(), msgList, null)) {
                     PushToast.getInstance().createToast("提示", "刷新成功", null, true);
                     adapter.notifyDataSetChanged();
                     msgRecyclerView.scrollToPosition(msgList.size() - 1);
+                    //tools.getLocalHistoryFromCloud(position,null);
                 }
                 swipeLayout.postDelayed(new Runnable() {
                     @Override
@@ -314,11 +315,22 @@ public class CreateSigTextMessageActivity extends Activity {
                 }, 1000);
             }
         });
+
+        if (getIntent().getBooleanExtra("showAllFromDatabases", false)) {
+            tools.shownHistoryFromDataBases(msgList, -1,userId);
+            msgRecyclerView.scrollToPosition(getIntent().getIntExtra("msgNumber", 0));
+        } else {
+            if (tools.getDataBasesNumber() <= 10) {
+                tools.shownHistoryFromDataBases(msgList, -1,userId);
+            } else {
+                tools.shownHistoryFromDataBases(msgList, 10,userId);
+            }
+            msgRecyclerView.scrollToPosition(msgList.size() - 1);
+        }
     }
 
     protected void onStop() {
         super.onStop();
-        //tools.getLocalHistoryFromCloud(position,null);
     }
 
     public void onDestroy() {
@@ -332,6 +344,31 @@ public class CreateSigTextMessageActivity extends Activity {
         View v = getWindow().peekDecorView();
         if (null != v) {
             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+        }
+    }
+    class LocalRceiver extends BroadcastReceiver {
+        private List<Msg> msgList;
+        private RecyclerView msgRecyclerView;
+        private MsgAdapter adapter;
+        private int position;
+
+        public LocalRceiver(int position, List<Msg> msgList, RecyclerView msgRecyclerView, MsgAdapter adapter) {
+            this.msgList = msgList;
+            this.msgRecyclerView = msgRecyclerView;
+            this.adapter = adapter;
+            this.position = position;
+        }
+
+        public void onReceive(Context context, Intent intent) {
+            Serializable se = intent.getSerializableExtra("BeanData");
+            DataBean db = (DataBean) se;
+            Message message = db.getMessage();
+            if (message.getFromUser().getUserID()==personList.get(position).getUserId()){
+                msgList.add(new Msg(message));
+                adapter.notifyItemInserted(msgList.size() - 1);
+                msgRecyclerView.scrollToPosition(msgList.size() - 1);
+            }
+
         }
     }
 

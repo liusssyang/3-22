@@ -35,7 +35,7 @@ import heath.com.test2_jmessage.tools.PushToast;
 import heath.com.test2_jmessage.tools.tools;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static heath.com.test2_jmessage.activity.TypeActivity.adapter;
+import static heath.com.test2_jmessage.activity.TypeActivity.personAdapter;
 import static heath.com.test2_jmessage.application.MyApplication.personList;
 
 
@@ -123,8 +123,7 @@ public class ManageFriendActivity extends Activity {
                                             if (i == 0) {
                                                 manage_person_icon.setImageBitmap(bitmap);
                                                 personList.get(position).setAvatar(bitmap);
-                                                personList.get(position).setAvatar(bitmap);
-                                                adapter.notifyDataSetChanged();
+                                                personAdapter.notifyDataSetChanged();
                                             }
                                         }
                                     });
@@ -166,7 +165,7 @@ public class ManageFriendActivity extends Activity {
                                                 public void gotResult(int i, String s) {
                                                     if (i == 0) {
                                                         personList.remove(position);
-                                                        adapter.notifyDataSetChanged();
+                                                        personAdapter.notifyDataSetChanged();
                                                         Intent intent = new Intent(MyApplication.getContext(), TypeActivity.class);
                                                         intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                                                         MyApplication.getContext().startActivity(intent);
@@ -247,7 +246,7 @@ public class ManageFriendActivity extends Activity {
             @Override
             public void onClick(View v) {
                 if (JMessageClient.deleteSingleConversation(personList.get(position).getUserName())) {
-                    adapter.notifyDataSetChanged();
+                    personAdapter.notifyDataSetChanged();
                     PushToast.getInstance().createToast("提示", "删除成功", null, true);
                 } else PushToast.getInstance().createToast("提示", "操作失败", null, false);
 

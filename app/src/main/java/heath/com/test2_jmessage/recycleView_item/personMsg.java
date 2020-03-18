@@ -30,11 +30,79 @@ public class personMsg {
     private int isDistubed;
     private int messageId;
     private String avatarLocalpath;
+    private long millisecond;
+    private int MsgNumber;
+    /********************************************************************************************/
+    private long groupId;
+    private int noDisturb, maxMemberCount;
+    private String groupName, groupOwner,
+            groupOwnerAppkey, groupDescription,
+            groupType, avatarFilePath;
+    public int getNoDisturb(){return noDisturb;}
+    public int getMaxMemberCount(){return maxMemberCount;}
+    public String getGroupName(){return groupName;}
+    public String getGroupOwner(){return groupOwner;}
+    public String getGroupOwnerAppkey(){return groupOwnerAppkey;}
+    public String getGroupDescription(){return groupDescription;}
+    public String getGroupType(){return groupType;}
+    public String getAvatarFilePath(){return avatarFilePath;}
+    public long getGroupId(){return groupId;}
 
-    public personMsg(Bitmap avatar,String username,String simpleMessage){
-        this.avatar=avatar;
+    public personMsg(String username,Bitmap avatar){
         this.username=username;
-        this.simpleMessage=simpleMessage;
+        this.avatar=avatar;
+    };
+
+    public personMsg(long groupId, String groupName, String groupOwner,
+    int noDisturb,String groupOwnerAppkey, int maxMemberCount,
+                     String groupDescription,Bitmap avatar,String groupType) {
+        this.groupId =groupId;
+        this.groupName = groupName;
+        this.groupOwner = groupOwner;
+        this.noDisturb = noDisturb;
+        this.groupOwnerAppkey = groupOwnerAppkey;
+        this.maxMemberCount = maxMemberCount;
+        this.groupDescription = groupDescription;
+        this.avatar = avatar;
+        this.groupType =groupType;
+    }
+
+    /********************************************************************************************/
+    public personMsg(String avatarLocalpath,
+                     String username,
+                     String simpleMessage,
+                     int messageId,
+                     String appkey,
+                     String nickname,
+                     String notename,
+                     long millisecond,
+                     int MsgNumber) {
+        this.MsgNumber = MsgNumber;
+        this.avatar = BitmapFactory.decodeFile(avatarLocalpath);
+        this.username = username;
+        this.simpleMessage = simpleMessage;
+        this.avatarLocalpath = avatarLocalpath;
+        this.messageId = messageId;
+        this.appkey = appkey;
+        this.nickname = nickname;
+        this.notename = notename;
+        this.millisecond = millisecond;
+    }
+
+    public int getMsgNumber() {
+        return MsgNumber;
+    }
+
+    public long getCreateMillisecond() {
+        return millisecond;
+    }
+
+    public int getMessageId() {
+        return messageId;
+    }
+
+    public String getAvatarLocalpath() {
+        return avatarLocalpath;
     }
 
     public personMsg(Bitmap avatar, String userName, String other,
@@ -52,7 +120,9 @@ public class personMsg {
                      String noteName, String appkey,
                      boolean hasInformation, String simpleMessage, String time,
                      String signature,
-                     String gender, String adress, String other, long birthday) {
+                     String gender, String adress, String other, long birthday,
+                     String avatarLocalpath) {
+        this.avatarLocalpath = avatarLocalpath;
         this.isDistubed = isDistubed;
         this.username = userName;
         this.signature = signature;

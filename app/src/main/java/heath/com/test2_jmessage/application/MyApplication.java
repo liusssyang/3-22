@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.jpush.im.android.api.JMessageClient;
+import cn.jpush.im.android.api.model.GroupInfo;
 import cn.jpush.im.android.api.model.UserInfo;
 import heath.com.test2_jmessage.GlobalEventListener;
 import heath.com.test2_jmessage.recycleView_item.personMsg;
@@ -25,8 +26,10 @@ public class MyApplication extends LitePalApplication {
     private final String TAG="MyApplication";
     public static boolean isAvaluable=false;
     public static List<UserInfo> list;
-    public static StringBuilder sb= new StringBuilder();
+    public static List<GroupInfo> list2=new ArrayList<>();
+
     public static List<personMsg> personList=new ArrayList<>();
+    public static List<personMsg> groupList=new ArrayList<>();
     public static int getNoDisturbToMyselfResult=0;
 
     @Override
@@ -40,6 +43,7 @@ public class MyApplication extends LitePalApplication {
         /**##################################*/
         tools.getUserInfoList();
         tools.getNoDisturbToMyself();
+        tools.getGroupIdList();
         Log.i("MyApplication", isAvaluable+"");
 
     }

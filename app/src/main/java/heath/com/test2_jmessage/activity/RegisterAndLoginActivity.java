@@ -130,6 +130,7 @@ public class RegisterAndLoginActivity extends Activity {
             @Override
             public void onClick(View v) {
                 tools.getUserInfoList();
+                tools.getGroupIdList();
                 mProgressDialog = ProgressDialog.show(RegisterAndLoginActivity.this, "提示：", "正在加载中。。。");
                 mProgressDialog.setCanceledOnTouchOutside(true);
                 String userName = mEd_userName.getText().toString();

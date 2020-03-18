@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -21,7 +20,6 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -31,6 +29,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toolbar;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -40,6 +39,7 @@ import org.litepal.crud.DataSupport;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -53,21 +53,19 @@ import cn.jpush.im.android.api.model.UserInfo;
 import de.hdodenhof.circleimageview.CircleImageView;
 import heath.com.test2_jmessage.MyDialog.TypeDialog;
 import heath.com.test2_jmessage.R;
-import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
-import heath.com.test2_jmessage.activity.chatroom.ChatRoomActivity;
+import heath.com.test2_jmessage.StatusBar.StatusBarUtils;
 import heath.com.test2_jmessage.activity.conversation.ConversationActivity;
-import heath.com.test2_jmessage.activity.createmessage.CreateMessageActivity;
 import heath.com.test2_jmessage.activity.friend.AddFriendActivity;
 import heath.com.test2_jmessage.activity.friend.FriendAskManage;
 import heath.com.test2_jmessage.activity.friend.FriendContactManager;
 import heath.com.test2_jmessage.activity.groupinfo.ApplyJoinGroupActivity;
 import heath.com.test2_jmessage.activity.groupinfo.GroupInfoActivity;
-import heath.com.test2_jmessage.activity.jmrtc.JMRTCActivity;
 import heath.com.test2_jmessage.activity.setting.SettingMainActivity;
 import heath.com.test2_jmessage.activity.setting.UpdateUserAvatar;
 import heath.com.test2_jmessage.activity.setting.UpdateUserInfoActivity;
+import heath.com.test2_jmessage.adapter.GroupAdapter;
+import heath.com.test2_jmessage.adapter.PersonAdapter;
 import heath.com.test2_jmessage.adapter.RecordAdapter;
-import heath.com.test2_jmessage.adapter.personAdapter;
 import heath.com.test2_jmessage.application.MyApplication;
 import heath.com.test2_jmessage.recycleView_item.personMsg;
 import heath.com.test2_jmessage.tools.LocalHistory;
@@ -75,25 +73,26 @@ import heath.com.test2_jmessage.tools.PushToast;
 import heath.com.test2_jmessage.tools.tools;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static heath.com.test2_jmessage.application.MyApplication.groupList;
 import static heath.com.test2_jmessage.application.MyApplication.list;
+import static heath.com.test2_jmessage.application.MyApplication.list2;
 import static heath.com.test2_jmessage.application.MyApplication.personList;
 
 /**
  * netstat -ano|findstr "5037"
  */
-public class TypeActivity extends Activity implements View.OnClickListener {
+public class TypeActivity extends Activity {
     public static final String TAG = "ly13172";
     public static final String LOGOUT_REASON = "logout_reason";
-    private TextView mTv_showOfflineMsg;
-    private TextView tv_refreshEvent;
-    private TextView tv_deviceInfo, head_state;
+    private TextView  head_state;
     private TextView headusername, headappkey, headvision, signature;
     public static final String INFO_UPDATE = "info_update";
     public static final String TRANS_COMMAND_SENDER = "trans_command_sender";
     public static final String TRANS_COMMAND_TARGET = "trans_command_target";
     public static final String TRANS_COMMAND_TYPE = "trans_command_type";
     public static final String TRANS_COMMAND_CMD = "trans_command_cmd";
-    public static personAdapter adapter;
+    public static PersonAdapter personAdapter;
+    private   GroupAdapter groupAdapter;
     private DrawerLayout drawerLayout;
     private Localreceiver localRceiver;
     private LocalBroadcastManager localBroadcastManager;
@@ -105,6 +104,9 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     private List<personMsg> recordList = new ArrayList<>();
     private RecordAdapter recordAdapter;
     private LinearLayout linearLayout;
+    private BottomNavigationView bottomNavigationView;
+    private RecyclerView recyclerView;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,16 +117,15 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     }
 
     private void initView() {
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(R.layout.activity_type);
         PushToast.getInstance().init(this);
-        zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
+        StatusBarUtils.with(this).setDrawable(getResources().getDrawable(R.drawable.toolbar_ground)).init();
         backUserId = getIntent().getLongExtra("userId", 0);
-        final Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         drawerLayout = findViewById(R.id.sigText_drawerLayout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         View navHeaderView = navigationView.inflateHeaderView(R.layout.headlayout);
+        bottomNavigationView=findViewById(R.id.navigation);
         headusername = navHeaderView.findViewById(R.id.head_username);
         circleImageView = navHeaderView.findViewById(R.id.picture);
         headappkey = navHeaderView.findViewById(R.id.head_appkey);
@@ -153,6 +154,8 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                         JMessageClient.logout();
                         list.clear();
                         personList.clear();
+                        list2.clear();
+                        groupList.clear();
                         PushToast.getInstance().createToast("提示", "已登出", null, true);
                         intent.setClass(getApplicationContext(), RegisterAndLoginActivity.class);
                         setResult(8);
@@ -163,10 +166,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                     }
                 }
                 if (item.toString().equals("开发者选项")) {
-                    List<LocalHistory> localHistories = DataSupport.where("messageid=?", "15").find(LocalHistory.class);
-                    for (LocalHistory localHistory : localHistories) {
-                        Log.d(TAG, localHistory.getContent());
-                    }
+                    Log.d(TAG, tools.getDataBasesNumber()+"条数据");
                 }
                 if (item.toString().equals("设置")) {
                     intent.setClass(getApplicationContext(), SettingMainActivity.class);
@@ -218,13 +218,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         });
         final LinearLayout index2_linear = findViewById(R.id.index2_linear);
         final LinearLayout other_linear = findViewById(R.id.other_linear);
-        findViewById(R.id.bt_about_setting).setOnClickListener(this);
-        findViewById(R.id.bt_create_message).setOnClickListener(this);
-        findViewById(R.id.bt_group_info).setOnClickListener(this);
-        findViewById(R.id.bt_conversation).setOnClickListener(this);
-        findViewById(R.id.bt_friend).setOnClickListener(this);
-        findViewById(R.id.bt_chatroom).setOnClickListener(this);
-        findViewById(R.id.bt_jmrtc).setOnClickListener(this);
         TextView menu = findViewById(R.id.type_menu);
         menu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -232,14 +225,11 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                 drawerLayout.openDrawer(GravityCompat.START);
             }
         });
-        mTv_showOfflineMsg = findViewById(R.id.tv_showOfflineMsg);
-        tv_refreshEvent = findViewById(R.id.tv_refreshEvent);
-        tv_deviceInfo = findViewById(R.id.tv_deviceInfo);
-        RecyclerView recyclerView = findViewById(R.id.type_recyclerview);
+        recyclerView = findViewById(R.id.type_recyclerview);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        adapter = new personAdapter(personList);
-        recyclerView.setAdapter(adapter);
+        personAdapter = new PersonAdapter(personList);
+        recyclerView.setAdapter(personAdapter);
 
         LinearLayoutManager layoutManager2 = new LinearLayoutManager(this);
         RecyclerView recyclerView2 = findViewById(R.id.msg_recycler_view);
@@ -249,7 +239,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("message");
-        localRceiver = new Localreceiver(personList, recyclerView, adapter);
+        localRceiver = new Localreceiver(personList, recyclerView, personAdapter);
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
         localBroadcastManager.registerReceiver(localRceiver, intentFilter);
         TextView addNew = findViewById(R.id.addNew);
@@ -271,6 +261,8 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                 mydialog.show();
             }
         });
+        final LinearLayout find_visibility = index2_linear.findViewById(R.id.find_visibility);
+        linearLayout=findViewById(R.id.index_record);
         TextView newFriends = findViewById(R.id.newFriends);
         newFriends.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -285,24 +277,47 @@ public class TypeActivity extends Activity implements View.OnClickListener {
             @Override
             public void onClick(View v) {
                 other_linear.setVisibility(View.GONE);
-                index.setVisibility(View.GONE);
-                toolbar.setVisibility(View.GONE);
                 index2_linear.setVisibility(View.VISIBLE);
+                find_visibility.setVisibility(View.GONE);
+                bottomNavigationView.setVisibility(View.GONE);
             }
         });
         TextView cancel = findViewById(R.id.cancel);
-        final LinearLayout find_visibility = findViewById(R.id.find_visibility);
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 hideInput();
                 other_linear.setVisibility(View.VISIBLE);
-                index.setVisibility(View.VISIBLE);
-                toolbar.setVisibility(View.VISIBLE);
                 index2_linear.setVisibility(View.GONE);
                 find_visibility.setVisibility(View.GONE);
+                bottomNavigationView.setVisibility(View.VISIBLE);
             }
         });
+        final TextView tip=toolbar.findViewById(R.id.tip);tip.setText("好友消息");
+        bottomNavigationView.setOnNavigationItemSelectedListener(
+                new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()){
+                    case R.id.navigation_group:
+                        tip.setText("群聊消息");
+                        groupAdapter = new GroupAdapter(groupList);
+                        recyclerView.setAdapter(groupAdapter);
+                        tools.initGrouplist();
+                        return true;
+                    case R.id.navigation_person:
+                        tip.setText("好友消息");
+                        personAdapter = new PersonAdapter(personList);
+                        recyclerView.setAdapter(personAdapter);
+                        tools.initPersonlist();
+                        return true;
+                }
+                return false;
+            }
+        });
+        bottomNavigationView.setItemTextColor(csl);
+        bottomNavigationView.setItemIconTintList(csl);
+        bottomNavigationView.getMenu().getItem(0).setChecked(true);
         final TextView find_single = findViewById(R.id.find_single);
         final TextView find_group = findViewById(R.id.find_group);
         final EditText index2 = findViewById(R.id.index2);
@@ -329,7 +344,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
 
             }
         });
-        linearLayout=findViewById(R.id.index_record);
+
         index2.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -337,39 +352,38 @@ public class TypeActivity extends Activity implements View.OnClickListener {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                linearLayout.setVisibility(View.GONE);
                 find_visibility.setVisibility(View.VISIBLE);
                 find_group.setText(s.toString());
                 find_single.setText(s.toString());
+                recordList.clear();
+                recordAdapter.notifyDataSetChanged();
                 if (!TextUtils.isEmpty(index2.getText().toString())) {
-                    recordList.clear();
-                    recordAdapter.notifyDataSetChanged();
-                    Cursor c = DataSupport.findBySQL("select *from LocalHistory where content like?", "%" + index2.getText().toString() + "%");
-                    if (c.moveToFirst()) {
-                        do {
-                            boolean dialogIsOpen = c.getInt(c.getColumnIndex("dialogisopen")) == 1;
-                            String IsFileUploaded = c.getString(c.getColumnIndex("isfileuploaded"));
-                            String LocalThumbnailPath = c.getString(c.getColumnIndex("localthumbnailpath"));
-                            String UserName = c.getString(c.getColumnIndex("username"));
-                            String appKey = c.getString(c.getColumnIndex("appkey"));
-                            String content = c.getString(c.getColumnIndex("content"));
-                            int type = c.getInt(c.getColumnIndex("type"));
-                            int messageId = c.getInt(c.getColumnIndex("messageid"));
-                            Log.d(TAG, "afterTextChanged: " + content + "|" + UserName);
-                            recordList.add(new personMsg(null, UserName, content));
-                            recordAdapter.notifyDataSetChanged();
-                        } while (c.moveToNext());
+                    linearLayout.setVisibility(View.VISIBLE);
+                    List<LocalHistory> localHistories=DataSupport.
+                            where("content like ?","%" + s.toString() + "%").find(LocalHistory.class);
+                    for (LocalHistory localHistory:localHistories){//"<font color='red'>"+msg.getSimpleMessage()+"</font>"
+                        recordList.add(new personMsg(localHistory.getAvatarFilePath(),
+                                localHistory.getUserName(),
+                                localHistory.getContent().replace(s.toString(),"<font color='#00C4FF'>"+s.toString()+"</font>"),
+                                localHistory.getMessageId(),
+                                localHistory.getAppKey(),
+                                localHistory.getNickName(),
+                                localHistory.getNoteName(),
+                                localHistory.getMillisecond(),
+                                localHistory.getMsgNumber()
+                        ));
+                        recordAdapter.notifyDataSetChanged();
                     }
-                    c.close();linearLayout.setVisibility(View.VISIBLE);
                 }
+                else linearLayout.setVisibility(View.GONE);
             }
         });
-        recordAdapter.notifyDataSetChanged();
-        adapter.notifyDataSetChanged();
+        personAdapter.notifyDataSetChanged();
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -392,6 +406,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                 }, 1000);
             }
         });
+
     }
 
     @Override
@@ -404,11 +419,11 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                 String time = pref2.getString("time" + personList.get(i).getUserId(), "");
                 if (!"".equals(simpleMessage)) {
                     personList.get(i).setSimpleMessage(simpleMessage);
-                    adapter.notifyDataSetChanged();
+                    personAdapter.notifyDataSetChanged();
                 }
                 if (!"".equals(time)) {
                     personList.get(i).setTime(time);
-                    adapter.notifyDataSetChanged();
+                    personAdapter.notifyDataSetChanged();
                 }
             }
         }
@@ -418,10 +433,10 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         }.getType());
         if (deviceInfos != null) {
             for (DeviceInfo deviceInfo : deviceInfos) {
-                tv_deviceInfo.append("设备登陆记录:\n");
+                /*tv_deviceInfo.append("设备登陆记录:\n");
                 tv_deviceInfo.append("设备ID: " + deviceInfo.getDeviceID() + " 平台：" + deviceInfo.getPlatformType()
                         + " 上次登陆时间:" + deviceInfo.getLastLoginTime() + "登陆状态:" + deviceInfo.isLogin() + "在线状态:" + deviceInfo.getOnlineStatus()
-                        + " flag:" + deviceInfo.getFlag());
+                        + " flag:" + deviceInfo.getFlag());*/
             }
         }
     }
@@ -461,10 +476,7 @@ public class TypeActivity extends Activity implements View.OnClickListener {
                 head_state.setVisibility(View.VISIBLE);
                 head_state.setText(state);
             } else head_state.setVisibility(View.GONE);
-
         }
-
-
     }
 
     protected void onDestroy() {
@@ -484,24 +496,17 @@ public class TypeActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == 8) {
-            mTv_showOfflineMsg.setText("");
-            tv_refreshEvent.setText("");
+            /*mTv_showOfflineMsg.setText("");
+            tv_refreshEvent.setText("");*/
         }
-    }
-
-    private void zoomInViewSize(int height) {
-        View img1 = findViewById(R.id.statusbar);
-        ViewGroup.LayoutParams lp = img1.getLayoutParams();
-        lp.height = height;
-        img1.setLayoutParams(lp);
     }
 
     class Localreceiver extends BroadcastReceiver {
         private List<personMsg> msgList;
         private RecyclerView msgRecyclerView;
-        private personAdapter adapter;
+        private PersonAdapter adapter;
 
-        public Localreceiver(List<personMsg> msgList, RecyclerView msgRecyclerView, personAdapter adapter) {
+        public Localreceiver(List<personMsg> msgList, RecyclerView msgRecyclerView, PersonAdapter adapter) {
             this.msgList = msgList;
             this.msgRecyclerView = msgRecyclerView;
             this.adapter = adapter;
@@ -567,43 +572,6 @@ public class TypeActivity extends Activity implements View.OnClickListener {
         View v = getWindow().peekDecorView();
         if (null != v) {
             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-        }
-    }
-
-    @Override
-    public void onClick(View v) {
-        Intent intent = new Intent();
-        switch (v.getId()) {
-            case R.id.bt_about_setting:
-                intent.setClass(getApplicationContext(), SettingMainActivity.class);
-                startActivityForResult(intent, 0);
-                break;
-            case R.id.bt_create_message:
-                intent.setClass(getApplicationContext(), CreateMessageActivity.class);
-                startActivity(intent);
-                break;
-            case R.id.bt_group_info:
-                intent.setClass(getApplicationContext(), GroupInfoActivity.class);
-                startActivity(intent);
-                break;
-            case R.id.bt_conversation:
-                intent.setClass(getApplicationContext(), ConversationActivity.class);
-                startActivity(intent);
-                break;
-            case R.id.bt_friend:
-                intent.setClass(getApplicationContext(), FriendContactManager.class);
-                startActivity(intent);
-                break;
-            case R.id.bt_chatroom:
-                intent.setClass(getApplicationContext(), ChatRoomActivity.class);
-                startActivity(intent);
-                break;
-            case R.id.bt_jmrtc:
-                intent.setClass(getApplicationContext(), JMRTCActivity.class);
-                startActivity(intent);
-                break;
-            default:
-                break;
         }
     }
 }

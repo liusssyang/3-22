@@ -17,82 +17,118 @@
             android:clipToPadding="false"
             android:fitsSystemWindows="true"
             android:orientation="vertical">
-
-            <View
-                android:id="@+id/statusbar"
+            <LinearLayout
+                android:layout_weight="1"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="24dp"
-                android:background="@drawable/toolbar_ground" />
-
-            <Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="@drawable/toolbar_ground"
-                app:contentInsetEnd="0dp"
-                app:contentInsetLeft="0dp"
-                app:contentInsetRight="0dp"
-                app:contentInsetStart="0dp">
-
-                <RelativeLayout
+                android:layout_height="wrap_content">
+            <LinearLayout
+                android:id="@+id/other_linear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <Toolbar
+                    android:id="@+id/toolbar"
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:paddingTop="15dp">
+                    android:layout_height="?attr/actionBarSize"
+                    android:background="@drawable/toolbar_ground"
+                    app:contentInsetEnd="0dp"
+                    app:contentInsetLeft="0dp"
+                    app:contentInsetRight="0dp"
+                    app:contentInsetStart="0dp">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:paddingTop="15dp">
+
+                        <TextView
+                            android:id="@+id/type_menu"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:background="@drawable/col_set_white"
+                            android:textColor="#ffffff" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_centerInParent="true"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:id="@+id/tip"
+                            android:text="消息"
+                            android:textColor="#ffffff"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:id="@+id/addNew"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_marginEnd="15dp"
+                            android:background="@drawable/addnew" />
+                    </RelativeLayout>
+                </Toolbar>
+                <TextView
+                    android:id="@+id/index"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="15dp"
+                    android:background="@drawable/background_round_"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:text="🔍搜索" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
 
                     <TextView
-                        android:id="@+id/type_menu"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_gravity="center"
-                        android:background="@drawable/col_set_white"
-                        android:textColor="#ffffff" />
+                        android:id="@+id/newFriends"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_weight="5"
+                        android:gravity="center_vertical"
+                        android:text="新朋友"
+                        android:textColor="#000000"
+                        android:textSize="18sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_centerInParent="true"
-                        android:layout_gravity="center"
-                        android:gravity="center"
-                        android:text="消息"
-                        android:textColor="#ffffff"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/addNew"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
+                        android:layout_height="50dp"
                         android:layout_alignParentEnd="true"
-                        android:layout_marginEnd="15dp"
-                        android:background="@drawable/addnew" />
-                </RelativeLayout>
-            </Toolbar>
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="17dp"
+                        android:layout_weight="0"
+                        android:background="#ffffff"
+                        android:gravity="center_vertical"
+                        android:text=">" />
+                </LinearLayout>
 
-            <TextView
-                android:id="@+id/tv_header"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp"
+                    android:background="#f5f6fa" />
 
-            <TextView
-                android:id="@+id/index"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="15dp"
-                android:background="@drawable/background_round_"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center"
-                android:text="🔍搜索" />
-
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/type_recyclerview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ffffff" />
+            </LinearLayout>
             <LinearLayout
+                android:visibility="gone"
                 android:id="@+id/index2_linear"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#ffffff"
                 android:orientation="vertical"
-                android:visibility="gone"
                 >
 
                 <LinearLayout
@@ -134,10 +170,8 @@
                     android:id="@+id/find_visibility"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
                     android:orientation="vertical"
                     >
-
                     <LinearLayout
                         android:id="@+id/find_single_line"
                         android:layout_width="match_parent"
@@ -173,12 +207,10 @@
                             android:textColor="#000000"
                             android:textSize="16sp" />
                     </LinearLayout>
-
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="#f5f6fa" />
-
                     <LinearLayout
                         android:id="@+id/find_group_line"
                         android:layout_width="match_parent"
@@ -218,7 +250,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="#f5f6fa" />
-
                     <LinearLayout
                         android:id="@+id/index_record"
                         android:layout_width="match_parent"
@@ -229,7 +260,7 @@
                             android:layout_height="20dp"
                             android:background="#f5f6fa" />
                         <TextView
-                            android:layout_marginTop="10dp"
+                            android:layout_marginTop="5dp"
                             android:layout_marginStart="15dp"
                             android:layout_marginBottom="10dp"
                             android:layout_width="match_parent"
@@ -237,160 +268,36 @@
                             android:text="聊天记录"/>
                         <androidx.recyclerview.widget.RecyclerView
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_height="match_parent"
                             android:id="@+id/msg_recycler_view"
                             android:background="#ffffff"
                             />
                         <View
                             android:layout_width="match_parent"
-                            android:layout_height="20dp"
+                            android:layout_height="match_parent"
                             android:background="#f5f6fa" />
 
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/other_linear"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/newFriends"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginStart="15dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_weight="5"
-                        android:gravity="center_vertical"
-                        android:text="新朋友"
-                        android:textColor="#000000"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="50dp"
-                        android:layout_alignParentEnd="true"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginEnd="17dp"
-                        android:layout_weight="0"
-                        android:background="#ffffff"
-                        android:gravity="center_vertical"
-                        android:text=">" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="10dp"
-                    android:background="#f5f6fa" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/type_recyclerview"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="#ffffff" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#f5f6fa" />
             </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <Button
-                    android:id="@+id/bt_about_setting"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="设置相关" />
-
-                <Button
-                    android:id="@+id/bt_create_message"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="创建消息" />
-
-                <Button
-                    android:id="@+id/bt_conversation"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="会话" />
-
-                <Button
-                    android:id="@+id/bt_group_info"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="群组" />
-
-                <Button
-                    android:id="@+id/bt_friend"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="好友相关" />
-
-                <Button
-                    android:id="@+id/bt_chatroom"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="聊天室相关" />
-
-                <Button
-                    android:id="@+id/bt_jmrtc"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="实时音视频" />
-
-                <ScrollView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1">
-
-                    <TextView
-                        android:id="@+id/tv_showOfflineMsg"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-                </ScrollView>
-
-                <TextView
-                    android:layout_width="fill_parent"
-                    android:layout_height="1dp"
-                    android:background="#000" />
-
-                <ScrollView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1">
-
-                    <TextView
-                        android:id="@+id/tv_refreshEvent"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-                </ScrollView>
-
-                <TextView
-                    android:layout_width="fill_parent"
-                    android:layout_height="1dp"
-                    android:background="#000" />
-
-                <ScrollView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1">
-
-                    <TextView
-                        android:id="@+id/tv_deviceInfo"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-                </ScrollView>
-            </LinearLayout>
+            <com.google.android.material.bottomnavigation.BottomNavigationView
+                android:id="@+id/navigation"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginEnd="0dp"
+                android:layout_marginStart="0dp"
+                android:background="#ffffff"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:menu="@menu/bottomnavigationmenu" />
         </LinearLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="270dp"

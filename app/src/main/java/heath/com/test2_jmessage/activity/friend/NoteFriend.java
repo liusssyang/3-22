@@ -24,7 +24,7 @@ import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
 import heath.com.test2_jmessage.tools.PushToast;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static heath.com.test2_jmessage.activity.TypeActivity.adapter;
+import static heath.com.test2_jmessage.activity.TypeActivity.personAdapter;
 import static heath.com.test2_jmessage.application.MyApplication.personList;
 
 
@@ -88,7 +88,7 @@ public class NoteFriend extends Activity {
                                                     if (i == 0) {
                                                         PushToast.getInstance().createToast("提示","备注更新成功",null,true);
                                                         personList.get(position).setNotename(noteName);
-                                                        adapter.notifyDataSetChanged();
+                                                        personAdapter.notifyDataSetChanged();
                                                         Intent intent=new Intent(getApplicationContext(),ManageFriendActivity.class);
                                                         intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                                                         intent.putExtra("position",position);

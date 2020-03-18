@@ -54,7 +54,7 @@ public class DeleteConversationActivity extends Activity implements View.OnClick
 
     @SuppressLint("ClickableViewAccessibility")
     private void initData() {
-       if (tools.shownHistory(position, msgList, null)){
+       if (tools.shownHistoryFromCloud(personList.get(position).getUserName(), msgList, null)){
            none.setVisibility(View.GONE);
         }else none.setVisibility(View.VISIBLE);
     }

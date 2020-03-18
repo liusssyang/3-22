@@ -18,7 +18,7 @@ import heath.com.test2_jmessage.recycleView_item.personMsg;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 
-public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder>{
+public class PersonAdapter extends RecyclerView.Adapter<PersonAdapter.ViewHolder>{
     private List<personMsg> personMsgList;
     static class ViewHolder extends RecyclerView.ViewHolder{
         View v;
@@ -34,7 +34,7 @@ public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder
             friendsIcon=view.findViewById(R.id.person_icon);
         }
     }
-    public  personAdapter(List<personMsg> msgList){
+    public PersonAdapter(List<personMsg> msgList){
         personMsgList=msgList;
     }
     public  ViewHolder onCreateViewHolder(ViewGroup parent,int viewType){
@@ -47,6 +47,7 @@ public class personAdapter extends RecyclerView.Adapter<personAdapter.ViewHolder
                 int position=holder.getAdapterPosition();
                 Intent intent = new Intent(MyApplication.getContext(), CreateSigTextMessageActivity.class);
                 intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("showAllFromDatabases",false);
                 intent.putExtra("position",position);
                 MyApplication.getContext().startActivity(intent);
 

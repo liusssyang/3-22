@@ -15,7 +15,6 @@ public class Msg {
     public static final int TYPE_RECEIVED=0;
     public static final int TYPE_SENT=1;
     private String content;
-    private Bitmap image;
     private Bitmap icon;
     private int type;
     private int messageId;
@@ -34,12 +33,11 @@ public class Msg {
         this.userName=message.getFromUser().getUserName();
         this.appKey=message.getFromUser().getAppKey();
         this.messageId=message.getId();
-        this.content=message.getId()+app.getText();
+        this.content=app.getText();
         this.LocalThumbnailPath=app.getLocalThumbnailPath();
         this.IsFileUploaded=app.getIsFileUploaded();
         this.dialogIsOpen=app.getLocalThumbnailPath() != null;
         this.message=message;
-
     }
     public Msg(String IsFileUploaded,
                String LocalThumbnailPath,
@@ -58,12 +56,9 @@ public class Msg {
         this.appKey=appKey;
         this.dialogIsOpen=dialogIsOpen;
     }
-    public String getLocalThumbnailPath(){return this.LocalThumbnailPath;}
-    public Msg(String content,int type){
-        this.content=content;
-        this.type=type;
-    }
 
+
+    public String getLocalThumbnailPath(){return this.LocalThumbnailPath;}
     public String getIsFileUploaded(){return IsFileUploaded;}
     public Message getMessage(){return message;}
     public boolean dialogIsOpen(){return dialogIsOpen;}
@@ -72,9 +67,6 @@ public class Msg {
     public int getId(){return messageId;}
     public String getContent(){
         return content;
-    }
-    public Bitmap getImageContent(){
-        return image;
     }
     public Bitmap getIconContent(){
         if (this.icon==null)

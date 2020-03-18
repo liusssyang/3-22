@@ -1,51 +1,147 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/co"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="8">
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        android:orientation="vertical">
 
-        <LinearLayout
+        <Toolbar
+            android:id="@+id/toolbar_sigText"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@drawable/toolbar_ground"
+            app:contentInsetEnd="0dp"
+            app:contentInsetLeft="0dp"
+            app:contentInsetRight="0dp"
+            app:contentInsetStart="0dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:paddingTop="15dp">
+
+                <TextView
+                    android:id="@+id/back"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/back"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:textColor="#ffffff" />
+
+                <TextView
+                    android:id="@+id/sigText_toolbarName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_centerInParent="true"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:textColor="#ffffff"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/sigText_toolbarMenu"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_gravity="center"
+                    android:layout_marginEnd="20dp"
+                    android:background="@drawable/col_set_white"
+                    android:gravity="center"
+                    android:textColor="#ffffff"
+                    android:textSize="16sp" />
+            </RelativeLayout>
+        </Toolbar>
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_weight="1">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="必填字段" />
-
-            <EditText
-                android:id="@+id/et_id"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/msg_recycler_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="群组id"
-                android:inputType="number" />
-
-            <EditText
-                android:id="@+id/et_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="准备发送的文本" />
-
-            <include layout="@layout/message_sending_options_layout" />
+                android:layout_height="0dp" />
 
             <EditText
                 android:id="@+id/et_atUserName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="\被@用户的用户名 或输入 all表示@全体群成员" />
-        </LinearLayout>
-    </ScrollView>
 
-    <Button
-        android:id="@+id/bt_send"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="发送" />
-</LinearLayout>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:id="@+id/l1"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:background="#F8F7F7"
+                    android:paddingRight="10dp">
+
+                    <TextView
+                        android:id="@+id/menu"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/menu"
+                        android:text=" " />
+
+                    <TextView
+                        android:id="@+id/bt_send"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/send4" />
+
+                    <TextView
+                        android:id="@+id/expression"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_toStartOf="@+id/bt_send"
+                        android:background="@drawable/expression" />
+
+                    <EditText
+                        android:id="@+id/et_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_toStartOf="@+id/expression"
+                        android:layout_toEndOf="@+id/menu"
+                        android:background="@drawable/background_square"
+                        android:inputType="text"
+                        android:textColor="#000000"
+                        android:theme="@style/MyEditText" />
+                </RelativeLayout>
+            </LinearLayout>
+
+        </ScrollView>
+    </LinearLayout>
+
+    <!--include layout="@layout/bottomsheet" /-->
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

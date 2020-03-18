@@ -2,7 +2,6 @@ package heath.com.test2_jmessage.adapter;
 
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +25,6 @@ import heath.com.test2_jmessage.tools.tools;
 
 import static heath.com.test2_jmessage.application.MyApplication.personList;
 
-//import heath.com.test2_jmessage.LocalReceiver.Localreceiver;
 
 
 public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.ViewHolder> {
@@ -88,7 +86,7 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.ViewHolder> {
             holder.leftMsg.setText(msg.getContent());
             holder.leftImg.setImageBitmap(BitmapFactory.decodeFile(msg.getLocalThumbnailPath()));
         } else if (msg.getType() == Msg.TYPE_SENT) {
-            if (msg.getImageContent() != null || msg.getContent() == null)
+            if (msg.getContent() == null)
                 holder.leftLayout.setBackgroundColor(Color.parseColor("#00000000"));
             else
                 holder.leftLayout.setBackgroundResource(R.drawable.right);
@@ -98,7 +96,6 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.ViewHolder> {
             holder.rightLayout.setVisibility(View.VISIBLE);
             holder.righticon.setVisibility(View.VISIBLE);
             holder.rightMsg.setText(msg.getContent());
-            holder.rightImg.setImageBitmap(msg.getImageContent());
         }
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,8 +119,7 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.ViewHolder> {
             @Override
             public boolean onLongClick(View v) {
                 tools.retractMessage(personList.get(CreateSigTextMessageActivity.position).getUserName(), msg.getAppKey(), msg.getId());
-                Log.d("ly67676", msg.getUserName()+msg.getAppKey()+msg.getId());
-                return true;
+                 return true;
             }
         });
     }

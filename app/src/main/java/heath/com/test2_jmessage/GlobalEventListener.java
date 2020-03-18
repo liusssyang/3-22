@@ -36,6 +36,7 @@ import cn.jpush.im.android.api.callback.GetUserInfoListCallback;
 import cn.jpush.im.android.api.content.ImageContent;
 import cn.jpush.im.android.api.content.TextContent;
 import cn.jpush.im.android.api.enums.ContentType;
+import cn.jpush.im.android.api.enums.ConversationType;
 import cn.jpush.im.android.api.event.ChatRoomNotificationEvent;
 import cn.jpush.im.android.api.event.CommandNotificationEvent;
 import cn.jpush.im.android.api.event.ContactNotifyEvent;
@@ -73,8 +74,8 @@ import heath.com.test2_jmessage.tools.tools;
 import static android.content.Context.USAGE_STATS_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static cn.jpush.im.android.api.jmrtc.JMRTCInternalUse.getApplicationContext;
-import static heath.com.test2_jmessage.activity.TypeActivity.adapter;
 import static heath.com.test2_jmessage.activity.TypeActivity.myUserId;
+import static heath.com.test2_jmessage.activity.TypeActivity.personAdapter;
 import static heath.com.test2_jmessage.application.MyApplication.personList;
 
 /**
@@ -198,7 +199,7 @@ public class GlobalEventListener {
             MyApplication.getContext().startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
     }
     private void MessageEventHandling (LocalBroadcastManager localBroadcastManager,MessageEvent event){
-        tools.getLocalHistoryFromCloud2(event.getMessage());
+        tools.setLocalHistory(event.getMessage(),-1);
         long userId=event.getMessage().getFromUser().getUserID();
         SharedPreferences.Editor editor3=getApplicationContext().getSharedPreferences("backdata"+myUserId,0).edit();
         /***************************************/
@@ -212,7 +213,7 @@ public class GlobalEventListener {
         intent.putExtra("time", tools.CurrentTime());
         intent.putExtra("userId",userId);
         intent.putExtra("init","2");
-
+        if (event.getMessage().getTargetType() == ConversationType.group){}
         switch (contentType) {
             case text:
                 TextContent textContent = (TextContent) event.getMessage().getContent();
@@ -227,8 +228,6 @@ public class GlobalEventListener {
                 localBroadcastManager.sendBroadcast(intent);
                 break;
             case image:
-                Mydialog.imageContent=(ImageContent)event.getMessage().getContent();
-                Mydialog.message=event.getMessage();
                 String thumbLocalPath = ((ImageContent)event.getMessage().getContent()).getLocalThumbnailPath();
                 if (!TextUtils.isEmpty(thumbLocalPath)) {
                     editor3.putString("simplemessage"+userId,"图片");
@@ -299,7 +298,7 @@ public class GlobalEventListener {
                                 String s2=fromUsername+appkey;
                                 if (s1.equals(s2)){
                                     tools.initPersonlist();
-                                    adapter.notifyItemChanged(personList.size()-1);
+                                    personAdapter.notifyItemChanged(personList.size()-1);
                                 }
                             }
                         } else {
@@ -320,7 +319,7 @@ public class GlobalEventListener {
                     if (s1.equals(s2)){
                         Toast.makeText(getApplicationContext(), fromUsername+"憾然离场！", Toast.LENGTH_LONG).show();
                         personList.remove(i);
-                        adapter.notifyDataSetChanged();
+                        personAdapter.notifyDataSetChanged();
                         break;
                     }
                 }

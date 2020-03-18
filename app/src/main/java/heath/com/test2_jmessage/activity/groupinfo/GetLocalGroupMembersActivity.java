@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -56,6 +55,7 @@ public class GetLocalGroupMembersActivity extends Activity {
                     @Override
                     public void gotResult(int i, String s, List<UserInfo> list) {
                         if (i == 0) {
+
                             mTv_getLocalGroupMember.setText("");
                             mProgressDialog.dismiss();
                             StringBuilder sb = new StringBuilder();
@@ -68,7 +68,6 @@ public class GetLocalGroupMembersActivity extends Activity {
                             mProgressDialog.dismiss();
                             mTv_getLocalGroupMember.setText("");
                             Toast.makeText(getApplicationContext(), "获取失败", Toast.LENGTH_SHORT).show();
-                            Log.i("GetLocalGroupMembersActivity", "JMessageClient.getGroupMembers " + ", responseCode = " + i + " ; Desc = " + s);
                         }
                     }
                 });

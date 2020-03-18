@@ -1,8 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#ffffff"
     android:orientation="vertical">
+
+    <View
+        android:id="@+id/statusbar"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        android:background="@drawable/toolbar_ground" />
+
+    <Toolbar
+        android:id="@+id/manage_toolbar_sigText"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@drawable/toolbar_ground"
+        app:contentInsetEnd="0dp"
+        app:contentInsetLeft="0dp"
+        app:contentInsetRight="0dp"
+        app:contentInsetStart="0dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:paddingTop="15dp">
+
+            <TextView
+                android:id="@+id/manage_back"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_gravity="center"
+                android:background="@drawable/back"
+                android:clickable="true"
+                android:focusable="true"
+                android:textColor="#ffffff" />
+
+            <TextView
+                android:id="@+id/manage_sigText_toolbarName"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="群聊设置"
+                android:textColor="#ffffff"
+                android:textSize="18sp" />
+        </RelativeLayout>
+    </Toolbar>
+    <!--**********************************************************-->
+    <!--**********************************************************-->
+
 
     <ScrollView
         android:layout_width="match_parent"
@@ -13,119 +62,545 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <Button
-                android:id="@+id/bt_create_group"
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=" 创建群组" />
+                android:layout_height="15dp"
+                android:background="#f5f6fa" />
 
-            <Button
-                android:id="@+id/bt_dissolve_group"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=" 解散群组"/>
 
-            <Button
-                android:id="@+id/bt_get_public_group_infos"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="分页获取应用下所有公开群组信息"/>
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
 
-            <Button
-                android:id="@+id/bt_apply_join_group"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="申请加入群组"/>
+                <TextView
+                    android:id="@+id/manage_HistoryFriends"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="15dp"
+                    android:gravity="center_vertical"
+                    android:text="群聊成员"
+                    android:textColor="#000000"
+                    android:textSize="18sp" />
 
-            <Button
-                android:id="@+id/bt_add_group_members"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=" 向群组中添加或删除成员" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="17dp"
+                    android:background="#ffffff"
+                    android:gravity="center_vertical"
+                    android:id="@+id/member_number" />
+            </RelativeLayout>
 
-            <Button
-                android:id="@+id/bt_change_group_admin"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/type_recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="移交群主"/>
+                android:background="#ffffff" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="15dp"
+                android:background="#f5f6fa" />
+            <RelativeLayout
+                android:layout_marginTop="5dp"
+                android:background="#ffffff"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
 
-            <Button
-                android:id="@+id/bt_group_mem_silence"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="群成员禁言状态设置(仅群主或群管理员有效)" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="15dp"
+                    android:gravity="center_vertical"
+                    android:text="设置禁言"
+                    android:id="@+id/no_speak"
+                    android:textColor="#000000"
+                    android:textSize="18sp" />
 
-            <Button
-                android:id="@+id/bt_group_keeper"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=" 群组管理员" />
+                <TextView
 
-            <Button
-                android:id="@+id/bt_update_group_name_and_desc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="17dp"
+                    android:background="#ffffff"
+                    android:gravity="center_vertical"
+                    android:text=">" />
+            </RelativeLayout>
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=" 更新群组相关信息" />
+                android:layout_height="1dp"
+                android:background="#f5f6fa" />
+            <RelativeLayout
 
-            <Button
-                android:id="@+id/bt_group_member_nickname"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=" 群成员昵称" />
+                android:background="#ffffff"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
 
-            <Button
-                android:id="@+id/bt_exit_group"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=" 退出群" />
+                <TextView
+                    android:id="@+id/keeper"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="15dp"
+                    android:gravity="center_vertical"
+                    android:text="设置群管理员"
+                    android:textColor="#000000"
+                    android:textSize="18sp" />
 
-            <Button
-                android:id="@+id/bt_get_group_id_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=" 当前用户所在群的群组ID－List" />
+                <TextView
 
-            <Button
-                android:id="@+id/bt_get_group_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="17dp"
+                    android:background="#ffffff"
+                    android:gravity="center_vertical"
+                    android:text=">" />
+            </RelativeLayout>
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="获取指定群的信息" />
+                android:layout_height="1dp"
+                android:background="#f5f6fa" />
+            <RelativeLayout
 
-            <Button
-                android:id="@+id/bt_get_group_members"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=" 本地获取群成员usernameList" />
+                android:background="#ffffff"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
 
-            <Button
-                android:id="@+id/bt_blockedGroupMsg"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="屏蔽群组信息" />
+                <TextView
+                    android:id="@+id/change_group_admin"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="15dp"
+                    android:gravity="center_vertical"
+                    android:text="移交群主"
+                    android:textColor="#000000"
+                    android:textSize="18sp" />
 
-            <Button
-                android:id="@+id/bt_group_approval_batch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="批量同意入群审批事件" />
+                <TextView
 
-            <Button
-                android:id="@+id/bt_group_announcement"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="群公告"/>
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="17dp"
+                    android:background="#ffffff"
+                    android:gravity="center_vertical"
+                    android:text=">" />
+            </RelativeLayout>
 
-            <Button
-                android:id="@+id/bt_group_black_list"
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="群黑名单"/>
+                android:layout_height="15dp"
+                android:background="#f5f6fa" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/message_notify"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="15dp"
+                    android:gravity="center_vertical"
+                    android:text="群公告"
+                    android:textColor="#000000"
+                    android:textSize="18sp" />
+
+                <TextView
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="17dp"
+                    android:background="#ffffff"
+                    android:gravity="center_vertical"
+                    android:text=">" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#f5f6fa" />
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/avatar"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="15dp"
+                    android:gravity="center_vertical"
+                    android:text="群管理"
+                    android:textColor="#000000"
+                    android:textSize="18sp" />
+
+                <TextView
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="17dp"
+                    android:background="#ffffff"
+                    android:gravity="center_vertical"
+                    android:text=">" />
+            </RelativeLayout>
+
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#f5f6fa" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="15dp"
+                    android:gravity="center_vertical"
+                    android:text="群聊ID"
+                    android:textColor="#000000"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/groupid"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="17dp"
+                    android:background="#ffffff"
+                    android:gravity="center_vertical"
+                    />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="15dp"
+                android:background="#f5f6fa" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="15dp"
+                    android:gravity="center_vertical"
+                    android:text="查找聊天记录"
+                    android:textColor="#000000"
+                    android:textSize="18sp" />
+
+                <TextView
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="17dp"
+                    android:background="#ffffff"
+                    android:gravity="center_vertical"
+                    android:text=">" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="15dp"
+                android:background="#f5f6fa" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/manage_disturb"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="15dp"
+                    android:gravity="center_vertical"
+                    android:text="置顶"
+                    android:textColor="#000000"
+                    android:textSize="18sp" />
+
+                <Switch
+                    android:id="@+id/no_disturb"
+                    android:layout_width="100dp"
+                    android:layout_height="50dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="17dp"
+                    android:background="#FFFFFF"
+                    android:gravity="center_vertical"
+                    android:switchMinWidth="50dp"
+                    android:thumb="@drawable/thumb"
+                    android:track="@drawable/track" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#f5f6fa" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="15dp"
+                    android:gravity="center_vertical"
+                    android:text="消息免打扰"
+                    android:textColor="#000000"
+                    android:textSize="18sp" />
+
+                <Switch
+                    android:id="@+id/cb_notify_enable"
+                    android:layout_width="100dp"
+                    android:layout_height="50dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="17dp"
+                    android:background="#FFFFFF"
+                    android:gravity="center_vertical"
+                    android:switchMinWidth="50dp"
+                    android:thumb="@drawable/thumb"
+                    android:track="@drawable/track" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/nickname"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="15dp"
+                    android:gravity="center_vertical"
+                    android:text="设置群昵称"
+                    android:textColor="#000000"
+                    android:textSize="18sp" />
+
+                <TextView
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="17dp"
+                    android:background="#ffffff"
+                    android:gravity="center_vertical"
+                    android:text=">" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="15dp"
+                android:background="#f5f6fa" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="15dp"
+                    android:gravity="center_vertical"
+                    android:text="删除聊天记录"
+                    android:textColor="@color/colorQQ"
+                    android:textSize="18sp" />
+
+                <TextView
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="17dp"
+                    android:background="#ffffff"
+                    android:gravity="center_vertical"
+                    android:text=">" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="15dp"
+                android:background="#f5f6fa" />
 
 
             <TextView
-                android:id="@+id/tv_get_list"
+                android:id="@+id/exit_group"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="50dp"
+                android:gravity="center"
+                android:text="退出该群"
+                android:textColor="#F44336"
+                android:textSize="18sp" />
+
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:background="#f5f6fa" />
+
+            <Button
+                android:id="@+id/bt_iscurrent_user_password_valid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=" 输入的字符串是否匹配当前密码"
+                android:visibility="gone" />
+
+
+            <Button
+                android:id="@+id/bt_get_my_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=" 获取当前用户信息"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/bt_get_black_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=" 获取当前用户的黑名单列表"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/bt_add_or_remove_users_to_blacklist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="把其他用户加入或移除黑名单"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/bt_get_no_disturb_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="获取当前用户设置的免打扰名单"
+                android:visibility="gone" />
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/bt_create_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=" 创建群组" />
+
+                <Button
+                    android:id="@+id/bt_dissolve_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=" 解散群组" />
+
+                <Button
+                    android:id="@+id/bt_get_public_group_infos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="分页获取应用下所有公开群组信息" />
+
+                <Button
+                    android:id="@+id/bt_apply_join_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="申请加入群组" />
+
+                <Button
+                    android:id="@+id/bt_add_group_members"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=" 向群组中添加或删除成员" />
+
+                <Button
+                    android:id="@+id/bt_change_group_admin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="移交群主" />
+
+                <Button
+                    android:id="@+id/bt_group_mem_silence"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="群成员禁言状态设置(仅群主或群管理员有效)" />
+
+                <Button
+                    android:id="@+id/bt_group_keeper"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=" 群组管理员" />
+
+                <Button
+                    android:id="@+id/bt_update_group_name_and_desc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=" 更新群组相关信息" />
+
+                <Button
+                    android:id="@+id/bt_group_member_nickname"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=" 群成员昵称" />
+
+                <Button
+                    android:id="@+id/bt_exit_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=" 退出群" />
+
+                <Button
+                    android:id="@+id/bt_get_group_id_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=" 当前用户所在群的群组ID－List" />
+
+                <Button
+                    android:id="@+id/bt_get_group_info"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="获取指定群的信息" />
+
+                <Button
+                    android:id="@+id/bt_get_group_members"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=" 本地获取群成员usernameList" />
+
+                <Button
+                    android:id="@+id/bt_blockedGroupMsg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="屏蔽群组信息" />
+
+                <Button
+                    android:id="@+id/bt_group_approval_batch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="批量同意入群审批事件" />
+
+                <Button
+                    android:id="@+id/bt_group_announcement"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="群公告" />
+
+                <Button
+                    android:id="@+id/bt_group_black_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="群黑名单" />
+
+
+                <TextView
+                    android:id="@+id/tv_get_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 

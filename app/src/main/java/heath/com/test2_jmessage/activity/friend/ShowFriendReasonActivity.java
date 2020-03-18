@@ -140,7 +140,7 @@ public class ShowFriendReasonActivity extends Activity {
                                             s2=userName+appKey;
                                                 if (s1.equals(s2)){
                                                     tools.initPersonlist();
-                                                    TypeActivity.adapter.notifyItemChanged(personList.size()-1);
+                                                    TypeActivity.personAdapter.notifyItemChanged(personList.size()-1);
                                                     break;
                                                 }
                                         }
