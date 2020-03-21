@@ -2,8 +2,10 @@ package heath.com.test2_jmessage.activity.groupinfo;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -18,15 +20,19 @@ import cn.jpush.im.android.api.model.GroupInfo;
 import cn.jpush.im.android.api.model.UserInfo;
 import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.R;
+import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
+
+import static heath.com.test2_jmessage.activity.groupinfo.GroupInfoActivity.gMemberList;
 
 public class GroupKeeperActivity extends Activity implements View.OnClickListener{
     private EditText mEtGroupId;
-    private EditText mEtUsername;
-    private EditText mEtAppKey;
+    private TextView mEtUsername;
+    private TextView mEtAppKey;
     private Button mBtAddGroupKeeper;
     private Button mBtRemoveGroupKeeper;
     private Button mBtGetGroupKeeper;
     private TextView mTvGroupKeeper;
+    private int position;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,10 +42,18 @@ public class GroupKeeperActivity extends Activity implements View.OnClickListene
     }
 
     private void initView() {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(R.layout.activity_group_keeper);
+        position = getIntent().getIntExtra("position", -1);
+        zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
         mEtGroupId = (EditText) findViewById(R.id.et_gid);
-        mEtUsername = (EditText) findViewById(R.id.et_keeper_username);
-        mEtAppKey = (EditText) findViewById(R.id.et_keeper_appKey);
+        mEtUsername =  findViewById(R.id.et_keeper_username);
+        mEtAppKey =  findViewById(R.id.et_keeper_appKey);
+
+        mEtAppKey.setText(gMemberList.get(position).getAppkey());
+        mEtUsername.setText(gMemberList.get(position).getUserName());
+
         mBtAddGroupKeeper = (Button) findViewById(R.id.bt_add_group_keeper);
         mBtRemoveGroupKeeper = (Button) findViewById(R.id.bt_remove_group_keeper);
         mBtGetGroupKeeper = (Button) findViewById(R.id.bt_get_group_keeper);
@@ -50,15 +64,19 @@ public class GroupKeeperActivity extends Activity implements View.OnClickListene
         mBtAddGroupKeeper.setOnClickListener(this);
         mBtRemoveGroupKeeper.setOnClickListener(this);
         mBtGetGroupKeeper.setOnClickListener(this);
+        TextView manage_back = findViewById(R.id.manage_back);
+        manage_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
+            }
+        });
     }
 
     @Override
     public void onClick(final View v) {
-        if (TextUtils.isEmpty(mEtGroupId.getText())) {
-            Toast.makeText(getApplicationContext(), "请输入gid", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        long gid = Long.parseLong(mEtGroupId.getText().toString());
+        long gid = gMemberList.get(position).getGroupId();
         JMessageClient.getGroupInfo(gid, new GetGroupInfoCallback() {
             @Override
             public void gotResult(int responseCode, String responseMessage, GroupInfo groupInfo) {
@@ -91,10 +109,9 @@ public class GroupKeeperActivity extends Activity implements View.OnClickListene
     }
 
     private void setGroupKeeper(GroupInfo groupInfo, boolean isAdd) {
-        if (!TextUtils.isEmpty(mEtUsername.getText())) {
-            String username = mEtUsername.getText().toString();
-            String appKey = mEtAppKey.getText().toString();
-            UserInfo userInfo = groupInfo.getGroupMemberInfo(username, appKey);
+            String username =gMemberList.get(position).getUserName();
+            String appKey = gMemberList.get(position).getAppkey();
+        UserInfo userInfo = groupInfo.getGroupMemberInfo(username, appKey);
             if (userInfo != null) {
                 List<UserInfo> userInfos = new ArrayList<UserInfo>();
                 userInfos.add(userInfo);
@@ -126,9 +143,16 @@ public class GroupKeeperActivity extends Activity implements View.OnClickListene
             } else {
                 mTvGroupKeeper.setText("can not find group member info with given username and appKey");
             }
-        } else {
-            Toast.makeText(getApplicationContext(), "请输入username", Toast.LENGTH_SHORT).show();
-        }
-    }
 
+    }
+    void zoomInViewSize(int height) {
+        View img1 = findViewById(R.id.statusbar);
+        ViewGroup.LayoutParams lp = img1.getLayoutParams();
+        lp.height = height;
+        img1.setLayoutParams(lp);
+    }
+    protected void onStop() {
+        super.onStop();
+        Log.d("13172", gMemberList.get(position).getGroupId()+"ID");
+    }
 }

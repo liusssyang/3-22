@@ -255,11 +255,12 @@ public class CreateGroupTextMsgActivity extends Activity {
             DataBean db = (DataBean) se;
             Message message = db.getMessage();
             if (message.getTargetType() == ConversationType.group){
-                msgList.add(new Msg(message));
-                adapter.notifyItemInserted(msgList.size() - 1);
-                msgRecyclerView.scrollToPosition(msgList.size() - 1);
+                GroupInfo groupInfo = (GroupInfo) message.getTargetInfo();
+                if(groupInfo.getGroupID()==groupList.get(position).getGroupId()){
+                    msgList.add(new Msg(message));
+                    adapter.notifyItemInserted(msgList.size() - 1);
+                    msgRecyclerView.scrollToPosition(msgList.size() - 1);
+                }
             }
-
-
         }}
 }

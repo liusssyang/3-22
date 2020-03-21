@@ -3,12 +3,11 @@
     <dbname value="LocalHistoryDataBase">
 
     </dbname>
-    <version value="8">
+    <version value="11">
 
     </version>
     <list>
-        <mapping class="heath.com.test2_jmessage.tools.LocalHistory">
-
-        </mapping>
+        <mapping class="heath.com.test2_jmessage.tools.LocalHistory" />
+        <mapping class="heath.com.test2_jmessage.tools.LoginInformation"/>
     </list>
 </litepal>

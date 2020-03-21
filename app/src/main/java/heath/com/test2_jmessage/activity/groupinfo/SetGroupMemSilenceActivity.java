@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -23,13 +25,14 @@ import cn.jpush.im.android.api.model.SilenceInfo;
 import cn.jpush.im.android.api.model.UserInfo;
 import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.R;
+import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
 
-import static heath.com.test2_jmessage.application.MyApplication.groupList;
+import static heath.com.test2_jmessage.activity.groupinfo.GroupInfoActivity.gMemberList;
 
 public class SetGroupMemSilenceActivity extends Activity {
     private String TAG = SetGroupMemSilenceActivity.class.getSimpleName();
-    private EditText mEtMemberName;
-    private EditText mEtMemberAppKey;
+    private TextView mEtMemberName;
+    private TextView mEtMemberAppKey;
     private EditText mEtSilenceTime;
     private Button mBtKeepSilence;
     private Button mBtKeepSilenceCancel;
@@ -108,7 +111,7 @@ public class SetGroupMemSilenceActivity extends Activity {
             @Override
             public void onClick(View v) {
                 mProgressDialog = ProgressDialog.show(SetGroupMemSilenceActivity.this, "提示：", "正在加载中。。。");
-                mGroupID = groupList.get(position).getGroupId();
+                mGroupID = gMemberList.get(position).getGroupId();
                 mTv_showSilenceInfo.setText("");
                 JMessageClient.getGroupInfo(mGroupID, new GetGroupInfoCallback() {
                     @Override
@@ -145,21 +148,34 @@ public class SetGroupMemSilenceActivity extends Activity {
     }
 
     private void initView() {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(R.layout.activity_set_group_mem_silence);
+        zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
         position=getIntent().getIntExtra("position",-1);
-        mEtMemberName = (EditText) findViewById(R.id.et_member_name);
-        mEtMemberAppKey = (EditText) findViewById(R.id.et_member_appkey);
+        mEtMemberName =findViewById(R.id.et_member_name);
+        mEtMemberName.setText(gMemberList.get(position).getUserName());
+        mEtMemberAppKey = findViewById(R.id.et_member_appkey);
+        mEtMemberAppKey.setText(gMemberList.get(position).getAppkey());
         mEtSilenceTime = (EditText) findViewById(R.id.et_silence_time);
         mBtKeepSilence = (Button) findViewById(R.id.bt_keep_silence);
         mBtKeepSilenceCancel = (Button) findViewById(R.id.bt_keep_silence_cancel);
         mBtGetGroupMemberSilence = (Button) findViewById(R.id.bt_get_group_member_silence);
         mBtGetGroupSilenceList = (Button) findViewById(R.id.bt_get_group_silence_list);
         mTv_showSilenceInfo = (TextView) findViewById(R.id.tv_show_silence_info);
+        TextView manage_back = findViewById(R.id.manage_back);
+        manage_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
+            }
+        });
     }
 
     private boolean preparedData() {
         mProgressDialog = ProgressDialog.show(SetGroupMemSilenceActivity.this, "提示：", "正在加载中。。。");
-        mGroupID =groupList.get(position).getGroupId();
+        mGroupID =gMemberList.get(position).getGroupId();
         mNames = mEtMemberName.getText().toString();
         mAppKey = mEtMemberAppKey.getText().toString();
         return true;
@@ -214,5 +230,11 @@ public class SetGroupMemSilenceActivity extends Activity {
             mProgressDialog.dismiss();
             Toast.makeText(getApplicationContext(), "请输入相关参数", Toast.LENGTH_SHORT).show();
         }
+    }
+    private void zoomInViewSize(int height) {
+        View img1 = findViewById(R.id.statusbar);
+        ViewGroup.LayoutParams  lp = img1.getLayoutParams();
+        lp.height =height;
+        img1.setLayoutParams(lp);
     }
 }

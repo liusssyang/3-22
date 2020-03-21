@@ -22,11 +22,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.callback.GetGroupIDListCallback;
+import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
+import heath.com.test2_jmessage.activity.TypeActivity;
 import heath.com.test2_jmessage.adapter.GMemberAdapter;
 import heath.com.test2_jmessage.recycleView_item.personMsg;
+import heath.com.test2_jmessage.tools.PushToast;
 
+import static heath.com.test2_jmessage.activity.TypeActivity.groupAdapter;
 import static heath.com.test2_jmessage.activity.createmessage.CreateGroupTextMsgActivity.GroupMemberList;
 import static heath.com.test2_jmessage.application.MyApplication.groupList;
 
@@ -51,8 +55,8 @@ public class GroupInfoActivity extends Activity implements View.OnClickListener 
     private ProgressDialog mProgressDialog = null;
     private Button mBt_getGroupMembers;
     private Button mBt_blockedGroupMsg;//message_notify
-    private List<personMsg> gMemberList = new ArrayList<>();
-    private GMemberAdapter gMemberAdapter;
+    public static List<personMsg> gMemberList = new ArrayList<>();
+    public static GMemberAdapter gMemberAdapter;
     private int position=-1;
 
 
@@ -149,8 +153,7 @@ public class GroupInfoActivity extends Activity implements View.OnClickListener 
                     public void gotResult(int i, String s, List<Long> list) {
                         if (i == 0) {
                             mProgressDialog.dismiss();
-                            Log.d("ly13173", "gotResult: "+list.get(0).toString());
-                            mTv_getList.setText("");
+                           mTv_getList.setText("");
                             mTv_getList.append(list.toString());
                         } else {
                             mProgressDialog.dismiss();
@@ -221,36 +224,7 @@ public class GroupInfoActivity extends Activity implements View.OnClickListener 
                 overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
             }
         });
-        TextView no_speak=findViewById(R.id.no_speak);
-        no_speak.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), SetGroupMemSilenceActivity.class);
-                intent.putExtra("position", position);
-                startActivity(intent);
-                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
-            }
-        });
-        TextView keeper=findViewById(R.id.keeper);
-        keeper.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), GroupKeeperActivity.class);
-                intent.putExtra("position", position);
-                startActivity(intent);
-                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
-            }
-        });
-        TextView change_group_admin=findViewById(R.id.change_group_admin);
-        change_group_admin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), ChangeGroupAdminActivity.class);
-                intent.putExtra("position", position);
-                startActivity(intent);
-                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
-            }
-        });
+
         TextView message_notify=findViewById(R.id.message_notify);
         message_notify.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -272,35 +246,65 @@ public class GroupInfoActivity extends Activity implements View.OnClickListener 
                 overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
             }
         });
-        TextView nickname=findViewById(R.id.nickname);
-        nickname.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent=new Intent(getApplicationContext(), GroupMemNicknameActivity.class);
-                intent.putExtra("position", position);
-                startActivity(intent);
-                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
-            }
-        });
         TextView exit_group=findViewById(R.id.exit_group);
         exit_group.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(getApplicationContext(),ExitGroupActivity.class);
-                intent.putExtra("position", position);
-                startActivity(intent);
-                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
+                mProgressDialog = ProgressDialog.show(v.getContext(), "提示：", "正在退出。。。");
+                JMessageClient.exitGroup(groupList.get(position).getGroupId(), new BasicCallback() {
+                    @Override
+                    public void gotResult(int i, String s) {
+                        if (i == 0) {
+                            mProgressDialog.dismiss();
+                            groupList.remove(position);
+                            groupAdapter.notifyDataSetChanged();
+                            Intent intent=new Intent(getApplicationContext(), TypeActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                            overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
+                            JMessageClient.deleteGroupConversation(groupList.get(position).getGroupId());
+                            PushToast.getInstance().createToast("提示", "退出成功", null, true);
+                            finish();
+                        } else {
+
+                            PushToast.getInstance().createToast("提示", "退出失败", null, false);
+                            Log.i("ExitGroupActivity", "JMessageClient.exitGroup " + ", responseCode = " + i + " ; Desc = " + s);
+                        }
+                    }
+                });
 
             }
         });
         groupid.setText(groupList.get(position).getGroupId()+"");
-        for (int i=0;i<GroupMemberList.size();i++){
+        gMemberList.clear();
+        gMemberAdapter.notifyDataSetChanged();
+        gMemberList.add(new personMsg("添加成员",
+                BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.add_icon)
+       ,groupList.get(position).getGroupId()));
+        for (int j=0;j<GroupMemberList.size();j++){
             Bitmap bitmap;
-            if (TextUtils.isEmpty(GroupMemberList.get(i).getAvatar())){
+            if (TextUtils.isEmpty(GroupMemberList.get(j).getAvatar())){
                 bitmap=null;
             }else
-                bitmap= BitmapFactory.decodeFile(GroupMemberList.get(i).getAvatarFile().getPath());
-            gMemberList.add(new personMsg(GroupMemberList.get(i).getUserName(),bitmap));
+                bitmap= BitmapFactory.decodeFile(GroupMemberList.get(j).getAvatarFile().getPath());
+            gMemberList.add(new personMsg(
+                    GroupMemberList.get(j).getNoDisturb(),
+                    GroupMemberList.get(j).getNickname()
+                    , GroupMemberList.get(j).getUserID()
+                    , bitmap
+                    , GroupMemberList.get(j).getUserName()
+                    , GroupMemberList.get(j).getNotename()
+                    , GroupMemberList.get(j).getAppKey()
+                    , true
+                    , GroupMemberList.get(j).getSignature()
+                    , ""
+                    , GroupMemberList.get(j).getSignature()
+                    , GroupMemberList.get(j).getGender().toString()
+                    , GroupMemberList.get(j).getAddress()
+                    , GroupMemberList.get(j).getNoteText()
+                    , GroupMemberList.get(j).getBirthday()
+                    , GroupMemberList.get(j).getAvatarFile().getPath()
+                    ,groupList.get(position).getGroupId()));
         }
     }
 
@@ -328,6 +332,9 @@ public class GroupInfoActivity extends Activity implements View.OnClickListener 
         ViewGroup.LayoutParams  lp = img1.getLayoutParams();
         lp.height =height;
         img1.setLayoutParams(lp);
+    }
+    protected void onResume() {
+        super.onResume();
     }
 
 }

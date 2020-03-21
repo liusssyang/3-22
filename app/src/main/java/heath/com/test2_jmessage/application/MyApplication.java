@@ -24,7 +24,8 @@ import heath.com.test2_jmessage.tools.tools;
 public class MyApplication extends LitePalApplication {
     private  static Context context;
     private final String TAG="MyApplication";
-    public static boolean isAvaluable=false;
+    public static boolean personListIsAvaluable =false;
+    public static boolean groupListIsAvaluable=false;
     public static List<UserInfo> list;
     public static List<GroupInfo> list2=new ArrayList<>();
 
@@ -44,13 +45,13 @@ public class MyApplication extends LitePalApplication {
         tools.getUserInfoList();
         tools.getNoDisturbToMyself();
         tools.getGroupIdList();
-        Log.i("MyApplication", isAvaluable+"");
+        Log.i("MyApplication", personListIsAvaluable +"");
 
     }
     @Override
     public void onTerminate() {
         // 程序终止的时候执行
-        Log.i("MyApplication", isAvaluable+"");
+        Log.i("MyApplication", personListIsAvaluable +"");
         personList.clear();
         super.onTerminate();
     }
@@ -65,7 +66,7 @@ public class MyApplication extends LitePalApplication {
     public void onTrimMemory(int level) {
         // 程序在内存清理的时候执行（回收内存）
         // HOME键退出应用程序、长按MENU键，打开Recent TASK都会执行
-        Log.i("MyApplication", isAvaluable+"");
+        Log.i("MyApplication", personListIsAvaluable +"");
         super.onTrimMemory(level);
     }
     @Override

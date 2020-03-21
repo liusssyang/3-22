@@ -1,6 +1,12 @@
 package heath.com.test2_jmessage.tools;
 
 import android.annotation.SuppressLint;
+import android.app.AppOpsManager;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -45,8 +51,12 @@ import heath.com.test2_jmessage.application.MyApplication;
 import heath.com.test2_jmessage.recycleView_item.Msg;
 import heath.com.test2_jmessage.recycleView_item.personMsg;
 
+import static android.content.Context.USAGE_STATS_SERVICE;
 import static cn.jpush.im.android.api.jmrtc.JMRTCInternalUse.getApplicationContext;
+import static heath.com.test2_jmessage.activity.TypeActivity.groupAdapter;
+import static heath.com.test2_jmessage.activity.TypeActivity.personAdapter;
 import static heath.com.test2_jmessage.application.MyApplication.groupList;
+import static heath.com.test2_jmessage.application.MyApplication.groupListIsAvaluable;
 import static heath.com.test2_jmessage.application.MyApplication.list;
 import static heath.com.test2_jmessage.application.MyApplication.list2;
 import static heath.com.test2_jmessage.application.MyApplication.personList;
@@ -58,8 +68,6 @@ public class tools {
             public void gotResult(int i, String s, List<UserInfo> list) {
                 if (i == 0) {
                     CreateGroupTextMsgActivity.GroupMemberList =list;
-                } else {
-                    Toast.makeText(getApplicationContext(), "获取失败", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -77,8 +85,7 @@ public class tools {
                     MyApplication.getNoDisturbToMyselfResult = integer;
                     Log.i("SettingMainActivity", "JMessageClient.getNoDisturbGlobal" + ", responseCode = " + i + " ; desc = " + s);
                 } else {
-                    Toast.makeText(getApplicationContext(), "获取失败", Toast.LENGTH_SHORT).show();
-                    Log.i("SettingMainActivity", "JMessageClient.getNoDisturbGlobal" + ", responseCode = " + i + " ; desc = " + s);
+                        Log.i("SettingMainActivity", "JMessageClient.getNoDisturbGlobal" + ", responseCode = " + i + " ; desc = " + s);
                 }
             }
         });
@@ -110,7 +117,7 @@ public class tools {
      * that confirm the userName.
      */
     public static boolean shownHistoryFromCloud(String userName, List<Msg> msgList, String groupId) {
-        if (MyApplication.isAvaluable) {
+        if (MyApplication.personListIsAvaluable) {
             Gson gson = new Gson();
             Conversation conversation = getConversation(userName, groupId);
             if (conversation != null) {
@@ -218,7 +225,7 @@ public class tools {
      * Don't change the contents of the method easily.
      */
     public static void getLocalHistoryFromCloud(int position, String groupId) {
-        if (MyApplication.isAvaluable) {
+        if (MyApplication.personListIsAvaluable) {
             List<LocalHistory> localHistories = DataSupport.findAll(LocalHistory.class);
             Conversation conversation = getConversation(personList.get(position).getUserName(), groupId);
             if (conversation != null) {
@@ -366,16 +373,14 @@ public class tools {
             public void gotResult(int i, String s, List<UserInfo> list) {
                 if (i == 0) {
                     if (list.size() != 0) {
+                        MyApplication.personListIsAvaluable = true;
                         MyApplication.list = list;
-                        MyApplication.isAvaluable = true;
                     } else {
-                        MyApplication.isAvaluable = true;
+                        MyApplication.personListIsAvaluable = true;
                         Log.d("getUserInfoList", "获取成功");
                     }
                 } else {
-                    MyApplication.isAvaluable = false;
-                    Log.d("getUserInfoList", "获取失败");
-                    Log.i("getUserInfoList", "ContactManager.getFriendList" + ", responseCode = " + i + " ; LoginDesc = " + s);
+                    MyApplication.personListIsAvaluable = false;
                 }
             }
         });
@@ -389,6 +394,8 @@ public class tools {
             @Override
             public void gotResult(int i, String s, List<Long> list) {
                 if (i == 0) {
+                    list2.clear();
+                    PushToast.getInstance().createToast("提示", "获取群列表成功", null, true);
                     for(int j=0;j<list.size();j++){
                         Log.d("13174",list.get(j).toString());
                         JMessageClient.getGroupInfo(list.get(j), new GetGroupInfoCallback() {
@@ -396,6 +403,7 @@ public class tools {
                             public void gotResult(int i, String s, GroupInfo groupInfo) {
                                 if (i == 0) {
                                    list2.add(groupInfo);
+                                    groupListIsAvaluable=true;
                                     Log.d("13174",list2.size()+"");
                                 }
                             }
@@ -403,13 +411,14 @@ public class tools {
                     }
 
                 } else {
-                    Toast.makeText(getApplicationContext(), "获取失败", Toast.LENGTH_SHORT).show();
+                    groupListIsAvaluable=false;
                 }
             }
         });
     }
     public static void initPersonlist() {
         personList.clear();
+        personAdapter.notifyDataSetChanged();
         for (int j = 0; j < list.size(); j++) {
             Bitmap bitmap;
             if (TextUtils.isEmpty(list.get(j).getAvatar())){
@@ -435,6 +444,7 @@ public class tools {
                             , list.get(j).getBirthday()
                             , list.get(j).getAvatarFile().getPath()
                     ));
+            personAdapter.notifyDataSetChanged();
         }
     }
     public static void initGrouplist(){
@@ -445,11 +455,16 @@ public class tools {
                 bitmap=null;
             }else
                 bitmap=BitmapFactory.decodeFile(list2.get(j).getAvatarFile().getPath());
-            groupList.add(new personMsg(list2.get(j).getGroupID(),list2.get(j).getGroupName(),
-                    list2.get(j).getGroupOwner(),list2.get(j).getNoDisturb(),list2.get(j).getOwnerAppkey(),
-                    list2.get(j).getMaxMemberCount(),list2.get(j).getGroupDescription(),
+            groupList.add(new personMsg(list2.get(j).getGroupID(),
+                    list2.get(j).getGroupName(),
+                    list2.get(j).getGroupOwner(),
+                    list2.get(j).getNoDisturb(),
+                    list2.get(j).getOwnerAppkey(),
+                    list2.get(j).getMaxMemberCount(),
+                    list2.get(j).getGroupDescription(),
                     bitmap
                     ,list2.get(j).getGroupType().toString()));
+            groupAdapter.notifyDataSetChanged();
         }
 
     }
@@ -497,11 +512,6 @@ public class tools {
             message.setOnSendCompleteCallback(new BasicCallback() {
                 @Override
                 public void gotResult(int i, String s) {
-                    if (i == 0) {
-                        Toast.makeText(MyApplication.getContext(), "发送成功", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(MyApplication.getContext(), "发送失败", Toast.LENGTH_SHORT).show();
-                    }
                 }
             });
             //设置消息发送时的一些控制参数
@@ -586,5 +596,47 @@ public class tools {
             }
         }
         return position;
+    }
+/************获取状态权限和状态信息*****************************/
+    public static  boolean getE_permission(Context context){
+        AppOpsManager appOpt = (AppOpsManager) context
+                .getSystemService(Context.APP_OPS_SERVICE);
+        int mode = appOpt.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
+                android.os.Process.myUid(),context.getPackageName());
+        return  mode == AppOpsManager.MODE_ALLOWED;
+    }
+    public static String getE(){
+        String s1 = null;
+        Calendar beginCal = Calendar.getInstance();
+        beginCal.add(Calendar.HOUR_OF_DAY, -1);
+        Calendar endCal = Calendar.getInstance();
+        UsageStatsManager manager=(UsageStatsManager)getApplicationContext().getSystemService(USAGE_STATS_SERVICE);
+        List<UsageStats> stats=manager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,beginCal.getTimeInMillis(),endCal.getTimeInMillis());
+        StringBuilder sb=new StringBuilder();
+        for(UsageStats us:stats){
+            try {
+                PackageManager pm = getApplicationContext().getPackageManager();
+                ApplicationInfo applicationInfo = pm.getApplicationInfo(us.getPackageName(), PackageManager.GET_META_DATA);
+                if ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) <= 0) {
+                    @SuppressLint("SimpleDateFormat")
+                    SimpleDateFormat format = new SimpleDateFormat("MM/dd HH:mm:ss");
+                    String t = format.format(new Date(us.getLastTimeUsed()));
+
+                    if (us.getTotalTimeInForeground() != 0) {
+                        if (us.getTotalTimeInForeground() / 1000 / 60 >=180) {
+                            sb.append("AN:   ").append(pm.getApplicationLabel(applicationInfo)).append("\n").append("LT:   ").append(t).append("\n").append("RT:   ").append(us.getTotalTimeInForeground() / 1000 / 60).append("min").append(us.getTotalTimeInForeground() / 1000 % 60).append("s     ⚠\n").append("\n");
+                        } else {
+                            sb.append("AN:   ").append(pm.getApplicationLabel(applicationInfo)).append("\n").append("LT:   ").append(t).append("\n").append("RT:   ").append(us.getTotalTimeInForeground() / 1000 / 60).append("min").append(us.getTotalTimeInForeground() / 1000 % 60).append("s\n\n");
+                        }
+                        s1=sb.toString();
+                    }
+
+                }
+            }catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
+
+        }
+        return s1;
     }
 }

@@ -51,7 +51,13 @@ public class personMsg {
     public personMsg(String username,Bitmap avatar){
         this.username=username;
         this.avatar=avatar;
-    };
+
+    }
+    public personMsg(String username,Bitmap avatar,long groupId){
+        this.username=username;
+        this.avatar=avatar;
+        this.groupId=groupId;
+    }
 
     public personMsg(long groupId, String groupName, String groupOwner,
     int noDisturb,String groupOwnerAppkey, int maxMemberCount,
@@ -114,6 +120,30 @@ public class personMsg {
         this.time = time;
         this.simpleMessage = simpleMessage;
         this.unique = unique;
+    }
+    public personMsg(int isDistubed, String nickname, long userId, Bitmap avatar, String userName,
+                     String noteName, String appkey,
+                     boolean hasInformation, String simpleMessage, String time,
+                     String signature,
+                     String gender, String adress, String other, long birthday,
+                     String avatarLocalpath,long groupId) {
+        this.avatarLocalpath = avatarLocalpath;
+        this.isDistubed = isDistubed;
+        this.username = userName;
+        this.signature = signature;
+        this.notename = noteName;
+        this.appkey = appkey;
+        this.hasInformation = hasInformation;
+        this.other = other;
+        this.simpleMessage = simpleMessage;
+        this.time = time;
+        this.avatar = avatar;
+        this.userId = userId;
+        this.gender = gender;
+        this.address = adress;
+        this.birthday = birthday;
+        this.nickname = nickname;
+        this.groupId=groupId;
     }
 
     public personMsg(int isDistubed, String nickname, long userId, Bitmap avatar, String userName,

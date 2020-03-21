@@ -13,9 +13,12 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.text.Editable;
+import android.text.Html;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
@@ -34,6 +37,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import org.litepal.LitePal;
 import org.litepal.crud.DataSupport;
 
 import java.util.ArrayList;
@@ -83,8 +87,9 @@ import static heath.com.test2_jmessage.application.MyApplication.personList;
  */
 public class TypeActivity extends Activity {
     public static final String TAG = "ly13172";
+    private int flag = 1;
     public static final String LOGOUT_REASON = "logout_reason";
-    private TextView  head_state;
+    private TextView head_state;
     private TextView headusername, headappkey, headvision, signature;
     public static final String INFO_UPDATE = "info_update";
     public static final String TRANS_COMMAND_SENDER = "trans_command_sender";
@@ -92,7 +97,7 @@ public class TypeActivity extends Activity {
     public static final String TRANS_COMMAND_TYPE = "trans_command_type";
     public static final String TRANS_COMMAND_CMD = "trans_command_cmd";
     public static PersonAdapter personAdapter;
-    private   GroupAdapter groupAdapter;
+    public static GroupAdapter groupAdapter;
     private DrawerLayout drawerLayout;
     private Localreceiver localRceiver;
     private LocalBroadcastManager localBroadcastManager;
@@ -125,7 +130,7 @@ public class TypeActivity extends Activity {
         drawerLayout = findViewById(R.id.sigText_drawerLayout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         View navHeaderView = navigationView.inflateHeaderView(R.layout.headlayout);
-        bottomNavigationView=findViewById(R.id.navigation);
+        bottomNavigationView = findViewById(R.id.navigation);
         headusername = navHeaderView.findViewById(R.id.head_username);
         circleImageView = navHeaderView.findViewById(R.id.picture);
         headappkey = navHeaderView.findViewById(R.id.head_appkey);
@@ -166,7 +171,8 @@ public class TypeActivity extends Activity {
                     }
                 }
                 if (item.toString().equals("开发者选项")) {
-                    Log.d(TAG, tools.getDataBasesNumber()+"条数据");
+                    LitePal.getDatabase();
+                    Log.d(TAG, tools.getDataBasesNumber() + "条数据");
                 }
                 if (item.toString().equals("设置")) {
                     intent.setClass(getApplicationContext(), SettingMainActivity.class);
@@ -262,7 +268,7 @@ public class TypeActivity extends Activity {
             }
         });
         final LinearLayout find_visibility = index2_linear.findViewById(R.id.find_visibility);
-        linearLayout=findViewById(R.id.index_record);
+        linearLayout = findViewById(R.id.index_record);
         TextView newFriends = findViewById(R.id.newFriends);
         newFriends.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -293,28 +299,65 @@ public class TypeActivity extends Activity {
                 bottomNavigationView.setVisibility(View.VISIBLE);
             }
         });
-        final TextView tip=toolbar.findViewById(R.id.tip);tip.setText("好友消息");
-        bottomNavigationView.setOnNavigationItemSelectedListener(
-                new BottomNavigationView.OnNavigationItemSelectedListener() {
+        final TextView tip = toolbar.findViewById(R.id.tip);
+        tip.setText("好友消息");
+        final TextView myLog = findViewById(R.id.myLog);
+        myLog.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()){
-                    case R.id.navigation_group:
-                        tip.setText("群聊消息");
-                        groupAdapter = new GroupAdapter(groupList);
-                        recyclerView.setAdapter(groupAdapter);
-                        tools.initGrouplist();
-                        return true;
-                    case R.id.navigation_person:
-                        tip.setText("好友消息");
-                        personAdapter = new PersonAdapter(personList);
-                        recyclerView.setAdapter(personAdapter);
-                        tools.initPersonlist();
-                        return true;
+            public void onClick(View v) {
+                if (tools.getE_permission(getApplicationContext())) {
+                    myLog.setText(tools.getE());
+                }else {startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
                 }
-                return false;
             }
         });
+        myLog.setMovementMethod(new ScrollingMovementMethod());
+        bottomNavigationView.setOnNavigationItemSelectedListener(
+                new BottomNavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.navigation_person:
+                                flag = 1;
+                                swipeRefreshLayout.setEnabled(true);
+                                other_linear.setVisibility(View.VISIBLE);
+                                myLog.setVisibility(View.GONE);
+                                tip.setText("好友消息");
+                                personAdapter = new PersonAdapter(personList);
+                                recyclerView.setAdapter(personAdapter);
+                                tools.initPersonlist();
+                                return true;
+                            case R.id.navigation_group:
+                                flag = 2;
+                                swipeRefreshLayout.setEnabled(true);
+                                other_linear.setVisibility(View.VISIBLE);
+                                tip.setText("群聊消息");
+                                myLog.setVisibility(View.GONE);
+                                groupAdapter = new GroupAdapter(groupList);
+                                recyclerView.setAdapter(groupAdapter);
+                                tools.initGrouplist();
+                                groupAdapter.notifyDataSetChanged();
+                                return true;
+                            case R.id.navigation_myLog:
+                                flag = 3;
+                                swipeRefreshLayout.setEnabled(false);
+                                other_linear.setVisibility(View.GONE);
+                                myLog.setVisibility(View.VISIBLE);
+                                if (tools.getE_permission(getApplicationContext())) {
+                                    myLog.setText(tools.getE());
+                                } else{
+
+                                    String s="查看我的日志需要<font color=red>Test2_JMessage</font>的使用情况访问权限；" +
+                                            "再次授权或已经授权请点击<font color=red>这里</font>。";
+                                    PushToast.getInstance().createToast("提示","请打开使用情况访问权限",null,false);
+                                    myLog.setText(Html.fromHtml(s));
+                                    startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+                                }
+                                return true;
+                        }
+                        return false;
+                    }
+                });
         bottomNavigationView.setItemTextColor(csl);
         bottomNavigationView.setItemIconTintList(csl);
         bottomNavigationView.getMenu().getItem(0).setChecked(true);
@@ -364,12 +407,12 @@ public class TypeActivity extends Activity {
                 recordAdapter.notifyDataSetChanged();
                 if (!TextUtils.isEmpty(index2.getText().toString())) {
                     linearLayout.setVisibility(View.VISIBLE);
-                    List<LocalHistory> localHistories=DataSupport.
-                            where("content like ?","%" + s.toString() + "%").find(LocalHistory.class);
-                    for (LocalHistory localHistory:localHistories){//"<font color='red'>"+msg.getSimpleMessage()+"</font>"
+                    List<LocalHistory> localHistories = DataSupport.
+                            where("content like ?", "%" + s.toString() + "%").find(LocalHistory.class);
+                    for (LocalHistory localHistory : localHistories) {//"<font color='red'>"+msg.getSimpleMessage()+"</font>"
                         recordList.add(new personMsg(localHistory.getAvatarFilePath(),
                                 localHistory.getUserName(),
-                                localHistory.getContent().replace(s.toString(),"<font color='#00C4FF'>"+s.toString()+"</font>"),
+                                localHistory.getContent().replace(s.toString(), "<font color='#00C4FF'>" + s.toString() + "</font>"),
                                 localHistory.getMessageId(),
                                 localHistory.getAppKey(),
                                 localHistory.getNickName(),
@@ -379,31 +422,41 @@ public class TypeActivity extends Activity {
                         ));
                         recordAdapter.notifyDataSetChanged();
                     }
-                }
-                else linearLayout.setVisibility(View.GONE);
+                } else linearLayout.setVisibility(View.GONE);
             }
         });
         personAdapter.notifyDataSetChanged();
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                tools.getUserInfoList();
-                if (MyApplication.isAvaluable) {
-                    personList.clear();
-                    /*通知广播接收器该刷新personList了**/
-                    Intent intent = new Intent("message");
-                    intent.putExtra("init", "1");
-                    localBroadcastManager.sendBroadcast(intent);
-                    PushToast.getInstance().createToast("提示", "刷新成功", null, true);
-                } else {
-                    PushToast.getInstance().createToast("提示", "刷新失败", null, false);
-                }
-                swipeRefreshLayout.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        swipeRefreshLayout.setRefreshing(false);
+                if (flag == 1) {
+                    tools.getUserInfoList();
+                    if (MyApplication.personListIsAvaluable) {
+                        /*通知广播接收器该刷新personList和groupList了**/
+                        Intent intent = new Intent("message");
+                        intent.putExtra("init", "1");
+                        localBroadcastManager.sendBroadcast(intent);
+                        PushToast.getInstance().createToast("提示", "刷新成功", null, true);
+                    } else {
+                        PushToast.getInstance().createToast("提示", "刷新失败", null, false);
                     }
-                }, 1000);
+                    swipeRefreshLayout.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            swipeRefreshLayout.setRefreshing(false);
+                        }
+                    }, 1000);
+                }
+                if (flag == 2) {
+                    tools.getGroupIdList();
+                    swipeRefreshLayout.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            tools.initGrouplist();
+                            swipeRefreshLayout.setRefreshing(false);
+                        }
+                    }, 1000);
+                }
             }
         });
 
@@ -412,7 +465,7 @@ public class TypeActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (MyApplication.isAvaluable) {
+        if (MyApplication.personListIsAvaluable) {
             SharedPreferences pref2 = getBaseContext().getSharedPreferences("backdata" + myUserId, 0);
             for (int i = 0; i < personList.size(); i++) {
                 String simpleMessage = pref2.getString("simplemessage" + personList.get(i).getUserId(), "");
@@ -553,7 +606,7 @@ public class TypeActivity extends Activity {
     private final Runnable task = new Runnable() {
         @Override
         public void run() {
-            if (MyApplication.isAvaluable) {
+            if (MyApplication.personListIsAvaluable) {
                 Intent intent = new Intent("message");
                 intent.putExtra("init", "1");
                 localBroadcastManager.sendBroadcast(intent);

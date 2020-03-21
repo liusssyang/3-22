@@ -9,7 +9,9 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -94,7 +96,13 @@ public class UpdateUserAvatar extends Activity {
         setContentView(R.layout.activity_update_user_avatar);
         PushToast.getInstance().init(this);
         zoomInViewSize(StatusBarUtil.getStatusBarHeight(this),R.id.statusbar);
-        zoomInViewSize(StatusBarUtil.getNavigationBarHeight(this),R.id.nav_bar);
+        View view=findViewById(R.id.nav_bar);
+        //if (isNavigationBarShow(getWindowManager())){
+            //view.setVisibility(View.VISIBLE);
+            zoomInViewSize(StatusBarUtil.getNavigationBarHeight(this),R.id.nav_bar);
+        //}else {
+            //view.setVisibility(View.GONE);}
+
         mBt_localImage = (Button) findViewById(R.id.bt_local_image);
         mBt_update = (Button) findViewById(R.id.bt_update);
         TextView manage_back=findViewById(R.id.manage_back);
@@ -133,5 +141,25 @@ public class UpdateUserAvatar extends Activity {
         ViewGroup.LayoutParams  lp = img1.getLayoutParams();
         lp.height =height;
         img1.setLayoutParams(lp);
+    }
+    boolean isNavigationBarShow(WindowManager windowManager)
+    {
+        Display defaultDisplay = windowManager.getDefaultDisplay();
+        //获取屏幕高度
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        defaultDisplay.getRealMetrics(outMetrics);
+        int heightPixels = outMetrics.heightPixels;
+        //宽度
+        int widthPixels = outMetrics.widthPixels;
+
+
+        //获取内容高度
+        DisplayMetrics outMetrics2 = new DisplayMetrics();
+        defaultDisplay.getMetrics(outMetrics2);
+        int heightPixels2 = outMetrics2.heightPixels;
+        //宽度
+        int widthPixels2 = outMetrics2.widthPixels;
+
+        return heightPixels - heightPixels2 > 0 || widthPixels - widthPixels2 > 0;
     }
 }

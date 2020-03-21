@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -25,11 +27,18 @@ import java.io.File;
 
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.callback.CreateGroupCallback;
+import cn.jpush.im.android.api.callback.GetGroupInfoCallback;
+import cn.jpush.im.android.api.model.GroupInfo;
 import de.hdodenhof.circleimageview.CircleImageView;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
+import heath.com.test2_jmessage.recycleView_item.personMsg;
+import heath.com.test2_jmessage.tools.PushToast;
 
 import static heath.com.test2_jmessage.activity.RegisterAndLoginActivity.addLayoutListener;
+import static heath.com.test2_jmessage.activity.TypeActivity.groupAdapter;
+import static heath.com.test2_jmessage.application.MyApplication.groupList;
+import static heath.com.test2_jmessage.application.MyApplication.list2;
 
 /**
  * Created by ${chenyn} on 16/3/29.
@@ -50,6 +59,7 @@ public class CreateGroupActivity extends Activity {
     private RadioButton mRb_privateGroup;
     private RadioButton mRb_publicGroup;
     private int flag;
+    private CircleImageView icon_add;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,9 +76,33 @@ public class CreateGroupActivity extends Activity {
             public void gotResult(int responseCode, String responseMsg, long groupId) {
                 mProgressDialog.dismiss();
                 if (responseCode == 0) {
-                    Toast.makeText(getApplicationContext(), "创建成功", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getApplicationContext(), "创建失败", Toast.LENGTH_SHORT).show();
+
+                    JMessageClient.getGroupInfo(groupId, new GetGroupInfoCallback() {
+                        @Override
+                        public void gotResult(int i, String s, GroupInfo groupInfo) {
+                            if (i == 0) {
+                                list2.add(groupInfo);
+                                Bitmap bitmap;
+                                if (TextUtils.isEmpty(groupInfo.getAvatar())){
+                                    bitmap=null;
+                                }else
+                                    bitmap=BitmapFactory.decodeFile(groupInfo.getAvatarFile().getPath());
+                                groupList.add(new personMsg(groupInfo.getGroupID(),
+                                        groupInfo.getGroupName(),
+                                        groupInfo.getGroupOwner(),
+                                        groupInfo.getNoDisturb(),
+                                        groupInfo.getOwnerAppkey(),
+                                        groupInfo.getMaxMemberCount(),
+                                        groupInfo.getGroupDescription(),
+                                        bitmap,
+                                        groupInfo.getGroupType().toString()));
+                                groupAdapter.notifyDataSetChanged();
+                                PushToast.getInstance().createToast("提示", "创建成功", null, true);
+                            }
+                        }
+                    });
+                    } else {
+                    PushToast.getInstance().createToast("提示", "创建失败", null, false);
                 }
             }
         };
@@ -77,14 +111,17 @@ public class CreateGroupActivity extends Activity {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
             }
+
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
             @Override
             public void afterTextChanged(Editable s) {
-                if (TextUtils.isEmpty(mEt_groupName.getText())){
+                if (TextUtils.isEmpty(mEt_groupName.getText())) {
                     mBt_create.setBackgroundResource(R.drawable.background_addnew_declined);
                     mBt_create.setEnabled(false);
-                }else{
+                } else {
                     mBt_create.setBackgroundResource(R.drawable.background_addnew_accept);
                     mBt_create.setEnabled(true);
                 }
@@ -115,7 +152,7 @@ public class CreateGroupActivity extends Activity {
                 }
             }
         });
-        TextView service_station=findViewById(R.id.service_station);
+        TextView service_station = findViewById(R.id.service_station);
         service_station.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -123,14 +160,15 @@ public class CreateGroupActivity extends Activity {
 
             }
         });
-        TextView manage_back=findViewById(R.id.manage_back);
+        TextView manage_back = findViewById(R.id.manage_back);
         manage_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
+                overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
             }
         });
-        CircleImageView icon_add=findViewById(R.id.icon_add);
+        icon_add = findViewById(R.id.icon_add);
         icon_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -138,22 +176,7 @@ public class CreateGroupActivity extends Activity {
                 startActivityForResult(intent, RESULT_LOAD_IMAGE);
             }
         });
-        mEt_groupAvatar.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                    startActivityForResult(intent, RESULT_LOAD_IMAGE);
-                }
-            }
-        });
-        mEt_groupAvatar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(intent, RESULT_LOAD_IMAGE);
-            }
-        });
+
 
     }
 
@@ -162,6 +185,7 @@ public class CreateGroupActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(R.layout.activity_create_group);
         zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
+        PushToast.getInstance().init(this);
         mEt_groupName = (EditText) findViewById(R.id.et_group_name);
         mEt_groupDesc = (EditText) findViewById(R.id.et_group_desc);
         mEt_groupAvatar = (EditText) findViewById(R.id.et_create_group_avatar);
@@ -169,15 +193,15 @@ public class CreateGroupActivity extends Activity {
         mRb_privateGroup = (RadioButton) findViewById(R.id.rb_private_group);
         mRb_publicGroup = (RadioButton) findViewById(R.id.rb_public_group);
         mBt_create = (Button) findViewById(R.id.bt_create_group);
-        LinearLayout activity_create_group_totalLayout=findViewById(R.id.activity_create_group_totalLayout);
-        if (TextUtils.isEmpty(mEt_groupName.getText())){
+        LinearLayout activity_create_group_totalLayout = findViewById(R.id.activity_create_group_totalLayout);
+        if (TextUtils.isEmpty(mEt_groupName.getText())) {
             mBt_create.setBackgroundResource(R.drawable.background_addnew_declined);
             mBt_create.setEnabled(false);
-        }else{
+        } else {
             mBt_create.setBackgroundResource(R.drawable.background_addnew_accept);
             mBt_create.setEnabled(true);
         }
-        addLayoutListener(activity_create_group_totalLayout,mBt_create);
+        addLayoutListener(activity_create_group_totalLayout, mBt_create);
     }
 
     @Override
@@ -193,15 +217,20 @@ public class CreateGroupActivity extends Activity {
                 cursor.moveToFirst();
                 int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
                 mAvatarPath = cursor.getString(columnIndex);
-                mEt_groupAvatar.setText("群头像路径：" + mAvatarPath);
+                icon_add.setImageBitmap(BitmapFactory.decodeFile(mAvatarPath));
                 cursor.close();
             }
         }
     }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
     private void zoomInViewSize(int height) {
         View img1 = findViewById(R.id.statusbar);
-        ViewGroup.LayoutParams  lp = img1.getLayoutParams();
-        lp.height =height;
+        ViewGroup.LayoutParams lp = img1.getLayoutParams();
+        lp.height = height;
         img1.setLayoutParams(lp);
     }
 }

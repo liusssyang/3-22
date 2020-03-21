@@ -9,12 +9,15 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import org.litepal.crud.DataSupport;
 
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.api.BasicCallback;
 import heath.com.test2_jmessage.R;
 import heath.com.test2_jmessage.StatusBar.StatusBarUtil;
+import heath.com.test2_jmessage.tools.LoginInformation;
+import heath.com.test2_jmessage.tools.PushToast;
 
 /**
  * Created by ${chenyn} on 16/3/25.
@@ -26,6 +29,7 @@ public class UpdatePassword extends Activity {
     private Button   mBt_updatePassword;
     private EditText mEt_updateOldPassword;
     private EditText mEt_updateNewPassword;
+    private String userName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,12 +49,15 @@ public class UpdatePassword extends Activity {
                     @Override
                     public void gotResult(int responseCode, String updadePasswordDesc) {
                         if (responseCode == 0) {
-                            Toast.makeText(getApplicationContext(), "更新成功", Toast.LENGTH_SHORT).show();
+                            PushToast.getInstance().createToast("提示","更新成功",null,true);
                             Log.i("UpdatePassword", "JMessageClient.updateUserPassword" + ", responseCode = " + responseCode + " ; desc = " + updadePasswordDesc);
-
+                            DataSupport.deleteAll(LoginInformation.class,"account=?",userName);
+                            LoginInformation loginInformation=new LoginInformation(userName,newPassword);
+                            loginInformation.save();
                         } else {
                             Log.i("UpdatePassword", "JMessageClient.updateUserPassword" + ", responseCode = " + responseCode + " ; desc = " + updadePasswordDesc);
-                            Toast.makeText(getApplicationContext(), "更新失败", Toast.LENGTH_SHORT).show();
+                            PushToast.getInstance().createToast("提示","更新失败",null,false);
+
                         }
                     }
                 });
@@ -63,6 +70,8 @@ public class UpdatePassword extends Activity {
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(R.layout.activity_updatepassword);
         zoomInViewSize(StatusBarUtil.getStatusBarHeight(this));
+        PushToast.getInstance().init(this);
+        userName=JMessageClient.getMyInfo().getUserName();
         mBt_updatePassword = (Button) findViewById(R.id.bt_update_password);
         mEt_updateOldPassword = (EditText) findViewById(R.id.et_update_old_password);
         mEt_updateNewPassword = (EditText) findViewById(R.id.et_update_new_password);

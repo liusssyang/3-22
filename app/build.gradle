@@ -9,7 +9,7 @@ android {
     }
     defaultConfig {
         applicationId "heath.com.test2_jmessage"
-        minSdkVersion 21
+        minSdkVersion 22
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -30,6 +30,7 @@ android {
 
 dependencies {
 
+    implementation 'com.dk.view.patheffect:Library:0.1.1@aar'
     implementation 'com.readystatesoftware.systembartint:systembartint:1.0.3'
     implementation 'de.hdodenhof:circleimageview:2.1.0'
     implementation 'org.litepal.android:core:1.4.1'

@@ -228,6 +228,8 @@
         <activity android:name=".activity.query.Query" />
         <activity android:name=".activity.friend.FriendAskManage" />
         <activity android:name=".activity.history.MyHistory" />
+        <activity android:name=".activity.groupinfo.groupMemManage" />
+        <activity android:name=".activity.GetE" />
 
     </application>
 
