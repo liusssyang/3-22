@@ -73,6 +73,7 @@ import heath.com.test2_jmessage.adapter.RecordAdapter;
 import heath.com.test2_jmessage.application.MyApplication;
 import heath.com.test2_jmessage.recycleView_item.personMsg;
 import heath.com.test2_jmessage.tools.LocalHistory;
+import heath.com.test2_jmessage.tools.LoginInformation;
 import heath.com.test2_jmessage.tools.PushToast;
 import heath.com.test2_jmessage.tools.tools;
 
@@ -156,6 +157,11 @@ public class TypeActivity extends Activity {
                 if (item.toString().equals("退出")) {
                     UserInfo myInfo = JMessageClient.getMyInfo();
                     if (myInfo != null) {
+                        if (!TextUtils.isEmpty(myInfo.getAvatar())) {
+                            LoginInformation loginInformation = new LoginInformation();
+                            loginInformation.setAvatarPath(myInfo.getAvatarFile().getPath());
+                            loginInformation.updateAll("account=?", myInfo.getUserName());
+                        }
                         JMessageClient.logout();
                         list.clear();
                         personList.clear();
@@ -307,7 +313,8 @@ public class TypeActivity extends Activity {
             public void onClick(View v) {
                 if (tools.getE_permission(getApplicationContext())) {
                     myLog.setText(tools.getE());
-                }else {startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+                } else {
+                    startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
                 }
             }
         });
@@ -345,11 +352,11 @@ public class TypeActivity extends Activity {
                                 myLog.setVisibility(View.VISIBLE);
                                 if (tools.getE_permission(getApplicationContext())) {
                                     myLog.setText(tools.getE());
-                                } else{
+                                } else {
 
-                                    String s="查看我的日志需要<font color=red>Test2_JMessage</font>的使用情况访问权限；" +
+                                    String s = "查看我的日志需要<font color=red>Test2_JMessage</font>的使用情况访问权限；" +
                                             "再次授权或已经授权请点击<font color=red>这里</font>。";
-                                    PushToast.getInstance().createToast("提示","请打开使用情况访问权限",null,false);
+                                    PushToast.getInstance().createToast("提示", "请打开使用情况访问权限", null, false);
                                     myLog.setText(Html.fromHtml(s));
                                     startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
                                 }

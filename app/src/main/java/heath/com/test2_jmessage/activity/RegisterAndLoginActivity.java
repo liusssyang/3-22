@@ -87,6 +87,7 @@ public class RegisterAndLoginActivity extends Activity {
     private AutoCompleteTextView actv_main_at;
     private MultiAutoCompleteTextView mactv_main_m;
     private Spinner s_main_spinner;
+    private CircleImageView icon_left_default;
     private ArrayAdapter<String> adapter;
     private static final String[] REQUIRED_PERMISSIONS =
             new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
@@ -156,14 +157,17 @@ public class RegisterAndLoginActivity extends Activity {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
+
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
             }
+
             @Override
             public void afterTextChanged(Editable s) {
                 mEd_password.setText("");
-            }});
+            }
+        });
         mBt_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -174,24 +178,24 @@ public class RegisterAndLoginActivity extends Activity {
                 final String userName = mEd_userName.getText().toString();
                 final String password = mEd_password.getText().toString();
                 /**=================     调用SDk登陆接口    =================*/
-     /***/           JMessageClient.login(userName, password, new BasicCallback() {
+                /***/JMessageClient.login(userName, password, new BasicCallback() {
                     @Override
                     public void gotResult(int responseCode, String LoginDesc) {
                         if (responseCode == 0) {
 
                             mProgressDialog.dismiss();
-                            PushToast.getInstance().createToast("提示","登陆成功",null,true);
+                            PushToast.getInstance().createToast("提示", "登陆成功", null, true);
                             Log.d(TAG, "gotResult: button_login");
                             final Intent intent = new Intent(RegisterAndLoginActivity.this, TypeActivity.class);
                             startActivity(intent);
-                            DataSupport.deleteAll(LoginInformation.class,"account=?",userName);
-                            LoginInformation loginInformation=new LoginInformation(userName,password);
+                            DataSupport.deleteAll(LoginInformation.class, "account=?", userName);
+                            LoginInformation loginInformation = new LoginInformation(userName, password);
                             loginInformation.save();
                             finish();
 
                         } else {
                             mProgressDialog.dismiss();
-                            PushToast.getInstance().createToast("提示","登陆失败",null,false);
+                            PushToast.getInstance().createToast("提示", "登陆失败", null, false);
                             Log.i("MainActivity", "JMessageClient.login" + ", responseCode = " + responseCode + " ; LoginDesc = " + LoginDesc);
                         }
                     }
@@ -212,7 +216,7 @@ public class RegisterAndLoginActivity extends Activity {
                     public void gotResult(int responseCode, String responseMessage, List<DeviceInfo> result) {
                         if (responseCode == 0) {
                             mProgressDialog.dismiss();
-                            PushToast.getInstance().createToast("提示","登陆成功",null,true);
+                            PushToast.getInstance().createToast("提示", "登陆成功", null, true);
                             Log.i("MainActivity", "JMessageClient.login" + ", responseCode = " + responseCode + " ; LoginDesc = " + responseMessage);
                             Intent intent = new Intent(getApplicationContext(), TypeActivity.class);
                             Gson gson = new Gson();
@@ -221,7 +225,7 @@ public class RegisterAndLoginActivity extends Activity {
                             finish();
                         } else {
                             mProgressDialog.dismiss();
-                            PushToast.getInstance().createToast("提示","登陆失败",null,false);
+                            PushToast.getInstance().createToast("提示", "登陆失败", null, false);
                             Log.i("MainActivity", "JMessageClient.login" + ", responseCode = " + responseCode + " ; LoginDesc = " + responseMessage);
                         }
                     }
@@ -273,7 +277,7 @@ public class RegisterAndLoginActivity extends Activity {
         mBt_login_with_infos = (Button) findViewById(R.id.bt_login_with_infos);
         mBt_gotoRegister = (Button) findViewById(R.id.bt_goto_regester);
 
-        pwdIsVisible=findViewById(R.id.eye);
+        pwdIsVisible = findViewById(R.id.eye);
         pwdIsVisible.setText(" ");
         pwdIsVisible.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -283,7 +287,7 @@ public class RegisterAndLoginActivity extends Activity {
                     mEd_password.setSelection(mEd_password.getText().toString().length());
                     pwdIsVisible.setText("");
                     pwdIsVisible.setBackgroundResource(R.drawable.eye_close);
-                }else{
+                } else {
                     pwdIsVisible.setText(" ");
                     mEd_password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
                     mEd_password.setSelection(mEd_password.getText().toString().length());
@@ -292,7 +296,8 @@ public class RegisterAndLoginActivity extends Activity {
             }
         });
         //addLayoutListener(re,mBt_login);
-        mRgType = (RadioGroup) findViewById(R.id.rg_environment);;
+        mRgType = (RadioGroup) findViewById(R.id.rg_environment);
+        ;
         if (!isTestVisibility) {
             mRgType.setVisibility(View.GONE);
         } else {
@@ -306,27 +311,32 @@ public class RegisterAndLoginActivity extends Activity {
                 mRgType.check(R.id.rb_qa);
             }
         }
-        adapter = new ArrayAdapter<String>(this, R.layout.login_item, R.id.account){
+        final CircleImageView icon_left_default = findViewById(R.id.icon_left_default);
+
+        adapter = new ArrayAdapter<String>(this, R.layout.login_item, R.id.account) {
             @Override
             public View getDropDownView(final int position, View convertView,
                                         ViewGroup parent) {
                 View view = LayoutInflater.from(getApplicationContext()).inflate(R.layout.login_item, null);
-                CircleImageView circleImageView=view.findViewById(R.id.avatar);
-                circleImageView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Log.d("131767", "onClick: "+position);
+                CircleImageView circleImageView = view.findViewById(R.id.avatar);
+                /*List<LoginInformation> loginInformations =
+                        DataSupport.select("avatarpath").where("account=?", adapter.getItem(position))
+                                .find(LoginInformation.class);
+                for (LoginInformation loginInformation : loginInformations) {
+                    File f = new File(loginInformation.getAvatarPath());
+                    if (f.exists()) {
+                        circleImageView.setImageBitmap(BitmapFactory.decodeFile(loginInformation.getAvatarPath()));
                     }
-                });
-                TextView textView=view.findViewById(R.id.account);
+                }*/
+                TextView textView = view.findViewById(R.id.account);
                 textView.setText(adapter.getItem(position));
                 return view;
             }
 
         };
-        adapter.setDropDownViewResource( R.layout.login_item);
+        adapter.setDropDownViewResource(R.layout.login_item);
         s_main_spinner = (Spinner) findViewById(R.id.s_main_spinner);
-        ImageView imageView=findViewById(R.id.spinner_but);
+        ImageView imageView = findViewById(R.id.spinner_but);
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -335,22 +345,29 @@ public class RegisterAndLoginActivity extends Activity {
         });
         //给控件设置适配器
         s_main_spinner.setAdapter(adapter);
-        List<LoginInformation> loginInformations=DataSupport.findAll(LoginInformation.class);
-        if (loginInformations.size()==0){
+        List<LoginInformation> loginInformations = DataSupport.findAll(LoginInformation.class);
+        if (loginInformations.size() == 0) {
             imageView.setEnabled(false);
         }
-        for (LoginInformation loginInformation:loginInformations){
+        for (LoginInformation loginInformation : loginInformations) {
             adapter.add(loginInformation.getAccount());
         }
-        s_main_spinner.setOnItemSelectedListener(new Spinner.OnItemSelectedListener(){
+        s_main_spinner.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
                 mEd_userName.setText(adapter.getItem(arg2));
-                List<LoginInformation> loginInformations1=DataSupport.select("password")
-                        .where("account=?",adapter.getItem(arg2)).find(LoginInformation.class);
-                for (LoginInformation loginInformation:loginInformations1){
+                List<LoginInformation> loginInformations1 = DataSupport.select("password", "avatarpath")
+                        .where("account=?", adapter.getItem(arg2)).find(LoginInformation.class);
+                for (LoginInformation loginInformation : loginInformations1) {
                     mEd_password.setText(loginInformation.getPassword());
+                    /*if (!TextUtils.isEmpty(loginInformation.getAvatarPath())) {
+                        File f = new File(loginInformation.getAvatarPath());
+                        if (f.exists()) {
+                            icon_left_default.setImageBitmap(BitmapFactory.decodeFile(loginInformation.getAvatarPath()));
+                        }
+                    }*/
                 }
             }
+
             public void onNothingSelected(AdapterView<?> arg0) {
 
             }
@@ -420,35 +437,40 @@ public class RegisterAndLoginActivity extends Activity {
             e.printStackTrace();
         }
     }
-    public static void addLayoutListener(final View main,final View scroll){
+
+    public static void addLayoutListener(final View main, final View scroll) {
         main.getViewTreeObserver().addOnGlobalLayoutListener(
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
-                        Rect rect=new Rect();
+                        Rect rect = new Rect();
                         main.getWindowVisibleDisplayFrame(rect);
-                        int mainInvisibleHeight=main.getRootView().getHeight()-rect.bottom;
-                        if (mainInvisibleHeight>100){
-                            int[] location=new int[2];
+                        int mainInvisibleHeight = main.getRootView().getHeight() - rect.bottom;
+                        if (mainInvisibleHeight > 100) {
+                            int[] location = new int[2];
                             scroll.getLocationInWindow(location);
-                            int srollHeight=
-                                    (location[1]+scroll.getHeight())-rect.bottom;
-                            main.scrollTo(0,srollHeight);
-                        }else{
-                            main.scrollTo(0,0);
+                            int srollHeight =
+                                    (location[1] + scroll.getHeight()) - rect.bottom;
+                            main.scrollTo(0, srollHeight);
+                        } else {
+                            main.scrollTo(0, 0);
                         }
 
                     }
                 }
         );
     }
+
     class LocalRceiver extends BroadcastReceiver {
-        public LocalRceiver() { }
+        public LocalRceiver() {
+        }
+
         public void onReceive(Context context, Intent intent) {
             mEd_userName.setText(intent.getStringExtra("account"));
 
         }
     }
+
     public void onDestroy() {
         super.onDestroy();
         localBroadcastManager.unregisterReceiver(localRceiver);

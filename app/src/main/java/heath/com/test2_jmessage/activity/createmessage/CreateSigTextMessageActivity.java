@@ -195,8 +195,8 @@ public class CreateSigTextMessageActivity extends Activity {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 //这里是bottomSheet状态的改变
-                if (newState == BottomSheetBehavior.STATE_DRAGGING)
-                    behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                //if (newState == BottomSheetBehavior.STATE_DRAGGING)
+                   // behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
 
             @Override

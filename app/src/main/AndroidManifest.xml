@@ -131,6 +131,7 @@
 
 
         <activity
+            android:windowSoftInputMode="adjustResize"
             android:name="heath.com.test2_jmessage.activity.RegisterAndLoginActivity"
             android:theme="@style/status_transparent"
             android:launchMode="singleTask">
